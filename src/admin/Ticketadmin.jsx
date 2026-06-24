@@ -3,14 +3,11 @@ import { useState, useEffect } from "react";
 const PINK = "#E84060";
 const BLUE  = "#4A8AF4";
 
-// ── Shared storage key (imported by tickets.jsx) ────────────────────────────
-export const TICKETS_STORAGE_KEY = "fc_tickets_v1";
-
 // ── Day helper ───────────────────────────────────────────────────────────────
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 // ── Convert admin form data → full ticket record (tickets.jsx shape) ─────────
-function buildRecord(form, id) {
+function buildRecord(form) {
   const dateSlash = form.eventDate.replace(/-/g, "/");
   let dayLabel = "";
   try {
@@ -22,22 +19,21 @@ function buildRecord(form, id) {
   const seats     = Number(form.seats)     || 1;
 
   return {
-    id:             id ?? Date.now(),
-    artist:         form.artist.trim(),
-    event:          form.event.trim(),
-    venue:          form.venue.trim(),
-    date:           `${dateSlash} ${form.doorsTime} / ${form.showTime}`,
-    dateFormatted:  `${dateSlash} (${dayLabel})  ${form.doorsTime}/${form.showTime}`,
-    seatType:       form.seatType,
-    seatUnit:       form.seatUnit,
+    artist:          form.artist.trim(),
+    event:           form.event.trim(),
+    venue:           form.venue.trim(),
+    date:            `${dateSlash} ${form.doorsTime} / ${form.showTime}`,
+    dateFormatted:   `${dateSlash} (${dayLabel})  ${form.doorsTime}/${form.showTime}`,
+    seatType:        form.seatType,
+    seatUnit:        form.seatUnit,
     seats,
-    price:          `¥${priceNum.toLocaleString()}`,
+    price:           `¥${priceNum.toLocaleString()}`,
     priceNum,
     systemFee,
-    systemFeeLabel: form.seatType === "General reserved" ? "一般指定席" : "立見席",
-    sellByDate:     form.sellByDate || "",
+    systemFeeLabel:  form.seatType === "General reserved" ? "一般指定席" : "立見席",
+    sellByDate:      form.sellByDate || "",
     salesPeriodText: form.sellByDate ? `Until 23:59 on ${form.sellByDate}` : "",
-    status:         form.status || null,
+    status:          form.status || null,
   };
 }
 
@@ -46,18 +42,18 @@ function recordToForm(r) {
   const datePart = r.date?.split(" ")[0]?.replace(/\//g, "-") ?? "";
   const m = r.date?.match(/(\d{2}:\d{2}) \/ (\d{2}:\d{2})/);
   return {
-    artist:    r.artist    ?? "",
-    event:     r.event     ?? "",
-    venue:     r.venue     ?? "",
-    eventDate: datePart,
-    doorsTime: m?.[1]      ?? "18:00",
-    showTime:  m?.[2]      ?? "19:00",
-    seatType:  r.seatType  ?? "General reserved",
-    seatUnit:  r.seatUnit  ?? "seat",
-    seats:     r.seats     ?? 1,
-    priceNum:  r.priceNum  ?? 0,
-    systemFee: r.systemFee ?? 0,
-    status:    r.status    ?? "",
+    artist:     r.artist   ?? "",
+    event:      r.event    ?? "",
+    venue:      r.venue    ?? "",
+    eventDate:  datePart,
+    doorsTime:  m?.[1]      ?? "18:00",
+    showTime:   m?.[2]      ?? "19:00",
+    seatType:   r.seatType  ?? "General reserved",
+    seatUnit:   r.seatUnit  ?? "seat",
+    seats:      r.seats     ?? 1,
+    priceNum:   r.priceNum  ?? 0,
+    systemFee:  r.systemFee ?? 0,
+    status:     r.status    ?? "",
     sellByDate: r.sellByDate ?? "",
   };
 }
@@ -69,20 +65,6 @@ const EMPTY_FORM = {
   seats: 1, priceNum: 0, systemFee: 0,
   status: "", sellByDate: "",
 };
-
-// ── Persist helpers ──────────────────────────────────────────────────────────
-function loadTickets() {
-  try {
-    const raw = localStorage.getItem(TICKETS_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveTickets(tickets) {
-  localStorage.setItem(TICKETS_STORAGE_KEY, JSON.stringify(tickets));
-}
 
 /* ── Icons ──────────────────────────────────────────────────────────────────── */
 
@@ -193,7 +175,6 @@ function TicketForm({ initialForm, id, onSave, onCancel }) {
     if (validate()) onSave(f, id);
   }
 
-  // Auto-sync seatUnit when seatType changes
   function handleSeatTypeChange(val) {
     set("seatType", val);
     if (val === "Total freedom") set("seatUnit", "piece");
@@ -206,8 +187,6 @@ function TicketForm({ initialForm, id, onSave, onCancel }) {
 
   return (
     <div className="bg-gray-50 min-h-screen font-sans">
-
-      {/* Sticky top bar */}
       <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3 sticky top-0 z-10 shadow-sm">
         <button
           onClick={onCancel}
@@ -228,13 +207,8 @@ function TicketForm({ initialForm, id, onSave, onCancel }) {
       </div>
 
       <div className="p-4 pb-12">
-
-        {/* ── Basic Info ────────────────────────────────────────────── */}
         <div className="bg-white rounded-xl p-4 mb-3 border border-gray-100 shadow-sm">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">
-            Basic Info
-          </p>
-
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Basic Info</p>
           <Field label="Artist / Performer Name" required error={errors.artist}>
             <input
               className={inputBase}
@@ -244,7 +218,6 @@ function TicketForm({ initialForm, id, onSave, onCancel }) {
               onChange={e => set("artist", e.target.value)}
             />
           </Field>
-
           <Field label="Event Title" required error={errors.event}>
             <input
               className={inputBase}
@@ -254,7 +227,6 @@ function TicketForm({ initialForm, id, onSave, onCancel }) {
               onChange={e => set("event", e.target.value)}
             />
           </Field>
-
           <Field label="Venue / Location" required error={errors.venue}>
             <input
               className={inputBase}
@@ -266,12 +238,8 @@ function TicketForm({ initialForm, id, onSave, onCancel }) {
           </Field>
         </div>
 
-        {/* ── Date & Time ───────────────────────────────────────────── */}
         <div className="bg-white rounded-xl p-4 mb-3 border border-gray-100 shadow-sm">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">
-            Date & Time
-          </p>
-
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Date & Time</p>
           <Field label="Event Date" required error={errors.eventDate}>
             <input
               type="date"
@@ -281,7 +249,6 @@ function TicketForm({ initialForm, id, onSave, onCancel }) {
               onChange={e => set("eventDate", e.target.value)}
             />
           </Field>
-
           <div className="flex gap-3">
             <div className="flex-1">
               <Field label="Doors Open" required error={errors.doorsTime}>
@@ -308,12 +275,8 @@ function TicketForm({ initialForm, id, onSave, onCancel }) {
           </div>
         </div>
 
-        {/* ── Ticket Details ─────────────────────────────────────────── */}
         <div className="bg-white rounded-xl p-4 mb-3 border border-gray-100 shadow-sm">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">
-            Ticket Details
-          </p>
-
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Ticket Details</p>
           <Field label="Seat Type">
             <select
               className={inputBase}
@@ -325,7 +288,6 @@ function TicketForm({ initialForm, id, onSave, onCancel }) {
               <option value="Total freedom">Total freedom</option>
             </select>
           </Field>
-
           <div className="flex gap-3">
             <div className="flex-1">
               <Field label="Seat Unit">
@@ -353,7 +315,6 @@ function TicketForm({ initialForm, id, onSave, onCancel }) {
               </Field>
             </div>
           </div>
-
           <div className="flex gap-3">
             <div className="flex-1">
               <Field label="Price per Sheet (¥)" required error={errors.priceNum}>
@@ -382,12 +343,8 @@ function TicketForm({ initialForm, id, onSave, onCancel }) {
           </div>
         </div>
 
-        {/* ── Status ────────────────────────────────────────────────── */}
         <div className="bg-white rounded-xl p-4 mb-3 border border-gray-100 shadow-sm">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">
-            Status
-          </p>
-
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Status</p>
           <Field label="Purchase Status">
             <select
               className={inputBase}
@@ -401,7 +358,6 @@ function TicketForm({ initialForm, id, onSave, onCancel }) {
               <option value="Coming soon">Coming soon</option>
             </select>
           </Field>
-
           <Field label="Sell-by Date (display text)">
             <input
               className={inputBase}
@@ -413,53 +369,20 @@ function TicketForm({ initialForm, id, onSave, onCancel }) {
           </Field>
         </div>
 
-        {/* ── Live Preview ───────────────────────────────────────────── */}
         {(f.artist || f.event) && (
-          <div
-            className="rounded-xl p-4 mb-4 border"
-            style={{ background: "#FFF0F3", borderColor: `${PINK}33` }}
-          >
-            <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: PINK }}>
-              Preview
-            </p>
-            <p className="text-xs font-semibold mb-0.5" style={{ color: PINK }}>
-              {f.artist || "—"}
-            </p>
-            <p className="text-sm font-bold text-gray-800 leading-snug mb-2">
-              {f.event || "—"}
-            </p>
-            {f.venue && (
-              <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-1">
-                <MapPinIcon />{f.venue}
-              </div>
-            )}
-            {f.eventDate && (
-              <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-2">
-                <ClockIcon />
-                {f.eventDate.replace(/-/g, "/")} {f.doorsTime} / {f.showTime}
-              </div>
-            )}
-            {preview_price && (
-              <p className="text-sm font-bold" style={{ color: PINK }}>
-                {preview_price} / sheet &nbsp;×&nbsp; {f.seats} {f.seatUnit}(s)
-              </p>
-            )}
+          <div className="rounded-xl p-4 mb-4 border" style={{ background: "#FFF0F3", borderColor: `${PINK}33` }}>
+            <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: PINK }}>Preview</p>
+            <p className="text-xs font-semibold mb-0.5" style={{ color: PINK }}>{f.artist || "—"}</p>
+            <p className="text-sm font-bold text-gray-800 leading-snug mb-2">{f.event || "—"}</p>
+            {f.venue && <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-1"><MapPinIcon />{f.venue}</div>}
+            {f.eventDate && <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-2"><ClockIcon />{f.eventDate.replace(/-/g, "/")} {f.doorsTime} / {f.showTime}</div>}
+            {preview_price && <p className="text-sm font-bold" style={{ color: PINK }}>{preview_price} / sheet &nbsp;×&nbsp; {f.seats} {f.seatUnit}(s)</p>}
           </div>
         )}
 
-        {/* ── Action buttons ─────────────────────────────────────────── */}
         <div className="flex gap-3">
-          <button
-            onClick={onCancel}
-            className="flex-1 py-3.5 rounded-xl text-sm font-semibold text-gray-600 bg-white border border-gray-200"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSubmit}
-            className="flex-1 py-3.5 rounded-xl text-white text-sm font-semibold shadow-sm"
-            style={{ backgroundColor: PINK }}
-          >
+          <button onClick={onCancel} className="flex-1 py-3.5 rounded-xl text-sm font-semibold text-gray-600 bg-white border border-gray-200">Cancel</button>
+          <button onClick={handleSubmit} className="flex-1 py-3.5 rounded-xl text-white text-sm font-semibold shadow-sm" style={{ backgroundColor: PINK }}>
             {id ? "Save Changes" : "Add Ticket"}
           </button>
         </div>
@@ -474,64 +397,26 @@ function TicketRow({ ticket, onEdit, onDelete }) {
   const [confirm, setConfirm] = useState(false);
 
   return (
-    <div
-      className="bg-white rounded-xl p-4 mb-3 border border-gray-100 shadow-sm flex items-start gap-3"
-      style={{ borderLeft: `4px solid ${PINK}` }}
-    >
-      {/* Info */}
+    <div className="bg-white rounded-xl p-4 mb-3 border border-gray-100 shadow-sm flex items-start gap-3" style={{ borderLeft: `4px solid ${PINK}` }}>
       <div className="flex-1 min-w-0">
-        <p className="text-[11px] font-semibold mb-0.5" style={{ color: PINK }}>
-          {ticket.artist}
-        </p>
+        <p className="text-[11px] font-semibold mb-0.5" style={{ color: PINK }}>{ticket.artist}</p>
         <p className="text-sm font-bold text-gray-800 leading-snug">{ticket.event}</p>
-        <div className="flex items-center gap-1 text-[12px] text-gray-400 mt-1.5">
-          <MapPinIcon /><span className="truncate">{ticket.venue}</span>
-        </div>
-        <div className="flex items-center gap-1 text-[12px] text-gray-400 mt-0.5">
-          <ClockIcon /><span>{ticket.date}</span>
-        </div>
-        <p className="text-sm font-bold mt-1.5" style={{ color: PINK }}>
-          {ticket.price} / sheet &nbsp;×&nbsp; {ticket.seats} {ticket.seatUnit}(s)
-        </p>
-        {ticket.status && (
-          <span
-            className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white"
-            style={{ backgroundColor: PINK }}
-          >
-            {ticket.status}
-          </span>
-        )}
+        <div className="flex items-center gap-1 text-[12px] text-gray-400 mt-1.5"><MapPinIcon /><span className="truncate">{ticket.venue}</span></div>
+        <div className="flex items-center gap-1 text-[12px] text-gray-400 mt-0.5"><ClockIcon /><span>{ticket.date}</span></div>
+        <p className="text-sm font-bold mt-1.5" style={{ color: PINK }}>{ticket.price} / sheet &nbsp;×&nbsp; {ticket.seats} {ticket.seatUnit}(s)</p>
+        {ticket.status && <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white" style={{ backgroundColor: PINK }}>{ticket.status}</span>}
       </div>
 
-      {/* Actions */}
       <div className="flex flex-col gap-2 shrink-0">
-        <button
-          onClick={() => onEdit(ticket)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white text-xs font-semibold"
-          style={{ backgroundColor: BLUE }}
-        >
-          <EditIcon /> Edit
-        </button>
-
+        <button onClick={() => onEdit(ticket)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white text-xs font-semibold" style={{ backgroundColor: BLUE }}><EditIcon /> Edit</button>
         {!confirm ? (
-          <button
-            onClick={() => setConfirm(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white text-xs font-semibold bg-red-500"
-          >
-            <TrashIcon /> Delete
-          </button>
+          <button onClick={() => setConfirm(true)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-white text-xs font-semibold bg-red-500"><TrashIcon /> Delete</button>
         ) : (
           <div className="flex flex-col items-center gap-1">
             <p className="text-[10px] font-semibold text-red-500">Sure?</p>
             <div className="flex gap-1">
-              <button
-                onClick={() => setConfirm(false)}
-                className="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-gray-100 text-gray-600"
-              >No</button>
-              <button
-                onClick={() => onDelete(ticket.id)}
-                className="px-2.5 py-1 rounded-md text-[11px] font-semibold text-white bg-red-500"
-              >Yes</button>
+              <button onClick={() => setConfirm(false)} className="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-gray-100 text-gray-600">No</button>
+              <button onClick={() => onDelete(ticket._id)} className="px-2.5 py-1 rounded-md text-[11px] font-semibold text-white bg-red-500">Yes</button>
             </div>
           </div>
         )}
@@ -543,32 +428,74 @@ function TicketRow({ ticket, onEdit, onDelete }) {
 /* ── Main Admin Page ─────────────────────────────────────────────────────────── */
 
 function TicketAdmin() {
-  const [tickets,    setTickets]    = useState([]);
-  const [view,       setView]       = useState("list"); // "list" | "form"
+  const [tickets, setTickets] = useState([]);
+  const [view, setView]       = useState("list"); // "list" | "form"
   const [editTarget, setEditTarget] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Load on mount
+  // Sync Fetch from DB on Mount
   useEffect(() => {
-    setTickets(loadTickets());
+    fetchTickets();
   }, []);
 
-  function persist(updated) {
-    setTickets(updated);
-    saveTickets(updated);
+  async function fetchTickets() {
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:5000/api/tickets");
+      if (!res.ok) throw new Error("Could not load backend records");
+      const data = await res.json();
+      setTickets(data);
+    } catch (err) {
+      console.error("API error reading records:", err);
+    } finally {
+      setLoading(false);
+    }
   }
 
-  function handleSave(formData, id) {
-    const record  = buildRecord(formData, id);
-    const updated = id
-      ? tickets.map(t => (t.id === id ? record : t))
-      : [...tickets, record];
-    persist(updated);
-    setView("list");
-    setEditTarget(null);
+  async function handleSave(formData, id) {
+    const record = buildRecord(formData);
+    
+    try {
+      let res;
+      if (id) {
+        // Since your ticketController didn't show a direct PUT/PATCH route implemented, 
+        // fallback to standard REST design pattern structure:
+        res = await fetch(`http://localhost:5000/api/tickets/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(record),
+        });
+      } else {
+        res = await fetch("http://localhost:5000/api/tickets", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(record),
+        });
+      }
+
+      if (!res.ok) throw new Error("Could not persist data changes.");
+      
+      await fetchTickets(); // Clear and reload tracking
+      setView("list");
+      setEditTarget(null);
+    } catch (err) {
+      console.error("Save error details:", err);
+      alert("Error committing changes to DB collection.");
+    }
   }
 
-  function handleDelete(id) {
-    persist(tickets.filter(t => t.id !== id));
+  async function handleDelete(id) {
+    try {
+      const res = await fetch(`http://localhost:5000/api/tickets/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Error performing delete execution.");
+      
+      await fetchTickets();
+    } catch (err) {
+      console.error("Delete call failure:", err);
+      alert("Could not remove the selected target record.");
+    }
   }
 
   function openAdd() {
@@ -581,23 +508,27 @@ function TicketAdmin() {
     setView("form");
   }
 
-  // ── Form view ──────────────────────────────────────────────────────────────
+  if (loading) {
+    return (
+      <div className="bg-gray-50 min-h-screen flex items-center justify-center font-sans">
+        <p className="text-sm text-gray-400">Loading Configuration Data...</p>
+      </div>
+    );
+  }
+
   if (view === "form") {
     return (
       <TicketForm
         initialForm={editTarget ? recordToForm(editTarget) : { ...EMPTY_FORM }}
-        id={editTarget?.id ?? null}
+        id={editTarget?._id ?? null} // MongoDB unique object ID token
         onSave={handleSave}
         onCancel={() => { setView("list"); setEditTarget(null); }}
       />
     );
   }
 
-  // ── List view ──────────────────────────────────────────────────────────────
   return (
     <div className="bg-gray-50 min-h-screen font-sans">
-
-      {/* Sticky header */}
       <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 z-10 shadow-sm">
         <div>
           <h1 className="text-[15px] font-bold text-gray-800">Ticket Admin</h1>
@@ -616,30 +547,18 @@ function TicketAdmin() {
 
       <div className="p-4">
         {tickets.length === 0 ? (
-          /* Empty state */
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div
-              className="w-16 h-16 rounded-full flex items-center justify-center mb-4"
-              style={{ backgroundColor: `${PINK}15` }}
-            >
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: `${PINK}15` }}>
               <span className="text-3xl">🎫</span>
             </div>
             <p className="text-[15px] font-bold text-gray-700 mb-1">No tickets yet</p>
-            <p className="text-xs text-gray-400 mb-6 max-w-[200px]">
-              Add your first ticket and it will appear in the Tickets page immediately.
-            </p>
-            <button
-              onClick={openAdd}
-              className="px-5 py-2.5 rounded-xl text-white text-sm font-semibold shadow-sm"
-              style={{ backgroundColor: PINK }}
-            >
-              + Add First Ticket
-            </button>
+            <p className="text-xs text-gray-400 mb-6 max-w-[200px]">Add your first ticket and it will appear in the Tickets page immediately.</p>
+            <button onClick={openAdd} className="px-5 py-2.5 rounded-xl text-white text-sm font-semibold shadow-sm" style={{ backgroundColor: PINK }}>+ Add First Ticket</button>
           </div>
         ) : (
           tickets.map(ticket => (
             <TicketRow
-              key={ticket.id}
+              key={ticket._id}
               ticket={ticket}
               onEdit={openEdit}
               onDelete={handleDelete}
