@@ -1,3 +1,6 @@
+import React from "react";
+import { Link } from "react-router-dom";
+
 const PINK = "#D4537E";
 
 function Navbar() {
@@ -15,6 +18,7 @@ function Navbar() {
     >
       {/* Left: back chevron + AnyPASS STORE logo */}
       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        <Link to="./" style={{ display: "flex", alignItems: "center", gap: 6, textDecoration: "none" }}>
         <button
           aria-label="Go back"
           style={{
@@ -40,6 +44,7 @@ function Navbar() {
             <polyline points="15 18 9 12 15 6" />
           </svg>
         </button>
+        </Link>
 
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
           <span
@@ -70,6 +75,7 @@ function Navbar() {
 
       {/* Right: user icon + My Page + username */}
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <Link to="./profile" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
         {/* Person icon */}
         <svg
           width="22"
@@ -109,6 +115,7 @@ function Navbar() {
             Satoshi Kemboi
           </p>
         </div>
+        </Link>
       </div>
     </nav>
   );

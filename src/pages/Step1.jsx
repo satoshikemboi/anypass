@@ -1,17 +1,11 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const PINK = "#E84060";
 const BLUE = "#4A8AF4";
 const ORANGE = "#CC6500";
 
-const ticketData = [
-  { id: 1, seats: 1 },
-  { id: 2, seats: 2 },
-  { id: 3, seats: 3 },
-];
-
-/* ── Icons ─────────────────────────────────────────────── */
+/* ── Icons ─────────────────────────────────────────────────── */
 
 function MapPinIcon() {
   return (
@@ -68,7 +62,21 @@ function CheckIcon() {
   );
 }
 
-/* ── Checkbox Row ───────────────────────────────────────── */
+/* ── Shared primitives ──────────────────────────────────────── */
+
+function Divider() {
+  return <hr className="border-t border-gray-100 -mx-5" />;
+}
+
+// Label + value on the same row
+function InfoRow({ label, value }) {
+  return (
+    <div className="flex items-start justify-between py-[13px]">
+      <span className="text-[13px] text-gray-500 shrink-0 mr-3">{label}</span>
+      <span className="text-[13px] text-gray-700 text-right leading-snug">{value}</span>
+    </div>
+  );
+}
 
 function CheckRow({ label, centered = false }) {
   return (
@@ -86,9 +94,86 @@ function CheckRow({ label, centered = false }) {
   );
 }
 
-/* ── Step 1 ─────────────────────────────────────────────── */
+/* ── Per-ticket card (event info + purchase details) ────────── */
+
+function TicketSummaryCard({ ticket }) {
+  const quantityLabel =
+    ticket.seatUnit === "piece"
+      ? `${ticket.seats} ${ticket.seats === 1 ? "piece" : "pieces"}`
+      : `${ticket.seats} ${ticket.seats === 1 ? "sheet" : "sheets"}`;
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 px-5 pt-[18px] pb-5 mb-3">
+
+      {/* Artist */}
+      <p className="text-xs font-medium mb-1 leading-none" style={{ color: PINK }}>
+        {ticket.artist}
+      </p>
+
+      {/* Event title */}
+      <h2 className="text-base font-bold text-gray-900 leading-snug mb-3.5">
+        {ticket.event}
+      </h2>
+
+      {/* Venue */}
+      <div className="flex items-center gap-[7px] mb-[7px]">
+        <MapPinIcon />
+        <span className="text-[13px] text-gray-500">{ticket.venue}</span>
+      </div>
+
+      {/* Date */}
+      <div className="flex items-center gap-[7px]">
+        <ClockIcon />
+        <span className="text-[13px] text-gray-500">{ticket.dateFormatted}</span>
+      </div>
+
+      {/* Divider into purchase details */}
+      <div className="mt-4 -mx-5">
+        <Divider />
+      </div>
+
+      {/* Price */}
+      <div className="flex items-baseline gap-1.5 pt-4 pb-3">
+        <span className="text-2xl font-bold" style={{ color: PINK }}>{ticket.price}</span>
+        <span className="text-[13px] text-gray-400">/ 1 sheet</span>
+      </div>
+
+      <Divider />
+
+      {/* Seat type + assignment */}
+      <div className="flex items-start justify-between py-[13px]">
+        <div className="flex items-start gap-1.5">
+          <TicketIcon />
+          <span className="text-[13px] font-medium leading-snug" style={{ color: BLUE }}>
+            {ticket.seatType}<br />seats
+          </span>
+        </div>
+        <span className="text-[13px] text-gray-500 text-right leading-snug">
+          Seat assignment<br />undecided
+        </span>
+      </div>
+
+      <Divider />
+
+      {/* Sales period */}
+      <InfoRow label="Sales period" value={ticket.salesPeriodText} />
+
+      <Divider />
+
+      {/* Quantity */}
+      <InfoRow label="Number of items purchased" value={quantityLabel} />
+
+    </div>
+  );
+}
+
+/* ── Step 1 ─────────────────────────────────────────────────── */
 
 function Step1() {
+  // Pull the ticket array passed from Tickets.jsx
+  const { state } = useLocation();
+  const selectedTickets = state?.selectedTickets ?? [];
+
   return (
     <div className="bg-gray-100 min-h-screen p-4 font-sans">
 
@@ -101,107 +186,31 @@ function Step1() {
         &rdquo;.
       </p>
 
-      {/* Event info card */}
-      <div className="bg-white rounded-xl border border-gray-200 px-5 pt-[18px] pb-5 mb-3">
+      {/* One combined event + purchase card per selected ticket */}
+      {selectedTickets.map(ticket => (
+        <TicketSummaryCard key={ticket.id} ticket={ticket} />
+      ))}
 
-        <p className="text-xs font-medium mb-1 leading-none" style={{ color: PINK }}>
-          Aina the End
-        </p>
+      {/* ── Terms & Conditions ─────────────────────────────── */}
 
-        <h2 className="text-base font-bold text-gray-900 leading-snug mb-3.5">
-          AiNA THE END LIVE TOUR 2026 - PICNIC -
-        </h2>
-
-        <div className="flex items-center gap-[7px] mb-[7px]">
-          <MapPinIcon />
-          <span className="text-[13px] text-gray-500">
-            ORIX THEATER, Osaka Prefecture
-          </span>
-        </div>
-
-        <div className="flex items-center gap-[7px]">
-          <ClockIcon />
-          <span className="text-[13px] text-gray-500">
-            2026/06/25 (Thu)&nbsp;&nbsp;&nbsp;&nbsp;18:00/19:00
-          </span>
-        </div>
-
-      </div>
-
-      {/* Purchase details card */}
-      <div className="bg-white rounded-xl border border-gray-200 px-5 mb-6">
-
-        {/* Price row */}
-        <div className="flex items-baseline gap-1.5 py-4">
-          <span className="text-2xl font-bold" style={{ color: PINK }}>¥9,500</span>
-          <span className="text-[13px] text-gray-400">/ 1 sheet</span>
-        </div>
-
-        <hr className="border-t border-gray-100 -mx-5" />
-
-        {/* Seat type + assignment status */}
-        <div className="flex items-start justify-between py-4">
-          <div className="flex items-start gap-1.5">
-            <TicketIcon />
-            <span className="text-[13px] font-medium leading-snug" style={{ color: BLUE }}>
-              General reserved<br />seats
-            </span>
-          </div>
-          <span className="text-[13px] text-gray-500 text-right leading-snug">
-            Seat assignment<br />undecided
-          </span>
-        </div>
-
-        <hr className="border-t border-gray-100 -mx-5" />
-
-        {/* Sales period label */}
-        <div className="py-4">
-          <span className="text-[13px] text-gray-500">Sales period</span>
-        </div>
-
-        <hr className="border-t border-gray-100 -mx-5" />
-
-        {/* Sales period value */}
-        <div className="py-4">
-          <span className="text-[13px] text-gray-700">
-            Until 23:59 on June 24, 2026 (Wednesday)
-          </span>
-        </div>
-
-        <hr className="border-t border-gray-100 -mx-5" />
-
-        {/* Number of items purchased */}
-        <div className="flex items-start justify-between py-4">
-          <span className="text-[13px] text-gray-500 leading-snug">
-            Number of items<br />purchased
-          </span>
-          <span className="text-[13px] text-gray-700">1 sheet</span>
-        </div>
-
-      </div>
-
-      {/* ── Terms & Conditions Section ─────────────────── */}
-
-      {/* Page title */}
-      <h1 className="text-[15px] font-bold text-gray-900 text-center leading-snug mb-4 px-1">
-        AnyPASS STORE Terms and Conditions / Terms and Conditions Regarding the Split Payment Function / AnyPASS MATCH Terms and Conditions
+      <h1 className="text-[15px] font-bold text-gray-900 text-center leading-snug mb-4 mt-3 px-1">
+        AnyPASS STORE Terms and Conditions / Terms and Conditions Regarding the
+        Split Payment Function / AnyPASS MATCH Terms and Conditions
       </h1>
 
       {/* Scrollable terms card */}
       <div className="bg-white rounded-xl border border-gray-200 px-5 py-4 mb-5 max-h-[200px] overflow-y-auto">
-
         <p className="text-[13px] font-medium mb-3 leading-snug" style={{ color: PINK }}>
           [AnyPASS STORE Individual Terms and Conditions]
         </p>
-
         <p className="text-[13px] leading-relaxed mb-4" style={{ color: ORANGE }}>
-          AnyPASS STORE (hereinafter referred to as &ldquo;this store&rdquo;) is a membership-based ticket trading site for this service. To use this store, you must agree to these individual terms and conditions.
+          AnyPASS STORE (hereinafter referred to as &ldquo;this store&rdquo;) is a
+          membership-based ticket trading site for this service. To use this store,
+          you must agree to these individual terms and conditions.
         </p>
-
         <p className="text-[13px]" style={{ color: PINK }}>
           Article 1 (Definitions of Terms)
         </p>
-
       </div>
 
       {/* Agree checkbox */}
@@ -212,14 +221,16 @@ function Step1() {
         />
       </div>
 
-      {/* Minors section heading */}
+      {/* Minors section */}
       <h2 className="text-[15px] font-bold text-gray-900 text-center mb-4">
         Ticket purchase by minors
       </h2>
 
-      {/* Minors body text */}
       <p className="text-[13px] text-gray-600 leading-relaxed mb-5 px-1">
-        If a minor purchases a ticket, it is assumed that they have obtained parental consent. Even if it is discovered after the ticket purchase that parental consent was not obtained, cancellations and refunds will not be possible.
+        If a minor purchases a ticket, it is assumed that they have obtained
+        parental consent. Even if it is discovered after the ticket purchase that
+        parental consent was not obtained, cancellations and refunds will not be
+        possible.
       </p>
 
       {/* Consent checkbox */}
@@ -227,23 +238,22 @@ function Step1() {
         <CheckRow label="I consent to the purchase by a minor." />
       </div>
 
-      {/* CTA section */}
+      {/* CTA — forwards selectedTickets state to Step 2 */}
       <div className="rounded-2xl px-4 pt-5 pb-4" style={{ background: "#FBEAF0" }}>
-
-        <button
-          className="w-full py-3.5 rounded-full text-white font-bold text-[15px] mb-3"
+        <Link
+          to="/step2"
+          state={{ selectedTickets }}
+          className="block w-full py-3.5 rounded-full text-white font-bold text-[15px] text-center mb-3"
           style={{ background: PINK }}
         >
-          <Link to="/step2" >Proceed to purchase</Link>
-        </button>
+          Proceed to purchase
+        </Link>
 
         <p className="text-[11px] text-gray-500 text-center leading-relaxed">
-          Please complete your application within 15 minutes. Applications
-          may be cancelled if more than 15 minutes have passed.
-          Please note that the tickets you purchase may not be for
-          consecutive seats.
+          Please complete your application within 15 minutes. Applications may be
+          cancelled if more than 15 minutes have passed. Please note that the
+          tickets you purchase may not be for consecutive seats.
         </p>
-
       </div>
 
     </div>

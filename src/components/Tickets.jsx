@@ -2,13 +2,69 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 
 const PINK = "#E84060";
-const BLUE = "#4A8AF4";
+const BLUE  = "#4A8AF4";
 
-const ticketData = [
-  { id: 1, seats: 1 },
-  { id: 2, seats: 2 },
-  { id: 3, seats: 3 },
+// ── Ticket data ─────────────────────────────────────────────
+// priceNum / systemFee are numeric for calculations in later steps.
+// dateFormatted, sellByDate, salesPeriodText are used by Step 1 & 2.
+export const ticketData = [
+  {
+    id: 1,
+    artist: "Aina the End",
+    event: "AiNA THE END LIVE TOUR 2026 - PICNIC -",
+    venue: "ORIX THEATER, Osaka Prefecture",
+    date: "2026/06/25 18:00 / 19:00",
+    dateFormatted: "2026/06/25 (Thu)  18:00/19:00",
+    seatType: "General reserved",
+    seatUnit: "seat",
+    seats: 1,
+    price: "¥9,500",
+    priceNum: 9500,
+    systemFee: 1320,
+    systemFeeLabel: "一般指定席",
+    sellByDate: "2026/6/24 (Wed) 23:59",
+    salesPeriodText: "Until 23:59 on June 24, 2026 (Wednesday)",
+    status: null,
+  },
+  {
+    id: 2,
+    artist: "claquepot",
+    event: "claquepot crosspoint 2026",
+    venue: "Zepp Haneda, Tokyo",
+    date: "2026/06/25 18:00 / 19:00",
+    dateFormatted: "2026/06/25 (Thu)  18:00/19:00",
+    seatType: "Total freedom",
+    seatUnit: "piece",
+    seats: 1,
+    price: "¥7,700",
+    priceNum: 7700,
+    systemFee: 880,
+    systemFeeLabel: "立見席",
+    sellByDate: "2026/6/24 (Wed) 23:59",
+    salesPeriodText: "Until 23:59 on June 24, 2026 (Wednesday)",
+    status: null,
+  },
+  {
+    id: 3,
+    artist: "LUNA SEA",
+    event: "LUNA SEA TOUR 2026 UNENDING JOURNEY -FOREVER-",
+    venue: "Aichi Prefecture, Aichi Prefectural Arts Theater, Main Hall",
+    date: "2026/07/04 17:00 / 18:00",
+    dateFormatted: "2026/07/04 (Sat)  17:00/18:00",
+    seatType: "General reserved",
+    seatUnit: "seat",
+    seats: 1,
+    price: "¥12,100",
+    priceNum: 12100,
+    systemFee: 1320,
+    systemFeeLabel: "一般指定席",
+    sellByDate: "2026/7/3 (Fri) 23:59",
+    salesPeriodText: "Until 23:59 on July 3, 2026 (Friday)",
+    status: "Purchase in progress",
+  },
 ];
+
+/* ── Icons ─────────────────────────────────────────────────── */
 
 function MapPinIcon() {
   return (
@@ -38,7 +94,7 @@ function ClockIcon() {
   );
 }
 
-function TicketIcon({ color = BLUE }) {
+function TicketIcon({ color }) {
   return (
     <svg
       width="15" height="15" viewBox="0 0 24 24"
@@ -55,8 +111,8 @@ function TicketIcon({ color = BLUE }) {
 function CheckIcon() {
   return (
     <svg
-      width="16" height="16" viewBox="0 0 24 24"
-      fill="none" stroke="#ffffff" strokeWidth="2.5"
+      width="12" height="12" viewBox="0 0 24 24"
+      fill="none" stroke="#ffffff" strokeWidth="3"
       strokeLinecap="round" strokeLinejoin="round"
       aria-hidden="true"
     >
@@ -65,130 +121,175 @@ function CheckIcon() {
   );
 }
 
-function TicketCard({ seats, selected, onClick }) {
+/* ── Ticket Card ────────────────────────────────────────────── */
+
+function TicketCard({ ticket, selected, onToggle }) {
+  const iconColor = selected ? PINK : BLUE;
+
   return (
-    <div
-      role="button"
-      tabIndex={0}
-      onClick={onClick}
-      onKeyDown={e => (e.key === "Enter" || e.key === " ") && onClick()}
-      className="rounded-lg shadow-xl border px-5 pt-[18px] pb-5 mb-3 transition-all duration-150 cursor-pointer select-none outline-none"
-      style={{
-        backgroundColor: selected ? "#FFF0F3" : "#ffffff",
-        borderColor: selected ? PINK : "#E5E7EB",
-        borderWidth: selected ? "2px" : "1px",
-        boxShadow: selected
-          ? `0 0 0 3px ${PINK}22, 0 4px 16px 0 ${PINK}18`
-          : "0 4px 16px 0 rgba(0,0,0,0.08)",
-      }}
-    >
-      {/* ── Top row: label + checkmark ────────────────── */}
-      <div className="flex items-start justify-between mb-1">
-        <p className="text-xs font-medium leading-none" style={{ color: PINK }}>
-          Aina the End
-        </p>
+    <div className="relative mb-3">
 
-        {/* Checkmark bubble */}
+      {/* Status badge */}
+      {ticket.status && (
         <div
-          className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-150"
-          style={{
-            backgroundColor: selected ? PINK : "transparent",
-            border: selected ? `2px solid ${PINK}` : "2px solid #D1D5DB",
-          }}
+          className="absolute top-0 right-0 z-10 px-3 py-[5px] rounded-tr-xl rounded-bl-xl"
+          style={{ background: PINK }}
         >
-          {selected && <CheckIcon />}
+          <span className="text-white text-[11px] font-semibold whitespace-nowrap">
+            {ticket.status}
+          </span>
         </div>
-      </div>
+      )}
 
-      <h2 className="text-xl font-bold text-gray-900 mb-3.5">
-        AiNA THE END LIVE TOUR 2026 - PICNIC -
-      </h2>
+      {/* Card */}
+      <div
+        role="checkbox"
+        aria-checked={selected}
+        tabIndex={0}
+        onClick={onToggle}
+        onKeyDown={e => (e.key === "Enter" || e.key === " ") && onToggle()}
+        className="rounded-xl px-5 pt-[18px] pb-5 cursor-pointer select-none outline-none transition-all duration-150"
+        style={{
+          backgroundColor: selected ? "#FFF0F3" : "#ffffff",
+          border: selected ? `2px solid ${PINK}` : "1px solid #E5E7EB",
+          boxShadow: selected
+            ? `0 0 0 3px ${PINK}22, 0 4px 16px 0 ${PINK}18`
+            : "0 4px 16px 0 rgba(0,0,0,0.07)",
+        }}
+      >
+        {/* Artist + checkmark */}
+        <div className="flex items-start justify-between mb-1">
+          <p className="text-xs font-medium leading-none" style={{ color: PINK }}>
+            {ticket.artist}
+          </p>
+          <div
+            className="w-[18px] h-[18px] rounded-full flex items-center justify-center shrink-0 ml-2 transition-all duration-150"
+            style={{
+              backgroundColor: selected ? PINK : "transparent",
+              border: selected ? `2px solid ${PINK}` : "2px solid #D1D5DB",
+            }}
+          >
+            {selected && <CheckIcon />}
+          </div>
+        </div>
 
-      <div className="flex items-center gap-[7px] mb-[7px]">
-        <MapPinIcon />
-        <span className="text-md text-gray-700 leading-none">
-          ORIX THEATER, Osaka Prefecture
-        </span>
-      </div>
+        {/* Event title */}
+        <h2 className="text-base font-bold text-gray-900 leading-snug mb-3.5">
+          {ticket.event}
+        </h2>
 
-      <div className="flex items-center gap-[7px]">
-        <ClockIcon />
-        <span className="text-md text-gray-700 leading-none">
-          2026/06/25 18:00 / 19:00
-        </span>
-      </div>
+        {/* Venue */}
+        <div className="flex items-center gap-[7px] mb-[7px]">
+          <MapPinIcon />
+          <span className="text-[13px] text-gray-500 leading-snug">{ticket.venue}</span>
+        </div>
 
-      <hr
-        className="my-4"
-        style={{ borderColor: selected ? `${PINK}33` : "#F3F4F6" }}
-      />
+        {/* Date */}
+        <div className="flex items-center gap-[7px]">
+          <ClockIcon />
+          <span className="text-[13px] text-gray-500 leading-none">{ticket.date}</span>
+        </div>
 
-      <div className="flex items-center gap-1.5 mb-2.5">
-        <TicketIcon color={selected ? PINK : BLUE} />
-        <span
-          className="text-md font-semibold leading-none"
-          style={{ color: selected ? PINK : BLUE }}
-        >
-          General reserved
-        </span>
-        <span className="text-md text-gray-800 leading-none">
-          {seats === 1 ? "seat" : "seats"} x
-        </span>
-        <span className="text-[22px] font-bold leading-none" style={{ color: PINK }}>
-          {seats}
-        </span>
-      </div>
+        {/* Divider */}
+        <hr
+          className="my-4 border-t"
+          style={{ borderColor: selected ? `${PINK}33` : "#F3F4F6" }}
+        />
 
-      <div className="flex items-baseline gap-1.5">
-        <span className="text-2xl font-md" style={{ color: PINK }}>
-          ¥9,500
-        </span>
-        <span className="text-md text-gray-800">
-          / 1 sheet
-        </span>
+        {/* Seat type row */}
+        <div className="flex items-center gap-1.5 mb-2.5">
+          <TicketIcon color={iconColor} />
+          <span className="text-[13px] font-medium leading-none" style={{ color: iconColor }}>
+            {ticket.seatType}
+          </span>
+
+          {ticket.seatUnit === "seat" && (
+            <>
+              <span className="text-[13px] text-gray-400 leading-none">
+                {ticket.seats === 1 ? "seat" : "seats"} x
+              </span>
+              <span className="text-[22px] font-bold leading-none" style={{ color: PINK }}>
+                {ticket.seats}
+              </span>
+            </>
+          )}
+
+          {ticket.seatUnit === "piece" && (
+            <>
+              <span className="text-[13px] text-gray-400 leading-none">x</span>
+              <span className="text-[22px] font-bold leading-none" style={{ color: PINK }}>
+                {ticket.seats}
+              </span>
+              <span className="text-[13px] text-gray-400 leading-none">
+                {ticket.seats === 1 ? "piece" : "pieces"}
+              </span>
+            </>
+          )}
+        </div>
+
+        {/* Price */}
+        <div className="flex items-baseline gap-1.5">
+          <span className="text-2xl font-bold" style={{ color: PINK }}>{ticket.price}</span>
+          <span className="text-[13px] text-gray-400">/ 1 sheet</span>
+        </div>
       </div>
     </div>
   );
 }
 
+/* ── Tickets Page ───────────────────────────────────────────── */
+
 function Tickets() {
-  const [selectedId, setSelectedId] = useState(null);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+
+  const toggle = (id) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  const count = selectedIds.size;
+  // Build the array of full ticket objects to pass forward
+  const selectedTickets = ticketData.filter(t => selectedIds.has(t.id));
 
   return (
     <div className="bg-gray-100 min-h-screen p-4 font-sans">
-
-      {/* ── Instruction ───────────────────────────────── */}
       <p className="text-[12px] text-gray-400 mb-3 px-1">
-        Select the number of seats
+        Select tickets to purchase
       </p>
 
-      {ticketData.map((ticket) => (
+      {ticketData.map(ticket => (
         <TicketCard
           key={ticket.id}
-          seats={ticket.seats}
-          selected={selectedId === ticket.id}
-          onClick={() =>
-            setSelectedId(prev => (prev === ticket.id ? null : ticket.id))
-          }
+          ticket={ticket}
+          selected={selectedIds.has(ticket.id)}
+          onToggle={() => toggle(ticket.id)}
         />
       ))}
 
-      {/* ── Confirm button ────────────────────────────── */}
-      <button
-        disabled={selectedId === null}
-        className="w-full mt-2 py-[14px] rounded-lg text-white text-[14px] font-semibold tracking-wide transition-opacity duration-150"
-        style={{
-          backgroundColor: PINK,
-          opacity: selectedId === null ? 0.35 : 1,
-          cursor: selectedId === null ? "not-allowed" : "pointer",
-        }}
+      {/* Confirm button — passes selectedTickets in router state */}
+      <Link
+        to={count > 0 ? "./step1" : "#"}
+        state={{ selectedTickets }}
+        className="block w-full mt-2"
+        onClick={e => count === 0 && e.preventDefault()}
       >
-        <Link to="./step1" > {selectedId === null
-          ? "Select a ticket to continue"
-          : `Confirm — ${ticketData.find(t => t.id === selectedId).seats} seat${ticketData.find(t => t.id === selectedId).seats > 1 ? "s" : ""} selected`}
-        </Link>
-      </button>
-
+        <button
+          disabled={count === 0}
+          className="w-full py-[14px] rounded-xl text-white text-[14px] font-semibold tracking-wide transition-opacity duration-150"
+          style={{
+            backgroundColor: PINK,
+            opacity: count === 0 ? 0.35 : 1,
+            cursor: count === 0 ? "not-allowed" : "pointer",
+          }}
+        >
+          {count === 0
+            ? "Select tickets to continue"
+            : `Confirm — ${count} ticket${count > 1 ? "s" : ""} selected`}
+        </button>
+      </Link>
     </div>
   );
 }
