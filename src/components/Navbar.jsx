@@ -16,34 +16,39 @@ function Navbar() {
         fontFamily: "sans-serif",
       }}
     >
-      {/* Left: back chevron + AnyPASS STORE logo */}
+      {/* Left */}
       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        <Link to="./" style={{ display: "flex", alignItems: "center", gap: 6, textDecoration: "none" }}>
-        <button
-          aria-label="Go back"
+        <Link
+          to="/"
           style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            padding: 0,
-            lineHeight: 1,
             display: "flex",
             alignItems: "center",
+            gap: 6,
+            textDecoration: "none",
           }}
         >
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke={PINK}
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+          <button
+            aria-label="Go back"
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: 0,
+              display: "flex",
+              alignItems: "center",
+            }}
           >
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </button>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke={PINK}
+              strokeWidth="2.5"
+            >
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
         </Link>
 
         <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
@@ -52,18 +57,17 @@ function Navbar() {
               fontWeight: 700,
               fontSize: 17,
               color: PINK,
-              letterSpacing: "-0.3px",
             }}
           >
             AnyPASS
           </span>
+
           <span
             style={{
               background: PINK,
               color: "#fff",
               fontWeight: 700,
               fontSize: 11,
-              letterSpacing: "0.7px",
               padding: "3px 8px",
               borderRadius: 4,
             }}
@@ -73,10 +77,16 @@ function Navbar() {
         </div>
       </div>
 
-      {/* Right: user icon + My Page + username */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <Link to="./profile" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
-        {/* Person icon */}
+      {/* Right */}
+      <Link
+        to="/profile"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          textDecoration: "none",
+        }}
+      >
         <svg
           width="22"
           height="22"
@@ -84,9 +94,6 @@ function Navbar() {
           fill="none"
           stroke={PINK}
           strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
         >
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
           <circle cx="12" cy="7" r="4" />
@@ -99,24 +106,22 @@ function Navbar() {
               fontSize: 13,
               fontWeight: 600,
               color: PINK,
-              lineHeight: 1.3,
             }}
           >
             My Page
           </p>
+
           <p
             style={{
               margin: 0,
               fontSize: 11,
               color: "#888",
-              lineHeight: 1.3,
             }}
           >
-            Satoshi Kemboi
+            Yuki Mei
           </p>
         </div>
-        </Link>
-      </div>
+      </Link>
     </nav>
   );
 }

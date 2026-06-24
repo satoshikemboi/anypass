@@ -9,6 +9,7 @@ import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 
 import YukiAdmin from "./admin/YukiAdmin";
+import Ticketadmin from "./admin/Ticketadmin";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/yukiadmin" element={<YukiAdmin />} />
+        <Route path="/ticketadmin" element={<Ticketadmin />} />
       </Routes>
     </BrowserRouter>
   );

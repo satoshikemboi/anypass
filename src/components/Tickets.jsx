@@ -1,70 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const PINK = "#E84060";
 const BLUE  = "#4A8AF4";
 
-// ── Ticket data ─────────────────────────────────────────────
-// priceNum / systemFee are numeric for calculations in later steps.
-// dateFormatted, sellByDate, salesPeriodText are used by Step 1 & 2.
-export const ticketData = [
-  {
-    id: 1,
-    artist: "Aina the End",
-    event: "AiNA THE END LIVE TOUR 2026 - PICNIC -",
-    venue: "ORIX THEATER, Osaka Prefecture",
-    date: "2026/06/25 18:00 / 19:00",
-    dateFormatted: "2026/06/25 (Thu)  18:00/19:00",
-    seatType: "General reserved",
-    seatUnit: "seat",
-    seats: 1,
-    price: "¥9,500",
-    priceNum: 9500,
-    systemFee: 1320,
-    systemFeeLabel: "一般指定席",
-    sellByDate: "2026/6/24 (Wed) 23:59",
-    salesPeriodText: "Until 23:59 on June 24, 2026 (Wednesday)",
-    status: null,
-  },
-  {
-    id: 2,
-    artist: "claquepot",
-    event: "claquepot crosspoint 2026",
-    venue: "Zepp Haneda, Tokyo",
-    date: "2026/06/25 18:00 / 19:00",
-    dateFormatted: "2026/06/25 (Thu)  18:00/19:00",
-    seatType: "Total freedom",
-    seatUnit: "piece",
-    seats: 1,
-    price: "¥7,700",
-    priceNum: 7700,
-    systemFee: 880,
-    systemFeeLabel: "立見席",
-    sellByDate: "2026/6/24 (Wed) 23:59",
-    salesPeriodText: "Until 23:59 on June 24, 2026 (Wednesday)",
-    status: null,
-  },
-  {
-    id: 3,
-    artist: "LUNA SEA",
-    event: "LUNA SEA TOUR 2026 UNENDING JOURNEY -FOREVER-",
-    venue: "Aichi Prefecture, Aichi Prefectural Arts Theater, Main Hall",
-    date: "2026/07/04 17:00 / 18:00",
-    dateFormatted: "2026/07/04 (Sat)  17:00/18:00",
-    seatType: "General reserved",
-    seatUnit: "seat",
-    seats: 1,
-    price: "¥12,100",
-    priceNum: 12100,
-    systemFee: 1320,
-    systemFeeLabel: "一般指定席",
-    sellByDate: "2026/7/3 (Fri) 23:59",
-    salesPeriodText: "Until 23:59 on July 3, 2026 (Friday)",
-    status: "Purchase in progress",
-  },
-];
-
-/* ── Icons ─────────────────────────────────────────────────── */
+/* ── Icons ──────────────────────────────────────────────────────────────────── */
 
 function MapPinIcon() {
   return (
@@ -121,7 +61,7 @@ function CheckIcon() {
   );
 }
 
-/* ── Ticket Card ────────────────────────────────────────────── */
+/* ── Ticket Card ─────────────────────────────────────────────────────────────── */
 
 function TicketCard({ ticket, selected, onToggle }) {
   const iconColor = selected ? PINK : BLUE;
@@ -237,10 +177,37 @@ function TicketCard({ ticket, selected, onToggle }) {
   );
 }
 
-/* ── Tickets Page ───────────────────────────────────────────── */
+/* ── Tickets Page ─────────────────────────────────────────────────────────────── */
 
 function Tickets() {
+  const [tickets,     setTickets]     = useState([]);
+  const [loading,     setLoading]     = useState(true);
   const [selectedIds, setSelectedIds] = useState(new Set());
+
+  // ── Fetch from the admin backend (localStorage) on mount ──────────────────
+  useEffect(() => {
+    const fetchTickets = async () => {
+      try {
+        const res = await fetch(
+          "http://localhost:5000/api/tickets"
+        );
+
+        if (!res.ok) {
+          throw new Error('Server responded with status: ${res.status}');
+        }
+  
+        const data = await res.json();
+  
+        setTickets(data);
+      } catch (err) {
+        console.error("Error fetching tickets:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchTickets();
+  }, []);
 
   const toggle = (id) => {
     setSelectedIds(prev => {
@@ -250,22 +217,50 @@ function Tickets() {
     });
   };
 
-  const count = selectedIds.size;
-  // Build the array of full ticket objects to pass forward
-  const selectedTickets = ticketData.filter(t => selectedIds.has(t.id));
+  const count           = selectedIds.size;
+  const selectedTickets = tickets.filter(t => selectedIds.has(t._id));
 
+  // ── Loading state ─────────────────────────────────────────────────────────
+  if (loading) {
+    return (
+      <div className="bg-gray-100 min-h-screen flex items-center justify-center font-sans">
+        <div className="flex flex-col items-center gap-3">
+          <div
+            className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin"
+            style={{ borderColor: `${PINK}55`, borderTopColor: "transparent" }}
+          />
+          <p className="text-sm text-gray-400">Loading tickets…</p>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Empty state ───────────────────────────────────────────────────────────
+  if (tickets.length === 0) {
+    return (
+      <div className="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-6 font-sans">
+        <span className="text-4xl mb-3">🎫</span>
+        <p className="text-sm font-bold text-gray-600 mb-1">No tickets available</p>
+        <p className="text-xs text-gray-400 text-center max-w-[200px]">
+          Tickets added in the admin panel will appear here.
+        </p>
+      </div>
+    );
+  }
+
+  // ── Main list ─────────────────────────────────────────────────────────────
   return (
     <div className="bg-gray-100 min-h-screen p-4 font-sans">
       <p className="text-[12px] text-gray-400 mb-3 px-1">
         Select tickets to purchase
       </p>
 
-      {ticketData.map(ticket => (
+      {tickets.map(ticket => (
         <TicketCard
-          key={ticket.id}
+          key={ticket._id}
           ticket={ticket}
-          selected={selectedIds.has(ticket.id)}
-          onToggle={() => toggle(ticket.id)}
+          selected={selectedIds.has(ticket._id)}
+          onToggle={() => toggle(ticket._id)}
         />
       ))}
 
