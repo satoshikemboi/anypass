@@ -1,125 +1,91 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 
 const PINK = "#D4537E";
 
 function Navbar() {
+  const location = useLocation();
+  const [userName, setUserName] = useState("Guest");
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        const name = parsedUser?.fullName || parsedUser?.user?.fullName || "My Account";
+        setUserName(name);
+      } catch (error) {
+        console.error("Error parsing user from localStorage", error);
+        setUserName("My Account");
+      }
+    } else {
+      setUserName("Guest");
+    }
+  }, [location]);
+
   return (
-    <nav
-      style={{
-        background: "#fff",
-        borderBottom: "0.5px solid rgba(0,0,0,0.1)",
-        padding: "10px 20px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        fontFamily: "sans-serif",
-      }}
-    >
-      {/* Left */}
-      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+    <nav className="sticky top-0 z-50 flex items-center justify-between bg-white px-4 py-3 md:px-8 border-b shadow-sm transition-all duration-200" style={{ borderBottomColor: PINK }}>
+      
+      {/* Left Section */}
+      <div className="flex items-center">
         <Link
           to="/"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            textDecoration: "none",
-          }}
+          className="flex items-center justify-center text-gray-500 hover:text-gray-900 transition-colors"
+          aria-label="Go back"
         >
-          <button
-            aria-label="Go back"
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: 0,
-              display: "flex",
-              alignItems: "center",
-            }}
+          <svg
+            width="22"
+            height="22"
+            fill="none"
+            stroke={PINK}
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke={PINK}
-              strokeWidth="2.5"
-            >
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </button>
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
         </Link>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-          <span
-            style={{
-              fontWeight: 700,
-              fontSize: 17,
-              color: PINK,
-            }}
-          >
-            AnyPASS
-          </span>
-
-          <span
-            style={{
-              background: PINK,
-              color: "#fff",
-              fontWeight: 700,
-              fontSize: 11,
-              padding: "3px 8px",
-              borderRadius: 4,
-            }}
-          >
-            STORE
-          </span>
-        </div>
+        {/* Brand Logo Container */}
+        <Link to="/" className="flex items-center gap-2 select-none group">
+          <div className="h-11 w-auto flex items-center overflow-hidden rounded-md transition-transform duration-200 group-hover:scale-[1.03]">
+            <img 
+              src="/logo.png" 
+              alt="AnyPASS Logo" 
+              className="h-full object-contain"
+            />
+          </div>
+        </Link>
       </div>
 
-      {/* Right */}
+      {/* Right Section */}
       <Link
         to="/profile"
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          textDecoration: "none",
-        }}
+        className="flex items-center gap-3 group"
       >
-        <svg
-          width="22"
-          height="22"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke={PINK}
-          strokeWidth="1.8"
-        >
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-          <circle cx="12" cy="7" r="4" />
-        </svg>
-
-        <div>
-          <p
-            style={{
-              margin: 0,
-              fontSize: 13,
-              fontWeight: 600,
-              color: PINK,
-            }}
+        <div className="p-1 rounded-full bg-white border border-gray-100 shadow-sm transition-colors group-hover:border-pink-200">
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke={PINK}
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+        </div>
+
+        <div className="flex flex-col text-left leading-none max-w-[120px]">
+          <p className="text-[13px] font-bold mb-0.5 tracking-tight group-hover:text-pink-700 transition-colors" style={{ color: PINK }}>
             My Page
           </p>
-
-          <p
-            style={{
-              margin: 0,
-              fontSize: 11,
-              color: "#888",
-            }}
-          >
-            Yuki Mei
-          </p>
+          <span className="text-[11px] text-gray-500 truncate font-medium">
+            {userName}
+          </span>
         </div>
       </Link>
     </nav>

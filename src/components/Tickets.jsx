@@ -88,7 +88,7 @@ function TicketCard({ ticket, selected, onToggle }) {
         tabIndex={0}
         onClick={onToggle}
         onKeyDown={e => (e.key === "Enter" || e.key === " ") && onToggle()}
-        className="rounded-xl px-5 pt-[18px] pb-5 cursor-pointer select-none outline-none transition-all duration-150"
+        className="rounded-lg px-5 pt-[18px] pb-5 cursor-pointer select-none outline-none transition-all duration-150"
         style={{
           backgroundColor: selected ? "#FFF0F3" : "#ffffff",
           border: selected ? `2px solid ${PINK}` : "1px solid #E5E7EB",
