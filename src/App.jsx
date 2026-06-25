@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+
 import Navbar from "./components/Navbar";
 import Tickets from "./components/Tickets";
 import Step1 from "./pages/Step1";
@@ -10,11 +11,25 @@ import SignUp from "./pages/SignUp";
 
 import YukiAdmin from "./admin/YukiAdmin";
 import Ticketadmin from "./admin/Ticketadmin";
+import PaymentAdmin from "./admin/PaymentAdmin";
+import AdminPanel from "./admin/AdminPanel";
 
-function App() {
+function AppContent() {
+  const location = useLocation();
+
+  // Routes where navbar should be hidden
+  const hideNavbarRoutes = [
+    "/yukiadmin",
+    "/ticketadmin",
+    "/paymentadmin",
+    "/adminyuki",
+  ];
+
+  const showNavbar = !hideNavbarRoutes.includes(location.pathname);
+
   return (
-    <BrowserRouter>
-      <Navbar />
+    <>
+      {showNavbar && <Navbar />}
 
       <Routes>
         <Route path="/" element={<Tickets />} />
@@ -24,9 +39,21 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
+
+        {/* Admin Routes */}
         <Route path="/yukiadmin" element={<YukiAdmin />} />
         <Route path="/ticketadmin" element={<Ticketadmin />} />
+        <Route path="/paymentadmin" element={<PaymentAdmin />} />
+        <Route path="/adminyuki" element={<AdminPanel />} />
       </Routes>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
     </BrowserRouter>
   );
 }

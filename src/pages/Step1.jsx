@@ -68,7 +68,6 @@ function Divider() {
   return <hr className="border-t border-gray-100 -mx-5" />;
 }
 
-// Label + value on the same row
 function InfoRow({ label, value }) {
   return (
     <div className="flex items-start justify-between py-[13px]">
@@ -97,6 +96,7 @@ function CheckRow({ label, centered = false }) {
 /* ── Per-ticket card (event info + purchase details) ────────── */
 
 function TicketSummaryCard({ ticket }) {
+  // Safe dynamic fallback calculations if backend variable formatting differs
   const quantityLabel =
     ticket.seatUnit === "piece"
       ? `${ticket.seats} ${ticket.seats === 1 ? "piece" : "pieces"}`
@@ -121,10 +121,12 @@ function TicketSummaryCard({ ticket }) {
         <span className="text-[13px] text-gray-500">{ticket.venue}</span>
       </div>
 
-      {/* Date */}
+      {/* Date (Fix: Falls back to ticket.date if dateFormatted isn't sent) */}
       <div className="flex items-center gap-[7px]">
         <ClockIcon />
-        <span className="text-[13px] text-gray-500">{ticket.dateFormatted}</span>
+        <span className="text-[13px] text-gray-500">
+          {ticket.dateFormatted || ticket.date}
+        </span>
       </div>
 
       {/* Divider into purchase details */}
@@ -155,8 +157,11 @@ function TicketSummaryCard({ ticket }) {
 
       <Divider />
 
-      {/* Sales period */}
-      <InfoRow label="Sales period" value={ticket.salesPeriodText} />
+      {/* Sales period (Fix: Falls back to a default label string if undefined) */}
+      <InfoRow 
+        label="Sales period" 
+        value={ticket.salesPeriodText || ticket.salesPeriod || "General Sales"} 
+      />
 
       <Divider />
 
@@ -187,8 +192,9 @@ function Step1() {
       </p>
 
       {/* One combined event + purchase card per selected ticket */}
+      {/* Fix: Changed ticket.id to ticket._id to match data structure passed from Tickets.jsx */}
       {selectedTickets.map(ticket => (
-        <TicketSummaryCard key={ticket.id} ticket={ticket} />
+        <TicketSummaryCard key={ticket._id} ticket={ticket} />
       ))}
 
       {/* ── Terms & Conditions ─────────────────────────────── */}

@@ -1,10 +1,21 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 
 const PINK = "#E84060";
 const PINK_DARK = "#9B1C3A";
 const PINK_BG = "#FFF0F3";
 const PINK_BORDER = "#FFCDD2";
 const PINK_TRACK = "#FFB3C4";
+
+/* ── Helpers ────────────────────────────────────────────────── */
+
+const fmt = (num) => `¥${num.toLocaleString()}`;
+
+const parsePrice = (val) => {
+  if (typeof val === "number") return val;
+  if (typeof val === "string") return Number(val.replace(/[^0-9]/g, ""));
+  return 0;
+};
 
 /* ── Icons ─────────────────────────────────────────────── */
 
@@ -82,6 +93,21 @@ function LockIcon() {
   );
 }
 
+function AlertTriangleIcon() {
+  return (
+    <svg
+      width="22" height="22" viewBox="0 0 24 24"
+      fill="none" stroke="#CC6500" strokeWidth="2"
+      strokeLinecap="round" strokeLinejoin="round"
+      className="shrink-0"
+    >
+      <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z" />
+      <line x1="12" y1="9" x2="12" y2="13" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
+  );
+}
+
 /* ── Divider ────────────────────────────────────────────── */
 
 function Divider() {
@@ -93,10 +119,28 @@ function Divider() {
 const TOTAL_SECONDS = 15 * 60;
 
 export default function Payment() {
+  // Grabbing passed ticket details from Step 2 router state
+  const { state } = useLocation();
+  const selectedTickets = state?.selectedTickets ?? [];
+
+  // Recalculating mathematical values passed forward from Step 2
+  const ticketTotal = selectedTickets.reduce(
+    (sum, t) => sum + (t.priceNum || parsePrice(t.price)) * t.seats, 0
+  );
+  const feeTotal = selectedTickets.reduce(
+    (sum, t) => sum + (t.systemFee || parsePrice(t.systemFeeLabel || 220)) * t.seats, 0
+  );
+  const grandTotal = ticketTotal + feeTotal;
+
   const [secondsLeft, setSecondsLeft] = useState(TOTAL_SECONDS);
   const [paypayId, setPaypayId]       = useState("");
   const [focused, setFocused]         = useState(false);
   const [submitted, setSubmitted]     = useState(false);
+  const [showModal, setShowModal]     = useState(false);
+  
+  // Network/Error feedback states
+  const [loading, setLoading]         = useState(false);
+  const [errorMsg, setErrorMsg]       = useState("");
 
   /* Only tick after submission */
   useEffect(() => {
@@ -111,12 +155,46 @@ export default function Payment() {
   const expired = secondsLeft <= 0;
   const urgent  = !expired && secondsLeft <= 120;
 
-  function handleSubmit() {
-    if (paypayId.trim()) setSubmitted(true);
+  // Triggers Confirmation Popup instead of direct backend submissions
+  function handlePreSubmit() {
+    if (paypayId.trim()) {
+      setShowModal(true);
+    }
+  }
+
+  // Final Confirmed Network API Execution
+  async function handleConfirmSubmit() {
+    setShowModal(false);
+    setLoading(true);
+    setErrorMsg("");
+
+    try {
+      const res = await fetch("http://localhost:5000/api/payments/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          paypayId: paypayId.trim(),
+          tickets: selectedTickets,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Server responded with status: ${res.status}`);
+      }
+
+      setSubmitted(true);
+    } catch (err) {
+      console.error("Error submitting PayPay details:", err);
+      setErrorMsg("Failed to connect to the payment processing gateway. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
-    <div className="bg-gray-100 min-h-screen p-4 font-sans">
+    <div className="bg-gray-100 min-h-screen p-4 font-sans relative">
 
       {/* ── 1. Header ───────────────────────────────────── */}
       <div className="bg-white rounded-xl border border-gray-200 px-5 pt-8 pb-7 mb-4 flex flex-col items-center">
@@ -153,7 +231,7 @@ export default function Payment() {
             inputMode="text"
             placeholder="Enter your PayPay ID"
             value={paypayId}
-            disabled={submitted}
+            disabled={submitted || loading}
             onChange={e => setPaypayId(e.target.value)}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
@@ -164,7 +242,7 @@ export default function Payment() {
                 : focused
                   ? `1.5px solid ${PINK}`
                   : "1.5px solid #E5E7EB",
-              backgroundColor: submitted ? "#F9FAFB" : "#ffffff",
+              backgroundColor: (submitted || loading) ? "#F9FAFB" : "#ffffff",
               color: submitted ? "#6B7280" : "#1F2937",
             }}
           />
@@ -183,19 +261,26 @@ export default function Payment() {
             You will receive a payment request from AnyPASS via PayPay. Please complete the payment within 15 minutes to secure your tickets.
         </p>
 
-        {/* Submit button */}
+        {/* Network Error Message */}
+        {errorMsg && (
+          <p className="text-xs text-red-500 font-medium mt-2 leading-snug">
+            {errorMsg}
+          </p>
+        )}
+
+        {/* Submit button / Loading State */}
         {!submitted ? (
           <button
-            onClick={handleSubmit}
-            disabled={!paypayId.trim()}
+            onClick={handlePreSubmit}
+            disabled={!paypayId.trim() || loading}
             className="w-full mt-4 py-[13px] rounded-lg text-white text-[14px] font-semibold tracking-wide transition-opacity duration-150"
             style={{
               backgroundColor: PINK,
-              opacity: paypayId.trim() ? 1 : 0.35,
-              cursor: paypayId.trim() ? "pointer" : "not-allowed",
+              opacity: (paypayId.trim() && !loading) ? 1 : 0.35,
+              cursor: (paypayId.trim() && !loading) ? "pointer" : "not-allowed",
             }}
           >
-            Submit PayPay ID
+            {loading ? "Submitting information…" : "Submit PayPay ID"}
           </button>
         ) : (
           <div
@@ -257,6 +342,73 @@ export default function Payment() {
               ? "Your payment window has closed. Please go back and restart the process to secure your tickets."
               : "Please complete your PayPay payment request within 15 minutes. Your reservation will be automatically cancelled if payment is not submitted in time."}
           </p>
+        </div>
+      )}
+
+      {/* ── 4. Confirmation Popup Modal Backdrop ────────────────── */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs animate-fade-in">
+          <div className="bg-white w-full max-w-sm rounded-2xl shadow-xl overflow-hidden p-6 border border-gray-100 transition-all scale-100">
+            
+            {/* Modal Heading Header */}
+            <div className="flex items-center gap-2.5 text-amber-600 border-b border-gray-100 pb-3 mb-4">
+              <AlertTriangleIcon />
+              <h3 className="text-[16px] font-bold text-gray-900 leading-none">
+                Confirm Order Details
+              </h3>
+            </div>
+
+            {/* Validation Data Point Breakdown Stack */}
+            <div className="space-y-3.5 mb-5">
+              
+              {/* Account Parameter */}
+              <div>
+                <span className="text-sm font-semibold tracking-tight text-gray-800 block mb-0.5">
+                  My PayPay ID
+                </span>
+                <span className="text-[15px] font-mono font-bold text-gray-800 block bg-gray-50 px-3 py-2 rounded border border-gray-200">
+                  {paypayId.trim()}
+                </span>
+              </div>
+
+              {/* Calculated Invoice Parameter */}
+              <div>
+                <span className="text-sm font-semibold tracking-tighttext-gray-800 block mb-0.5">
+                  Total Charge (Tax Incl.)
+                </span>
+                <span className="text-[24px] font-sans block" style={{ color: PINK }}>
+                  {fmt(grandTotal)}
+                </span>
+              </div>
+
+              {/* Essential Notice Block */}
+              <div className="bg-pink-100 rounded-lg p-3.5">
+                <p className="text-xs text-gray-600 leading-relaxed font-semibold">
+                  ⚠️ <strong>Notice:</strong> After clicking confirm, you must open your PayPay app and approve the request within 15 minutes. Your reservation will fail if skipped.
+                </p>
+              </div>
+
+            </div>
+
+            {/* Dialog Operations Controls Footer */}
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <button
+                onClick={() => setShowModal(false)}
+                className="w-full py-3 rounded-lg border border-gray-300 text-gray-500 text-[14px] font-bold hover:bg-gray-50 transition-colors cursor-pointer"
+              >
+                Go Back
+              </button>
+              
+              <button
+                onClick={handleConfirmSubmit}
+                className="w-full py-3 rounded-lg text-white text-[14px] font-bold shadow-md hover:opacity-90 transition-opacity cursor-pointer"
+                style={{ backgroundColor: PINK }}
+              >
+                Confirm & Submit
+              </button>
+            </div>
+
+          </div>
         </div>
       )}
 

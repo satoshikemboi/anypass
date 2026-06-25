@@ -193,7 +193,7 @@ function Tickets() {
         );
 
         if (!res.ok) {
-          throw new Error('Server responded with status: ${res.status}');
+          throw new Error(`Server responded with status: ${res.status}`);
         }
   
         const data = await res.json();
@@ -282,7 +282,7 @@ function Tickets() {
         >
           {count === 0
             ? "Select tickets to continue"
-            : `Confirm — ${count} ticket${count > 1 ? "s" : ""} selected`}
+            : `Confirm —  ticket${count > 1 ? "s" : ""} selected`}
         </button>
       </Link>
     </div>

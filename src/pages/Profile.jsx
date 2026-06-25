@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const PINK = "#E84060";
 const BLUE = "#4A8AF4";
@@ -94,13 +95,13 @@ function Profile({ onClose }) {
     <div className="min-h-screen pt-4 pb-8 font-sans max-w-[400px] mx-auto">
 
       {/* Close button */}
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-end px-4 mb-3">
         <button
           onClick={onClose}
           className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 transition-colors"
           aria-label="Close"
         >
-          <CloseIcon />
+          <Link to="/"><CloseIcon /></Link>
         </button>
       </div>
 
@@ -113,22 +114,7 @@ function Profile({ onClose }) {
         <Divider />
         <MenuRow label="Purchase history" />
         <Divider />
-        <MenuRow label="Sales history" />
-        <Divider />
-        <MenuRow label="Sales Management" />
-        <Divider />
-        <MenuRow label="Bank transfer history" />
-        <Divider />
-        <MenuRow label="Account management" />
-        <Divider />
         <MenuRow label="Log out" />
-      </div>
-
-      {/* ── Section 2: Bill splitting ────────────────────────── */}
-      <div className="bg-white rounded-lg border shadow-lg border-gray-200 overflow-hidden mb-3">
-        <MenuRow label="History of splitting the bill"/>
-        <Divider />
-        <MenuRow label="Exchange history" />
       </div>
 
       {/* ── Section 3: Registration information (no chevrons) ── */}
@@ -144,18 +130,6 @@ function Profile({ onClose }) {
           AnyPASS ID{" "}
           <span style={{ color: BLUE }}>affa5303b5</span>
         </p>
-      </div>
-
-      {/* ── Section 4: Account settings ─────────────────────── */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden mb-3">
-        <MenuRowWithNote
-          label="Change registration information"
-          noteColor={PINK}
-        />
-        <Divider />
-        <MenuRow label="Change email address" />
-        <Divider />
-        <MenuRow label="Newsletter settings" />
       </div>
 
       {/* ── Section 5: Help & legal ──────────────────────────── */}

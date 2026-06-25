@@ -8,6 +8,13 @@ const BLUE  = "#4A8AF4";
 
 const fmt = (num) => `¥${num.toLocaleString()}`;
 
+// Safe extraction helper in case the backend fields aren't numbers yet
+const parsePrice = (val) => {
+  if (typeof val === "number") return val;
+  if (typeof val === "string") return Number(val.replace(/[^0-9]/g, ""));
+  return 0;
+};
+
 /* ── Icons ─────────────────────────────────────────────────── */
 
 function MapPinIcon() {
@@ -96,7 +103,9 @@ function TicketConfirmBlock({ ticket }) {
         </div>
         <div className="flex items-center gap-[7px]">
           <ClockIcon />
-          <span className="text-[13px] text-gray-500">{ticket.dateFormatted}</span>
+          <span className="text-[13px] text-gray-500">
+            {ticket.dateFormatted || ticket.date}
+          </span>
         </div>
       </div>
 
@@ -124,7 +133,7 @@ function TicketConfirmBlock({ ticket }) {
         </div>
 
         <Divider />
-        <Row label="Sell-by-Date" value={ticket.sellByDate} />
+        <Row label="Sell-by-Date" value={ticket.sellByDate || ticket.date} />
         <Divider />
         <Row label="Number of purchases" value={quantityLabel} />
 
@@ -140,12 +149,12 @@ function Step2() {
   const { state } = useLocation();
   const selectedTickets = state?.selectedTickets ?? [];
 
-  // Computed totals
+  // Computed totals (Uses safe parser fallbacks)
   const ticketTotal = selectedTickets.reduce(
-    (sum, t) => sum + t.priceNum * t.seats, 0
+    (sum, t) => sum + (t.priceNum || parsePrice(t.price)) * t.seats, 0
   );
   const feeTotal = selectedTickets.reduce(
-    (sum, t) => sum + t.systemFee * t.seats, 0
+    (sum, t) => sum + (t.systemFee || parsePrice(t.systemFeeLabel || 220)) * t.seats, 0
   );
   const grandTotal = ticketTotal + feeTotal;
 
@@ -153,8 +162,9 @@ function Step2() {
     <div className="bg-gray-100 min-h-screen p-4 font-sans">
 
       {/* One confirmation block per selected ticket */}
+      {/* Fix: Changed ticket.id to ticket._id */}
       {selectedTickets.map(ticket => (
-        <TicketConfirmBlock key={ticket.id} ticket={ticket} />
+        <TicketConfirmBlock key={ticket._id} ticket={ticket} />
       ))}
 
       {/* ── Combined purchase price breakdown ──────────────── */}
@@ -162,47 +172,55 @@ function Step2() {
       <div className="bg-white rounded-xl border border-gray-200 px-5 mb-5">
 
         {/* Ticket price row(s) */}
-        {selectedTickets.map((ticket, i) => (
-          <React.Fragment key={ticket.id}>
-            <div className="flex items-start justify-between py-[14px]">
-              <span className="text-[13px] text-gray-600 leading-snug" style={{ maxWidth: "60%" }}>
-                Ticket price (tax incl.)
-                {selectedTickets.length > 1 && (
-                  <span className="block text-[11px] text-gray-400">{ticket.artist}</span>
-                )}
-              </span>
-              <span className="text-[13px] text-gray-700">
-                {fmt(ticket.priceNum * ticket.seats)}
-              </span>
-            </div>
-            <Divider />
-          </React.Fragment>
-        ))}
+        {/* Fix: Changed ticket.id to ticket._id */}
+        {selectedTickets.map((ticket) => {
+          const currentPriceNum = ticket.priceNum || parsePrice(ticket.price);
+          return (
+            <React.Fragment key={ticket._id}>
+              <div className="flex items-start justify-between py-[14px]">
+                <span className="text-[13px] text-gray-600 leading-snug" style={{ maxWidth: "60%" }}>
+                  Ticket price (tax incl.)
+                  {selectedTickets.length > 1 && (
+                    <span className="block text-[11px] text-gray-400">{ticket.artist}</span>
+                  )}
+                </span>
+                <span className="text-[13px] text-gray-700">
+                  {fmt(currentPriceNum * ticket.seats)}
+                </span>
+              </div>
+              <Divider />
+            </React.Fragment>
+          );
+        })}
 
         {/* System usage fee row(s) */}
-        {selectedTickets.map((ticket, i) => (
-          <React.Fragment key={`fee-${ticket.id}`}>
-            <div className="pt-[14px] pb-1">
-              <span className="text-[13px] text-gray-600">System usage fee</span>
-              {selectedTickets.length > 1 && (
-                <span className="text-[11px] text-gray-400 ml-1">({ticket.artist})</span>
-              )}
-            </div>
-            <div className="flex items-start justify-between pb-[14px] pl-3">
-              <span
-                className="text-[12px] text-gray-400 leading-snug"
-                style={{ maxWidth: "62%" }}
-              >
-                {ticket.systemFeeLabel}：
-                ({fmt(ticket.systemFee)} per ticket, tax included)
-              </span>
-              <span className="text-[13px] text-gray-700">
-                {fmt(ticket.systemFee * ticket.seats)}
-              </span>
-            </div>
-            <Divider />
-          </React.Fragment>
-        ))}
+        {/* Fix: Changed ticket.id to ticket._id */}
+        {selectedTickets.map((ticket) => {
+          const currentFee = ticket.systemFee || parsePrice(ticket.systemFeeLabel || 220);
+          return (
+            <React.Fragment key={`fee-${ticket._id}`}>
+              <div className="pt-[14px] pb-1">
+                <span className="text-[13px] text-gray-600">System usage fee</span>
+                {selectedTickets.length > 1 && (
+                  <span className="text-[11px] text-gray-400 ml-1">({ticket.artist})</span>
+                )}
+              </div>
+              <div className="flex items-start justify-between pb-[14px] pl-3">
+                <span
+                  className="text-[12px] text-gray-400 leading-snug"
+                  style={{ maxWidth: "62%" }}
+                >
+                  System Usage Fee：
+                  ({fmt(currentFee)} per ticket, tax included)
+                </span>
+                <span className="text-[13px] text-gray-700">
+                  {fmt(currentFee * ticket.seats)}
+                </span>
+              </div>
+              <Divider />
+            </React.Fragment>
+          );
+        })}
 
         {/* Grand total */}
         <div className="flex items-center justify-between py-[14px]">
@@ -238,6 +256,7 @@ function Step2() {
         {/* CTA */}
         <Link
           to="./payment"
+          state={{ selectedTickets}}
           className="block w-full py-[14px] rounded-lg text-white text-[14px] font-semibold tracking-wide text-center"
           style={{ backgroundColor: PINK }}
         >
