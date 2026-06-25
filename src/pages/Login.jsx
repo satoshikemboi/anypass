@@ -53,7 +53,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center pt-24 px-4">
+    <div className="min-h-screen bg-white flex flex-col items-center pt-24 px-6">
       <p className="text-sm text-gray-700 mb-4 max-w-lg font-semibold w-full">
         You need to log in to purchase tickets.
       </p>
@@ -74,7 +74,7 @@ export default function Login() {
             placeholder="anypass@example.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="border border-pink-400 rounded-md p-3 outline-none"
+            className="border border-pink-300 rounded-md p-2.5 outline-none"
           />
 
           <input
@@ -82,7 +82,7 @@ export default function Login() {
             placeholder="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="border border-pink-400 rounded-md p-3 outline-none"
+            className="border border-pink-300 rounded-md p-2.5 outline-none"
           />
 
           <button
