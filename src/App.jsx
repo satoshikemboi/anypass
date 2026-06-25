@@ -46,10 +46,10 @@ function AppContent() {
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
         {/* Protected Admin Routes */}
-        <Route path="/yukiadmin" element={<ProtectedRoute><YukiAdmin /></ProtectedRoute>} />
-        <Route path="/ticketadmin" element={<ProtectedRoute><Ticketadmin /></ProtectedRoute>} />
-        <Route path="/paymentadmin" element={<ProtectedRoute><PaymentAdmin /></ProtectedRoute>} />
-        <Route path="/adminyuki" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
+        <Route path="/yukiadmin" element={<YukiAdmin />} />
+        <Route path="/ticketadmin" element={<Ticketadmin />} />
+        <Route path="/paymentadmin" element={<PaymentAdmin />} />
+        <Route path="/adminyuki" element={<AdminPanel />} />
       </Routes>
     </>
   );
