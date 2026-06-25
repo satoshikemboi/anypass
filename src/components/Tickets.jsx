@@ -189,7 +189,7 @@ function Tickets() {
     const fetchTickets = async () => {
       try {
         const res = await fetch(
-          "http://localhost:5000/api/tickets"
+          "https://anypass.onrender.com/api/tickets"
         );
 
         if (!res.ok) {

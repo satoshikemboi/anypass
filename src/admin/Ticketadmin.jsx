@@ -441,7 +441,7 @@ function TicketAdmin() {
   async function fetchTickets() {
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:5000/api/tickets");
+      const res = await fetch("https://anypass.onrender.com/api/tickets");
       if (!res.ok) throw new Error("Could not load backend records");
       const data = await res.json();
       setTickets(data);
@@ -460,13 +460,13 @@ function TicketAdmin() {
       if (id) {
         // Since your ticketController didn't show a direct PUT/PATCH route implemented, 
         // fallback to standard REST design pattern structure:
-        res = await fetch(`http://localhost:5000/api/tickets/${id}`, {
+        res = await fetch(`https://anypass.onrender.com/api/tickets/${id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(record),
         });
       } else {
-        res = await fetch("http://localhost:5000/api/tickets", {
+        res = await fetch("https://anypass.onrender.com/api/tickets", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(record),
@@ -486,7 +486,7 @@ function TicketAdmin() {
 
   async function handleDelete(id) {
     try {
-      const res = await fetch(`http://localhost:5000/api/tickets/${id}`, {
+      const res = await fetch(`https://anypass.onrender.com/api/tickets/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Error performing delete execution.");

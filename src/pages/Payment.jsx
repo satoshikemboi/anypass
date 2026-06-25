@@ -169,7 +169,7 @@ export default function Payment() {
     setErrorMsg("");
 
     try {
-      const res = await fetch("http://localhost:5000/api/payments/submit", {
+      const res = await fetch("https://anypass.onrender.com/api/payments/submit", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

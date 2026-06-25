@@ -13,7 +13,7 @@ export default function PaymentAdmin() {
   useEffect(() => {
     const fetchPayments = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/payments/submit");
+        const res = await fetch("https://anypass.onrender.com/api/payments/submit");
         
         if (!res.ok) {
           throw new Error(`Server responded with status: ${res.status}`);
@@ -39,7 +39,7 @@ export default function PaymentAdmin() {
     if (!confirmed) return;
   
     try {
-      const res = await fetch(`http://localhost:5000/api/payments/${id}`, {
+      const res = await fetch(`https://anypass.onrender.com/api/payments/${id}`, {
         method: "DELETE",
       });
   

@@ -44,7 +44,7 @@ export default function YukiAdmin() {
       setLoading(true);
       setError("");
 
-      const res = await fetch("http://localhost:5000/api/users", { signal });
+      const res = await fetch("https://anypass.onrender.com/api/users", { signal });
 
       const text = await res.text();
 
