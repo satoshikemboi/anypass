@@ -12,6 +12,7 @@ import YukiAdmin from "./admin/YukiAdmin";
 import Ticketadmin from "./admin/Ticketadmin";
 import PaymentAdmin from "./admin/PaymentAdmin";
 import AdminPanel from "./admin/AdminPanel";
+import ScrollToTop from "./components/ScrollToTop";
 
 import ProtectedRoute from "./components/ProtectedRoute"; 
 
@@ -34,12 +35,12 @@ function AppContent() {
 
       <Routes>
         {/* Public Routes */}
-        <Route path="/" element={<Tickets />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
 
         {/* Protected Customer Routes */}
-        <Route path="/step1" element={<Step1 />} />
+        <Route path="/" element={<ProtectedRoute><Tickets /></ProtectedRoute>} />
+        <Route path="/step1" element={<ProtectedRoute><Step1 /></ProtectedRoute>} />
         <Route path="/step2" element={<ProtectedRoute><Step2 /></ProtectedRoute>} />
         <Route path="/step2/payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
@@ -58,6 +59,7 @@ function AppContent() {
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AppContent />
     </BrowserRouter>
   );
