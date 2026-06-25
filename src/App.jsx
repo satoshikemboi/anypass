@@ -8,16 +8,17 @@ import Payment from "./pages/Payment";
 import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
-
 import YukiAdmin from "./admin/YukiAdmin";
 import Ticketadmin from "./admin/Ticketadmin";
 import PaymentAdmin from "./admin/PaymentAdmin";
 import AdminPanel from "./admin/AdminPanel";
 
+import ProtectedRoute from "./components/ProtectedRoute"; 
+
+// 1. AppContent handles hooks that depend on the Router context
 function AppContent() {
   const location = useLocation();
 
-  // Routes where navbar should be hidden
   const hideNavbarRoutes = [
     "/yukiadmin",
     "/ticketadmin",
@@ -32,24 +33,28 @@ function AppContent() {
       {showNavbar && <Navbar />}
 
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<Tickets />} />
-        <Route path="/step1" element={<Step1 />} />
-        <Route path="/step2" element={<Step2 />} />
-        <Route path="/step2/payment" element={<Payment />} />
-        <Route path="/profile" element={<Profile />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
 
-        {/* Admin Routes */}
-        <Route path="/yukiadmin" element={<YukiAdmin />} />
-        <Route path="/ticketadmin" element={<Ticketadmin />} />
-        <Route path="/paymentadmin" element={<PaymentAdmin />} />
-        <Route path="/adminyuki" element={<AdminPanel />} />
+        {/* Protected Customer Routes */}
+        <Route path="/step1" element={<Step1 />} />
+        <Route path="/step2" element={<ProtectedRoute><Step2 /></ProtectedRoute>} />
+        <Route path="/step2/payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+
+        {/* Protected Admin Routes */}
+        <Route path="/yukiadmin" element={<ProtectedRoute><YukiAdmin /></ProtectedRoute>} />
+        <Route path="/ticketadmin" element={<ProtectedRoute><Ticketadmin /></ProtectedRoute>} />
+        <Route path="/paymentadmin" element={<ProtectedRoute><PaymentAdmin /></ProtectedRoute>} />
+        <Route path="/adminyuki" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
       </Routes>
     </>
   );
 }
 
+// 2. App provides the BrowserRouter context and acts as the entry point
 function App() {
   return (
     <BrowserRouter>

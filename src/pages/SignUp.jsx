@@ -1,7 +1,10 @@
 import { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom"; // 1. Import useNavigate
 
 export default function SignUp() {
+  const navigate = useNavigate(); // 2. Initialize the navigation hook
+
   const [form, setForm] = useState({
     fullName: "",
     email: "",
@@ -40,6 +43,9 @@ export default function SignUp() {
         password: "",
       });
 
+      /* ── 3. REDIRECT USER TO TICKETS PAGE ── */
+      navigate("/");
+
     } catch (error) {
       alert(
         error.response?.data?.message ||
@@ -52,7 +58,6 @@ export default function SignUp() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex justify-center pt-10 pb-10">
-
       <form
         onSubmit={handleSubmit}
         className="bg-white rounded-xl shadow-sm border py-8 px-4 w-full max-w-lg"
@@ -62,13 +67,13 @@ export default function SignUp() {
         </h1>
 
         <div className="flex flex-col gap-3 mt-6">
-
           <input
             type="text"
             placeholder="Full name"
             value={form.fullName}
             onChange={update("fullName")}
             className="border p-3 rounded"
+            required
           />
 
           <input
@@ -77,6 +82,7 @@ export default function SignUp() {
             value={form.email}
             onChange={update("email")}
             className="border p-3 rounded"
+            required
           />
 
           <input
@@ -85,6 +91,7 @@ export default function SignUp() {
             value={form.phone}
             onChange={update("phone")}
             className="border p-3 rounded"
+            required
           />
 
           <input
@@ -93,6 +100,7 @@ export default function SignUp() {
             value={form.username}
             onChange={update("username")}
             className="border p-3 rounded"
+            required
           />
 
           <input
@@ -101,20 +109,18 @@ export default function SignUp() {
             value={form.password}
             onChange={update("password")}
             className="border p-3 rounded"
+            required
           />
 
           <button
+            type="submit"
             disabled={loading}
-            className="bg-pink-500 text-white py-3 rounded"
+            className="bg-pink-500 text-white py-3 rounded hover:bg-pink-600 transition-colors"
           >
-            {loading
-              ? "Creating..."
-              : "Create account"}
+            {loading ? "Creating..." : "Create account"}
           </button>
-
         </div>
       </form>
-
     </div>
   );
 }
