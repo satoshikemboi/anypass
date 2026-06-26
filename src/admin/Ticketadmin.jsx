@@ -46,13 +46,13 @@ function recordToForm(r) {
     event:      r.event    ?? "",
     venue:      r.venue    ?? "",
     eventDate:  datePart,
-    doorsTime:  m?.[1]      ?? "18:00",
-    showTime:   m?.[2]      ?? "19:00",
+    doorsTime:  m?.[1]      ?? "11:30",
+    showTime:   m?.[2]      ?? "12:30",
     seatType:   r.seatType  ?? "General reserved",
     seatUnit:   r.seatUnit  ?? "seat",
-    seats:      r.seats     ?? 1,
+    seats:      r.seats     ?? 2,
     priceNum:   r.priceNum  ?? 0,
-    systemFee:  r.systemFee ?? 0,
+    systemFee:  r.systemFee ?? 1450,
     status:     r.status    ?? "",
     sellByDate: r.sellByDate ?? "",
   };
@@ -60,7 +60,7 @@ function recordToForm(r) {
 
 const EMPTY_FORM = {
   artist: "", event: "", venue: "",
-  eventDate: "", doorsTime: "18:00", showTime: "19:00",
+  eventDate: "", doorsTime: "11:30", showTime: "12:30",
   seatType: "General reserved", seatUnit: "seat",
   seats: 1, priceNum: 0, systemFee: 0,
   status: "", sellByDate: "",
@@ -552,7 +552,7 @@ function TicketAdmin() {
               <span className="text-3xl">🎫</span>
             </div>
             <p className="text-[15px] font-bold text-gray-700 mb-1">No tickets yet</p>
-            <p className="text-xs text-gray-400 mb-6 max-w-[200px]">Add your first ticket and it will appear in the Tickets page immediately.</p>
+            <p className="text-xs text-gray-400 mb-6 max-w-50">Add your first ticket and it will appear in the Tickets page immediately.</p>
             <button onClick={openAdd} className="px-5 py-2.5 rounded-xl text-white text-sm font-semibold shadow-sm" style={{ backgroundColor: PINK }}>+ Add First Ticket</button>
           </div>
         ) : (

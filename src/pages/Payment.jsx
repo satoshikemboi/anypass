@@ -21,7 +21,7 @@ const parsePrice = (val) => {
 
 function PaymentDocIcon() {
   return (
-    <div className="w-[56px] h-[56px] rounded-full border border-gray-300 flex items-center justify-center mb-5">
+    <div className="w-14 h-14 rounded-full border border-gray-300 flex items-center justify-center mb-5">
       <svg
         width="26" height="26" viewBox="0 0 24 24"
         fill="none" stroke="#555555" strokeWidth="1.5"
@@ -206,7 +206,7 @@ export default function Payment() {
 
       {/* ── 2. PayPay ID input ──────────────────────────── */}
       <p className="text-[12px] text-gray-400 mb-2 px-1">PayPay ID</p>
-      <div className="bg-white rounded-xl border border-gray-200 px-5 pt-[18px] pb-5 mb-4">
+      <div className="bg-white rounded-xl border border-gray-200 px-5 pt-4.5 pb-5 mb-4">
 
         {/* Label row */}
         <div className="flex items-center justify-between mb-3">
@@ -273,7 +273,7 @@ export default function Payment() {
           <button
             onClick={handlePreSubmit}
             disabled={!paypayId.trim() || loading}
-            className="w-full mt-4 py-[13px] rounded-lg text-white text-[14px] font-semibold tracking-wide transition-opacity duration-150"
+            className="w-full mt-4 py-3.25 rounded-lg text-white text-[14px] font-semibold tracking-wide transition-opacity duration-150"
             style={{
               backgroundColor: PINK,
               opacity: (paypayId.trim() && !loading) ? 1 : 0.35,
@@ -284,7 +284,7 @@ export default function Payment() {
           </button>
         ) : (
           <div
-            className="w-full mt-4 py-[13px] rounded-lg text-[14px] font-semibold tracking-wide text-center flex items-center justify-center gap-2"
+            className="w-full mt-4 py-3.25 rounded-lg text-[14px] font-semibold tracking-wide text-center flex items-center justify-center gap-2"
             style={{ backgroundColor: "#F0FDF4", color: "#16A34A" }}
           >
             <CheckCircleIcon />
@@ -297,7 +297,7 @@ export default function Payment() {
       {/* ── 3. 15-min countdown (only after submission) ─── */}
       {submitted && (
         <div
-          className="rounded-xl px-5 pt-[18px] pb-5"
+          className="rounded-xl px-5 pt-4.5 pb-5"
           style={{ backgroundColor: PINK_BG, border: `1px solid ${PINK_BORDER}` }}
         >
           {/* Title row */}
@@ -325,7 +325,7 @@ export default function Payment() {
 
           {/* Progress bar */}
           <div
-            className="w-full h-[5px] rounded-full mb-4 overflow-hidden"
+            className="w-full h-1.25 rounded-full mb-4 overflow-hidden"
             style={{ backgroundColor: PINK_TRACK }}
           >
             <div

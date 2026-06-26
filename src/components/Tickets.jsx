@@ -72,7 +72,7 @@ function TicketCard({ ticket, selected, onToggle }) {
       {/* Status badge */}
       {ticket.status && (
         <div
-          className="absolute top-0 right-0 z-10 px-3 py-[5px] rounded-tr-xl rounded-bl-xl"
+          className="absolute top-0 right-0 z-10 px-3 py-1.25 rounded-tr-xl rounded-bl-xl"
           style={{ background: PINK }}
         >
           <span className="text-white text-[11px] font-semibold whitespace-nowrap">
@@ -88,7 +88,7 @@ function TicketCard({ ticket, selected, onToggle }) {
         tabIndex={0}
         onClick={onToggle}
         onKeyDown={e => (e.key === "Enter" || e.key === " ") && onToggle()}
-        className="rounded-lg px-5 pt-[18px] pb-5 cursor-pointer select-none outline-none transition-all duration-150"
+        className="rounded-lg px-5 pt-4.5 pb-5 cursor-pointer select-none outline-none transition-all duration-150"
         style={{
           backgroundColor: selected ? "#FFF0F3" : "#ffffff",
           border: selected ? `2px solid ${PINK}` : "1px solid #E5E7EB",
@@ -103,7 +103,7 @@ function TicketCard({ ticket, selected, onToggle }) {
             {ticket.artist}
           </p>
           <div
-            className="w-[18px] h-[18px] rounded-full flex items-center justify-center shrink-0 ml-2 transition-all duration-150"
+            className="w-4.5 h-4.5 rounded-full flex items-center justify-center shrink-0 ml-2 transition-all duration-150"
             style={{
               backgroundColor: selected ? PINK : "transparent",
               border: selected ? `2px solid ${PINK}` : "2px solid #D1D5DB",
@@ -119,13 +119,13 @@ function TicketCard({ ticket, selected, onToggle }) {
         </h2>
 
         {/* Venue */}
-        <div className="flex items-center gap-[7px] mb-[7px]">
+        <div className="flex items-center gap-1.75 mb-1.75">
           <MapPinIcon />
           <span className="text-[13px] text-gray-500 leading-snug">{ticket.venue}</span>
         </div>
 
         {/* Date */}
-        <div className="flex items-center gap-[7px]">
+        <div className="flex items-center gap-1.75">
           <ClockIcon />
           <span className="text-[13px] text-gray-500 leading-none">{ticket.date}</span>
         </div>
@@ -241,7 +241,7 @@ function Tickets() {
       <div className="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-6 font-sans">
         <span className="text-4xl mb-3">🎫</span>
         <p className="text-sm font-bold text-gray-600 mb-1">No tickets available</p>
-        <p className="text-xs text-gray-400 text-center max-w-[200px]">
+        <p className="text-xs text-gray-400 text-center max-w-50">
           Tickets added in the admin panel will appear here.
         </p>
       </div>
@@ -273,7 +273,7 @@ function Tickets() {
       >
         <button
           disabled={count === 0}
-          className="w-full py-[14px] rounded-xl text-white text-[14px] font-semibold tracking-wide transition-opacity duration-150"
+          className="w-full py-3.5 rounded-xl text-white text-[14px] font-semibold tracking-wide transition-opacity duration-150"
           style={{
             backgroundColor: PINK,
             opacity: count === 0 ? 0.35 : 1,

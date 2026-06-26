@@ -28,7 +28,7 @@ function Divider() {
 
 function MenuRow({ label, labelColor = DARK, showDot = false, onClick }) {
   return (
-    <button className="w-full flex items-center justify-between px-4 py-[14px] text-left hover:bg-gray-50 transition-colors" onClick={onClick}>
+    <button className="w-full flex items-center justify-between px-4 py-3.5 text-left hover:bg-gray-50 transition-colors" onClick={onClick}>
       <span className="text-[14px] font-medium leading-snug" style={{ color: labelColor }}>{label}</span>
       <div className="flex items-center gap-2 shrink-0 ml-2">
         {showDot && <span className="w-3 h-3 rounded-full" style={{ backgroundColor: PINK }} />}
@@ -105,7 +105,7 @@ function Profile({ onClose }) {
   }
 
   return (
-    <div className="min-h-screen pt-4 pb-8 font-sans max-w-[400px] mx-auto">
+    <div className="min-h-screen pt-4 pb-8 font-sans max-w-100 mx-auto">
       <div className="flex justify-end px-4 mb-3">
         <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 transition-colors">
           <Link to="/"><CloseIcon /></Link>
@@ -122,9 +122,9 @@ function Profile({ onClose }) {
 
       <div className="bg-white rounded-lg border shadow-lg border-gray-200 px-4 py-4 mb-3">
         <p className="text-[13px] font-semibold mb-2 leading-none" style={{ color: BLUE }}>[Registration Information]</p>
-        <p className="text-[13px] text-gray-700 mb-[6px]">Mobile phone number : <span style={{ color: BLUE }}>{userData?.phone || "N/A"}</span></p>
+        <p className="text-[13px] text-gray-700 mb-1.5">Mobile phone number : <span style={{ color: BLUE }}>{userData?.phone || "N/A"}</span></p>
         <p className="text-[13px] text-gray-700">AnyPASS ID/Username : <span style={{ color: BLUE }}>{userData?.username || "N/A"}</span></p>
-        <p className="text-[13px] text-gray-700 mt-[6px]">email : <span style={{ color: BLUE}}>{userData?.email || "N/A"}</span></p>
+        <p className="text-[13px] text-gray-700 mt-1.5">email : <span style={{ color: BLUE}}>{userData?.email || "N/A"}</span></p>
       </div>
 
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">

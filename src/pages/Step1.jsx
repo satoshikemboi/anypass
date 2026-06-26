@@ -70,7 +70,7 @@ function Divider() {
 
 function InfoRow({ label, value }) {
   return (
-    <div className="flex items-start justify-between py-[13px]">
+    <div className="flex items-start justify-between py-3.25">
       <span className="text-[13px] text-gray-500 shrink-0 mr-3">{label}</span>
       <span className="text-[13px] text-gray-700 text-right leading-snug">{value}</span>
     </div>
@@ -81,7 +81,7 @@ function CheckRow({ label, centered = false }) {
   return (
     <div className={`flex items-center gap-3 px-1 ${centered ? "justify-center" : ""}`}>
       <div
-        className="w-[22px] h-[22px] rounded-sm flex items-center justify-center shrink-0"
+        className="w-5.5 h-5.5 rounded-sm flex items-center justify-center shrink-0"
         style={{ background: PINK }}
       >
         <CheckIcon />
@@ -103,7 +103,7 @@ function TicketSummaryCard({ ticket }) {
       : `${ticket.seats} ${ticket.seats === 1 ? "sheet" : "sheets"}`;
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 px-5 pt-[18px] pb-5 mb-3">
+    <div className="bg-white rounded-xl border border-gray-200 px-5 pt-4.5 pb-5 mb-3">
 
       {/* Artist */}
       <p className="text-xs font-medium mb-1 leading-none" style={{ color: PINK }}>
@@ -116,13 +116,13 @@ function TicketSummaryCard({ ticket }) {
       </h2>
 
       {/* Venue */}
-      <div className="flex items-center gap-[7px] mb-[7px]">
+      <div className="flex items-center gap-1.75 mb-1.75">
         <MapPinIcon />
         <span className="text-[13px] text-gray-500">{ticket.venue}</span>
       </div>
 
       {/* Date (Fix: Falls back to ticket.date if dateFormatted isn't sent) */}
-      <div className="flex items-center gap-[7px]">
+      <div className="flex items-center gap-1.75">
         <ClockIcon />
         <span className="text-[13px] text-gray-500">
           {ticket.dateFormatted || ticket.date}
@@ -143,7 +143,7 @@ function TicketSummaryCard({ ticket }) {
       <Divider />
 
       {/* Seat type + assignment */}
-      <div className="flex items-start justify-between py-[13px]">
+      <div className="flex items-start justify-between py-3.25">
         <div className="flex items-start gap-1.5">
           <TicketIcon />
           <span className="text-[13px] font-medium leading-snug" style={{ color: BLUE }}>
@@ -205,7 +205,7 @@ function Step1() {
       </h1>
 
       {/* Scrollable terms card */}
-      <div className="bg-white rounded-xl border border-gray-200 px-5 py-4 mb-5 max-h-[200px] overflow-y-auto">
+      <div className="bg-white rounded-xl border border-gray-200 px-5 py-4 mb-5 max-h-50 overflow-y-auto">
         <p className="text-[13px] font-medium mb-3 leading-snug" style={{ color: PINK }}>
           [AnyPASS STORE Individual Terms and Conditions]
         </p>

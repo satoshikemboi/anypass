@@ -102,7 +102,7 @@ export default function PaymentAdmin() {
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50 text-[11px] font-bold uppercase tracking-wider text-gray-500 select-none">
                   <th className="py-3 px-6">Timestamp / Order ID</th>
-                  <th className="py-3 px-6">PayPay ID Contact</th>
+                  <th className="py-3 px-6">PayPay ID</th>
                   <th className="py-3 px-6">Allocated Items & Artist Description</th>
                   <th className="py-3 px-6 text-right">Price Tally</th>
                   <th className="py-3 px-6 text-center">System Status</th>
@@ -129,7 +129,7 @@ export default function PaymentAdmin() {
                       <td className="py-4 px-6 vertical-top">
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2 rounded-full" style={{ backgroundColor: PINK }} />
-                          <span className="font-mono font-bold text-gray-800 bg-pink-50 text-pink-700 px-2 py-0.5 rounded border border-pink-100">
+                          <span className="font-mono font-bold bg-pink-50 text-pink-700 px-2 py-0.5 rounded border border-pink-100">
                             {record.paypayId}
                           </span>
                         </div>

@@ -71,7 +71,7 @@ function Divider() {
 
 function Row({ label, value, valueClass = "text-[13px] text-gray-700" }) {
   return (
-    <div className="flex items-center justify-between py-[14px]">
+    <div className="flex items-center justify-between py-3.5">
       <span className="text-[13px] text-gray-600">{label}</span>
       <span className={valueClass}>{value}</span>
     </div>
@@ -90,18 +90,18 @@ function TicketConfirmBlock({ ticket }) {
     <>
       {/* Event info card */}
       <SectionLabel text="Confirmation of purchase details" />
-      <div className="bg-white rounded-xl border border-gray-200 px-5 pt-[18px] pb-5 mb-3">
+      <div className="bg-white rounded-xl border border-gray-200 px-5 pt-4.5 pb-5 mb-3">
         <p className="text-xs font-medium mb-1 leading-none" style={{ color: PINK }}>
           {ticket.artist}
         </p>
         <h2 className="text-base font-bold text-gray-900 leading-snug mb-3.5">
           {ticket.event}
         </h2>
-        <div className="flex items-center gap-[7px] mb-[7px]">
+        <div className="flex items-center gap-1.75 mb-1.75">
           <MapPinIcon />
           <span className="text-[13px] text-gray-500">{ticket.venue}</span>
         </div>
-        <div className="flex items-center gap-[7px]">
+        <div className="flex items-center gap-1.75">
           <ClockIcon />
           <span className="text-[13px] text-gray-500">
             {ticket.dateFormatted || ticket.date}
@@ -122,7 +122,7 @@ function TicketConfirmBlock({ ticket }) {
         <Divider />
 
         {/* Seat type */}
-        <div className="flex items-start justify-between py-[14px]">
+        <div className="flex items-start justify-between py-3.5">
           <div className="flex items-start gap-1.5">
             <TicketIcon />
             <span className="text-[13px] font-medium leading-snug" style={{ color: BLUE }}>
@@ -177,7 +177,7 @@ function Step2() {
           const currentPriceNum = ticket.priceNum || parsePrice(ticket.price);
           return (
             <React.Fragment key={ticket._id}>
-              <div className="flex items-start justify-between py-[14px]">
+              <div className="flex items-start justify-between py-3.5">
                 <span className="text-[13px] text-gray-600 leading-snug" style={{ maxWidth: "60%" }}>
                   Ticket price (tax incl.)
                   {selectedTickets.length > 1 && (
@@ -199,13 +199,13 @@ function Step2() {
           const currentFee = ticket.systemFee || parsePrice(ticket.systemFeeLabel || 220);
           return (
             <React.Fragment key={`fee-${ticket._id}`}>
-              <div className="pt-[14px] pb-1">
+              <div className="pt-3.5 pb-1">
                 <span className="text-[13px] text-gray-600">System usage fee</span>
                 {selectedTickets.length > 1 && (
                   <span className="text-[11px] text-gray-400 ml-1">({ticket.artist})</span>
                 )}
               </div>
-              <div className="flex items-start justify-between pb-[14px] pl-3">
+              <div className="flex items-start justify-between pb-3.5 pl-3">
                 <span
                   className="text-[12px] text-gray-400 leading-snug"
                   style={{ maxWidth: "62%" }}
@@ -223,7 +223,7 @@ function Step2() {
         })}
 
         {/* Grand total */}
-        <div className="flex items-center justify-between py-[14px]">
+        <div className="flex items-center justify-between py-3.5">
           <span className="text-[13px] text-gray-600">Total (tax included)</span>
           <span className="text-[20px] font-bold" style={{ color: PINK }}>
             {fmt(grandTotal)}
@@ -257,7 +257,7 @@ function Step2() {
         <Link
           to="./payment"
           state={{ selectedTickets}}
-          className="block w-full py-[14px] rounded-lg text-white text-[14px] font-semibold tracking-wide text-center"
+          className="block w-full py-3.5 rounded-lg text-white text-[14px] font-semibold tracking-wide text-center"
           style={{ backgroundColor: PINK }}
         >
           Payment information input

@@ -79,7 +79,7 @@ function Navbar() {
           </svg>
         </div>
 
-        <div className="flex flex-col text-left leading-none max-w-[120px]">
+        <div className="flex flex-col text-left leading-none max-w-30">
           <p className="text-[13px] font-bold mb-0.5 tracking-tight group-hover:text-pink-700 transition-colors" style={{ color: PINK }}>
             My Page
           </p>
