@@ -285,6 +285,7 @@ function TicketForm({ initialForm, id, onSave, onCancel }) {
               onChange={e => handleSeatTypeChange(e.target.value)}
             >
               <option value="General reserved">General reserved</option>
+              <option value="Reserved S seat">General reserved</option>
               <option value="Total freedom">Total freedom</option>
             </select>
           </Field>
@@ -353,6 +354,7 @@ function TicketForm({ initialForm, id, onSave, onCancel }) {
               onChange={e => set("status", e.target.value)}
             >
               <option value="">None</option>
+              <option value="On Sale">On Sale</option>
               <option value="Purchase in progress">Purchase in progress</option>
               <option value="Sold out">Sold out</option>
               <option value="Coming soon">Coming soon</option>
