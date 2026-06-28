@@ -8,7 +8,6 @@ const BLUE  = "#4A8AF4";
 
 const fmt = (num) => `¥${num.toLocaleString()}`;
 
-// Safe extraction helper in case the backend fields aren't numbers yet
 const parsePrice = (val) => {
   if (typeof val === "number") return val;
   if (typeof val === "string") return Number(val.replace(/[^0-9]/g, ""));
@@ -81,15 +80,12 @@ function Row({ label, value, valueClass = "text-[13px] text-gray-700" }) {
 /* ── Per-ticket confirmation block ──────────────────────────── */
 
 function TicketConfirmBlock({ ticket }) {
-  const quantityLabel =
-    ticket.seatUnit === "piece"
-      ? `${ticket.seats} ${ticket.seats === 1 ? "piece" : "pieces"}`
-      : `${ticket.seats} ${ticket.seats === 1 ? "sheet" : "sheets"}`;
+  const quantityLabel = `${ticket.seats}枚`;
 
   return (
     <>
       {/* Event info card */}
-      <SectionLabel text="Confirmation of purchase details" />
+      <SectionLabel text="購入内容の確認" />
       <div className="bg-white rounded-xl border border-gray-200 px-5 pt-4.5 pb-5 mb-3">
         <p className="text-xs font-medium mb-1 leading-none" style={{ color: PINK }}>
           {ticket.artist}
@@ -110,13 +106,13 @@ function TicketConfirmBlock({ ticket }) {
       </div>
 
       {/* Purchase ticket / amount card */}
-      <SectionLabel text="Purchase ticket / amount" />
+      <SectionLabel text="購入チケット / 金額" />
       <div className="bg-white rounded-xl border border-gray-200 px-5 mb-5">
 
         {/* Unit price */}
         <div className="flex items-baseline gap-2 py-4">
           <span className="text-2xl font-bold" style={{ color: PINK }}>{ticket.price}</span>
-          <span className="text-[13px] text-gray-400">per ticket</span>
+          <span className="text-[13px] text-gray-400">/ 1枚</span>
         </div>
 
         <Divider />
@@ -126,16 +122,16 @@ function TicketConfirmBlock({ ticket }) {
           <div className="flex items-start gap-1.5">
             <TicketIcon />
             <span className="text-[13px] font-medium leading-snug" style={{ color: BLUE }}>
-              {ticket.seatType}<br />seats
+              {ticket.seatType}<br />席
             </span>
           </div>
-          <span className="text-[13px] text-gray-500">Seat TBD</span>
+          <span className="text-[13px] text-gray-500">座席未定</span>
         </div>
 
         <Divider />
-        <Row label="Sell-by-Date" value={ticket.sellByDate || ticket.date} />
+        <Row label="販売期限" value={ticket.sellByDate || ticket.date} />
         <Divider />
-        <Row label="Number of purchases" value={quantityLabel} />
+        <Row label="購入枚数" value={quantityLabel} />
 
       </div>
     </>
@@ -145,11 +141,9 @@ function TicketConfirmBlock({ ticket }) {
 /* ── Step 2 ─────────────────────────────────────────────────── */
 
 function Step2() {
-  // Pull the ticket array passed from Step1.jsx
   const { state } = useLocation();
   const selectedTickets = state?.selectedTickets ?? [];
 
-  // Computed totals (Uses safe parser fallbacks)
   const ticketTotal = selectedTickets.reduce(
     (sum, t) => sum + (t.priceNum || parsePrice(t.price)) * t.seats, 0
   );
@@ -159,27 +153,24 @@ function Step2() {
   const grandTotal = ticketTotal + feeTotal;
 
   return (
-    <div className="bg-gray-100 min-h-screen p-4 font-sans">
+    <div className="bg-gray-100 min-h-screen p-4 pb-44 font-sans">
 
-      {/* One confirmation block per selected ticket */}
-      {/* Fix: Changed ticket.id to ticket._id */}
       {selectedTickets.map(ticket => (
         <TicketConfirmBlock key={ticket._id} ticket={ticket} />
       ))}
 
       {/* ── Combined purchase price breakdown ──────────────── */}
-      <SectionLabel text="Purchase price" />
+      <SectionLabel text="購入金額" />
       <div className="bg-white rounded-xl border border-gray-200 px-5 mb-5">
 
         {/* Ticket price row(s) */}
-        {/* Fix: Changed ticket.id to ticket._id */}
         {selectedTickets.map((ticket) => {
           const currentPriceNum = ticket.priceNum || parsePrice(ticket.price);
           return (
             <React.Fragment key={ticket._id}>
               <div className="flex items-start justify-between py-3.5">
                 <span className="text-[13px] text-gray-600 leading-snug" style={{ maxWidth: "60%" }}>
-                  Ticket price (tax incl.)
+                  チケット金額（税込）
                   {selectedTickets.length > 1 && (
                     <span className="block text-[11px] text-gray-400">{ticket.artist}</span>
                   )}
@@ -194,13 +185,12 @@ function Step2() {
         })}
 
         {/* System usage fee row(s) */}
-        {/* Fix: Changed ticket.id to ticket._id */}
         {selectedTickets.map((ticket) => {
           const currentFee = ticket.systemFee || parsePrice(ticket.systemFeeLabel || 220);
           return (
             <React.Fragment key={`fee-${ticket._id}`}>
               <div className="pt-3.5 pb-1">
-                <span className="text-[13px] text-gray-600">System usage fee</span>
+                <span className="text-[13px] text-gray-600">システム利用料</span>
                 {selectedTickets.length > 1 && (
                   <span className="text-[11px] text-gray-400 ml-1">({ticket.artist})</span>
                 )}
@@ -210,8 +200,8 @@ function Step2() {
                   className="text-[12px] text-gray-400 leading-snug"
                   style={{ maxWidth: "62%" }}
                 >
-                  System Usage Fee：
-                  ({fmt(currentFee)} per ticket, tax included)
+                  システム利用料：
+                  （{fmt(currentFee)} / 1枚・税込）
                 </span>
                 <span className="text-[13px] text-gray-700">
                   {fmt(currentFee * ticket.seats)}
@@ -224,7 +214,7 @@ function Step2() {
 
         {/* Grand total */}
         <div className="flex items-center justify-between py-3.5">
-          <span className="text-[13px] text-gray-600">Total (tax included)</span>
+          <span className="text-[13px] text-gray-600">合計（税込）</span>
           <span className="text-[20px] font-bold" style={{ color: PINK }}>
             {fmt(grandTotal)}
           </span>
@@ -232,35 +222,31 @@ function Step2() {
 
       </div>
 
-      {/* ── Disclaimer + phone + CTA ───────────────────────── */}
-      <p className="text-[12px] text-gray-500 leading-relaxed mb-3 px-1">
-        *Please note that tickets cannot be canceled, changed, or refunded after
-        purchase, regardless of the reason.
-      </p>
+      {/* ── Disclaimer + phone + CTA — fixed to bottom ─────── */}
+      <div className="fixed bottom-0 left-0 right-0 px-4 pt-3 pb-4" style={{ backgroundColor: "#FCE8ED" }}>
 
-      <div
-        className="rounded-xl px-5 pt-5 pb-5 flex flex-col items-center gap-3"
-        style={{ backgroundColor: "#FCE8ED" }}
-      >
+        <p className="text-[12px] text-gray-500 leading-relaxed mb-3 px-1">
+          ※いかなる理由があっても、購入後のチケットのキャンセル・変更・返金はできません。
+        </p>
+
         {/* Phone number */}
-        <p className="text-[22px] font-bold tracking-wide" style={{ color: PINK }}>
+        <p className="text-[22px] font-bold tracking-wide text-center mb-2" style={{ color: PINK }}>
           0812345678
         </p>
 
         {/* Sub-note */}
-        <p className="text-[11px] text-gray-500 text-center leading-relaxed">
-          *Purchased tickets will be automatically displayed on the AnyPASS app
-          registered with the above phone number.
+        <p className="text-[11px] text-gray-500 text-center leading-relaxed mb-3">
+          ※購入したチケットは、上記の電話番号で登録されたAnyPASSアプリに自動的に表示されます。
         </p>
 
         {/* CTA */}
         <Link
           to="./payment"
-          state={{ selectedTickets}}
+          state={{ selectedTickets }}
           className="block w-full py-3.5 rounded-lg text-white text-[14px] font-semibold tracking-wide text-center"
           style={{ backgroundColor: PINK }}
         >
-          Payment information input
+          お支払い情報の入力
         </Link>
       </div>
 

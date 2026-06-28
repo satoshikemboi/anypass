@@ -96,11 +96,7 @@ function CheckRow({ label, centered = false }) {
 /* ── Per-ticket card (event info + purchase details) ────────── */
 
 function TicketSummaryCard({ ticket }) {
-  // Safe dynamic fallback calculations if backend variable formatting differs
-  const quantityLabel =
-    ticket.seatUnit === "piece"
-      ? `${ticket.seats} ${ticket.seats === 1 ? "piece" : "pieces"}`
-      : `${ticket.seats} ${ticket.seats === 1 ? "sheet" : "sheets"}`;
+  const quantityLabel = `${ticket.seats}枚`;
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 px-5 pt-4.5 pb-5 mb-3">
@@ -121,7 +117,7 @@ function TicketSummaryCard({ ticket }) {
         <span className="text-[13px] text-gray-500">{ticket.venue}</span>
       </div>
 
-      {/* Date (Fix: Falls back to ticket.date if dateFormatted isn't sent) */}
+      {/* Date */}
       <div className="flex items-center gap-1.75">
         <ClockIcon />
         <span className="text-[13px] text-gray-500">
@@ -137,7 +133,7 @@ function TicketSummaryCard({ ticket }) {
       {/* Price */}
       <div className="flex items-baseline gap-1.5 pt-4 pb-3">
         <span className="text-2xl font-bold" style={{ color: PINK }}>{ticket.price}</span>
-        <span className="text-[13px] text-gray-400">/ 1 sheet</span>
+        <span className="text-[13px] text-gray-400">/ 1枚</span>
       </div>
 
       <Divider />
@@ -147,26 +143,26 @@ function TicketSummaryCard({ ticket }) {
         <div className="flex items-start gap-1.5">
           <TicketIcon />
           <span className="text-[13px] font-medium leading-snug" style={{ color: BLUE }}>
-            {ticket.seatType}<br />seats
+            {ticket.seatType}<br />席
           </span>
         </div>
         <span className="text-[13px] text-gray-500 text-right leading-snug">
-          Seat assignment<br />undecided
+          座席<br />未定
         </span>
       </div>
 
       <Divider />
 
-      {/* Sales period (Fix: Falls back to a default label string if undefined) */}
-      <InfoRow 
-        label="Sales period" 
-        value={ticket.salesPeriodText || ticket.salesPeriod || "General Sales"} 
+      {/* Sales period */}
+      <InfoRow
+        label="販売期間"
+        value={ticket.salesPeriodText || ticket.salesPeriod || "一般販売"}
       />
 
       <Divider />
 
       {/* Quantity */}
-      <InfoRow label="Number of items purchased" value={quantityLabel} />
+      <InfoRow label="購入枚数" value={quantityLabel} />
 
     </div>
   );
@@ -175,24 +171,22 @@ function TicketSummaryCard({ ticket }) {
 /* ── Step 1 ─────────────────────────────────────────────────── */
 
 function Step1() {
-  // Pull the ticket array passed from Tickets.jsx
   const { state } = useLocation();
   const selectedTickets = state?.selectedTickets ?? [];
 
   return (
-    <div className="bg-gray-100 min-h-screen p-4 font-sans">
+    <div className="bg-gray-100 min-h-screen p-4 pb-36 font-sans">
 
       {/* Top instruction */}
       <p className="text-sm text-gray-600 mb-4 leading-relaxed">
-        To purchase tickets, please click &ldquo;{" "}
+        チケットを購入するには、「
         <span className="cursor-pointer" style={{ color: PINK }}>
-          Proceed to Checkout
-        </span>{" "}
-        &rdquo;.
+          購入手続きへ進む
+        </span>
+        」をクリックしてください。
       </p>
 
       {/* One combined event + purchase card per selected ticket */}
-      {/* Fix: Changed ticket.id to ticket._id to match data structure passed from Tickets.jsx */}
       {selectedTickets.map(ticket => (
         <TicketSummaryCard key={ticket._id} ticket={ticket} />
       ))}
@@ -200,65 +194,57 @@ function Step1() {
       {/* ── Terms & Conditions ─────────────────────────────── */}
 
       <h1 className="text-[15px] font-bold text-gray-900 text-center leading-snug mb-4 mt-3 px-1">
-        AnyPASS STORE Terms and Conditions / Terms and Conditions Regarding the
-        Split Payment Function / AnyPASS MATCH Terms and Conditions
+        AnyPASS STORE利用規約 / 分割払い機能に関する利用規約 / AnyPASS MATCH利用規約
       </h1>
 
       {/* Scrollable terms card */}
       <div className="bg-white rounded-xl border border-gray-200 px-5 py-4 mb-5 max-h-50 overflow-y-auto">
         <p className="text-[13px] font-medium mb-3 leading-snug" style={{ color: PINK }}>
-          [AnyPASS STORE Individual Terms and Conditions]
+          【AnyPASS STORE個別利用規約】
         </p>
         <p className="text-[13px] leading-relaxed mb-4" style={{ color: ORANGE }}>
-          AnyPASS STORE (hereinafter referred to as &ldquo;this store&rdquo;) is a
-          membership-based ticket trading site for this service. To use this store,
-          you must agree to these individual terms and conditions.
+          AnyPASS STORE（以下「本ストア」といいます）は、本サービスの会員制チケット売買サイトです。本ストアをご利用いただくには、これらの個別利用規約に同意していただく必要があります。
         </p>
         <p className="text-[13px]" style={{ color: PINK }}>
-          Article 1 (Definitions of Terms)
+          第1条（定義）
         </p>
       </div>
 
       {/* Agree checkbox */}
       <div className="mb-6">
         <CheckRow
-          label="I agree to the above individual terms and conditions."
+          label="上記の個別利用規約に同意します。"
           centered
         />
       </div>
 
       {/* Minors section */}
       <h2 className="text-[15px] font-bold text-gray-900 text-center mb-4">
-        Ticket purchase by minors
+        未成年者によるチケットの購入
       </h2>
 
       <p className="text-[13px] text-gray-600 leading-relaxed mb-5 px-1">
-        If a minor purchases a ticket, it is assumed that they have obtained
-        parental consent. Even if it is discovered after the ticket purchase that
-        parental consent was not obtained, cancellations and refunds will not be
-        possible.
+        未成年者がチケットを購入する場合、保護者の同意を得ているものとみなします。チケット購入後に保護者の同意が得られていなかったことが判明した場合でも、キャンセルおよび返金はできません。
       </p>
 
       {/* Consent checkbox */}
       <div className="mb-5">
-        <CheckRow label="I consent to the purchase by a minor." />
+        <CheckRow label="未成年者による購入に同意します。" />
       </div>
 
-      {/* CTA — forwards selectedTickets state to Step 2 */}
-      <div className="rounded-2xl px-4 pt-5 pb-4" style={{ background: "#FBEAF0" }}>
+      {/* CTA — fixed to bottom of screen */}
+      <div className="fixed bottom-0 left-0 right-0 px-4 pt-3 pb-4" style={{ background: "#FBEAF0" }}>
         <Link
           to="/step2"
           state={{ selectedTickets }}
           className="block w-full py-3.5 rounded-full text-white font-bold text-[15px] text-center mb-3"
           style={{ background: PINK }}
         >
-          Proceed to purchase
+          購入手続きへ進む
         </Link>
 
         <p className="text-[11px] text-gray-500 text-center leading-relaxed">
-          Please complete your application within 15 minutes. Applications may be
-          cancelled if more than 15 minutes have passed. Please note that the
-          tickets you purchase may not be for consecutive seats.
+          15分以内にお手続きを完了してください。15分を超えた場合、申し込みがキャンセルされる場合があります。ご購入いただくチケットは連続した座席でない場合がありますので、あらかじめご了承ください。
         </p>
       </div>
 

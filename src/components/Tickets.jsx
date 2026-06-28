@@ -145,9 +145,7 @@ function TicketCard({ ticket, selected, onToggle }) {
 
           {ticket.seatUnit === "seat" && (
             <>
-              <span className="text-[13px] text-gray-400 leading-none">
-                {ticket.seats === 1 ? "seat" : "seats"} x
-              </span>
+              <span className="text-[13px] text-gray-400 leading-none">席 x</span>
               <span className="text-[22px] font-bold leading-none" style={{ color: PINK }}>
                 {ticket.seats}
               </span>
@@ -160,9 +158,7 @@ function TicketCard({ ticket, selected, onToggle }) {
               <span className="text-[22px] font-bold leading-none" style={{ color: PINK }}>
                 {ticket.seats}
               </span>
-              <span className="text-[13px] text-gray-400 leading-none">
-                {ticket.seats === 1 ? "piece" : "pieces"}
-              </span>
+              <span className="text-[13px] text-gray-400 leading-none">枚</span>
             </>
           )}
         </div>
@@ -170,7 +166,7 @@ function TicketCard({ ticket, selected, onToggle }) {
         {/* Price */}
         <div className="flex items-baseline gap-1.5">
           <span className="text-2xl font-bold" style={{ color: PINK }}>{ticket.price}</span>
-          <span className="text-[13px] text-gray-400">/ 1 sheet</span>
+          <span className="text-[13px] text-gray-400">/ 1枚</span>
         </div>
       </div>
     </div>
@@ -229,7 +225,7 @@ function Tickets() {
             className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin"
             style={{ borderColor: `${PINK}55`, borderTopColor: "transparent" }}
           />
-          <p className="text-sm text-gray-400">Loading tickets…</p>
+          <p className="text-sm text-gray-400">チケットを読み込み中…</p>
         </div>
       </div>
     );
@@ -240,9 +236,9 @@ function Tickets() {
     return (
       <div className="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-6 font-sans">
         <span className="text-4xl mb-3">🎫</span>
-        <p className="text-sm font-bold text-gray-600 mb-1">No tickets available</p>
+        <p className="text-sm font-bold text-gray-600 mb-1">チケットがありません</p>
         <p className="text-xs text-gray-400 text-center max-w-50">
-          Tickets added in the admin panel will appear here.
+          管理パネルで追加されたチケットがここに表示されます。
         </p>
       </div>
     );
@@ -250,9 +246,9 @@ function Tickets() {
 
   // ── Main list ─────────────────────────────────────────────────────────────
   return (
-    <div className="bg-gray-100 min-h-screen p-4 font-sans">
+    <div className="bg-gray-100 min-h-screen p-4 pb-24 font-sans">
       <p className="text-[12px] text-gray-400 mb-3 px-1">
-        Select tickets to purchase
+        購入するチケットを選択してください
       </p>
 
       {tickets.map(ticket => (
@@ -264,27 +260,29 @@ function Tickets() {
         />
       ))}
 
-      {/* Confirm button — passes selectedTickets in router state */}
-      <Link
-        to={count > 0 ? "./step1" : "#"}
-        state={{ selectedTickets }}
-        className="block w-full mt-2"
-        onClick={e => count === 0 && e.preventDefault()}
-      >
-        <button
-          disabled={count === 0}
-          className="w-full py-3.5 rounded-xl text-white text-[14px] font-semibold tracking-wide transition-opacity duration-150"
-          style={{
-            backgroundColor: PINK,
-            opacity: count === 0 ? 0.35 : 1,
-            cursor: count === 0 ? "not-allowed" : "pointer",
-          }}
+      {/* Confirm button — fixed to bottom of screen */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-gray-100">
+        <Link
+          to={count > 0 ? "./step1" : "#"}
+          state={{ selectedTickets }}
+          className="block w-full"
+          onClick={e => count === 0 && e.preventDefault()}
         >
-          {count === 0
-            ? "Select tickets to continue"
-            : `Confirm —  ticket${count > 1 ? "s" : ""} selected`}
-        </button>
-      </Link>
+          <button
+            disabled={count === 0}
+            className="w-full py-3.5 rounded-xl text-white text-[14px] font-semibold tracking-wide transition-opacity duration-150"
+            style={{
+              backgroundColor: PINK,
+              opacity: count === 0 ? 0.35 : 1,
+              cursor: count === 0 ? "not-allowed" : "pointer",
+            }}
+          >
+            {count === 0
+              ? "チケットを選択してください"
+              : `確認 — ${count}枚のチケットを選択中`}
+          </button>
+        </Link>
+      </div>
     </div>
   );
 }

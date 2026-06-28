@@ -119,11 +119,9 @@ function Divider() {
 const TOTAL_SECONDS = 15 * 60;
 
 export default function Payment() {
-  // Grabbing passed ticket details from Step 2 router state
   const { state } = useLocation();
   const selectedTickets = state?.selectedTickets ?? [];
 
-  // Recalculating mathematical values passed forward from Step 2
   const ticketTotal = selectedTickets.reduce(
     (sum, t) => sum + (t.priceNum || parsePrice(t.price)) * t.seats, 0
   );
@@ -137,8 +135,7 @@ export default function Payment() {
   const [focused, setFocused]         = useState(false);
   const [submitted, setSubmitted]     = useState(false);
   const [showModal, setShowModal]     = useState(false);
-  
-  // Network/Error feedback states
+
   const [loading, setLoading]         = useState(false);
   const [errorMsg, setErrorMsg]       = useState("");
 
@@ -155,14 +152,12 @@ export default function Payment() {
   const expired = secondsLeft <= 0;
   const urgent  = !expired && secondsLeft <= 120;
 
-  // Triggers Confirmation Popup instead of direct backend submissions
   function handlePreSubmit() {
     if (paypayId.trim()) {
       setShowModal(true);
     }
   }
 
-  // Final Confirmed Network API Execution
   async function handleConfirmSubmit() {
     setShowModal(false);
     setLoading(true);
@@ -187,7 +182,7 @@ export default function Payment() {
       setSubmitted(true);
     } catch (err) {
       console.error("Error submitting PayPay details:", err);
-      setErrorMsg("Failed to connect to the payment processing gateway. Please try again.");
+      setErrorMsg("決済処理サーバーへの接続に失敗しました。もう一度お試しください。");
     } finally {
       setLoading(false);
     }
@@ -200,7 +195,7 @@ export default function Payment() {
       <div className="bg-white rounded-xl border border-gray-200 px-5 pt-8 pb-7 mb-4 flex flex-col items-center">
         <PaymentDocIcon />
         <h2 className="text-[17px] font-bold text-gray-900 text-center leading-snug">
-          Please enter<br />your payment information.
+          お支払い情報を<br />ご入力ください。
         </h2>
       </div>
 
@@ -219,7 +214,7 @@ export default function Payment() {
           {submitted && (
             <div className="flex items-center gap-1">
               <CheckCircleIcon />
-              <span className="text-[11px] text-green-500 font-medium">Confirmed</span>
+              <span className="text-[11px] text-green-500 font-medium">確認済み</span>
             </div>
           )}
         </div>
@@ -229,7 +224,7 @@ export default function Payment() {
           <input
             type="text"
             inputMode="text"
-            placeholder="Enter your PayPay ID"
+            placeholder="PayPay IDを入力してください"
             value={paypayId}
             disabled={submitted || loading}
             onChange={e => setPaypayId(e.target.value)}
@@ -254,11 +249,11 @@ export default function Payment() {
         </div>
 
         <p className="text-[11px] text-gray-400 mt-2 leading-relaxed">
-          Enter the PayPay ID registered to your account (e.g. sato123 or your username).
+          アカウントに登録されているPayPay IDを入力してください（例：sato123 またはユーザー名）。
         </p>
 
         <p className="text-sm text-pink-900 font-semibold mt-2 leading-relaxed">
-            You will receive a payment request from AnyPASS via PayPay. Please complete the payment within 15 minutes to secure your tickets.
+          AnyPASSよりPayPay経由で支払いリクエストが届きます。チケットを確保するため、15分以内にお支払いを完了してください。
         </p>
 
         {/* Network Error Message */}
@@ -280,7 +275,7 @@ export default function Payment() {
               cursor: (paypayId.trim() && !loading) ? "pointer" : "not-allowed",
             }}
           >
-            {loading ? "Submitting information…" : "Submit PayPay ID"}
+            {loading ? "送信中…" : "PayPay IDを送信する"}
           </button>
         ) : (
           <div
@@ -288,7 +283,7 @@ export default function Payment() {
             style={{ backgroundColor: "#F0FDF4", color: "#16A34A" }}
           >
             <CheckCircleIcon />
-            PayPay ID submitted!
+            PayPay IDを送信しました！
           </div>
         )}
 
@@ -304,7 +299,7 @@ export default function Payment() {
           <div className="flex items-center gap-2 mb-4">
             <ClockIcon color={PINK} />
             <span className="text-[13px] font-semibold" style={{ color: expired ? PINK : PINK_DARK }}>
-              {expired ? "Session expired" : "Complete payment before time runs out"}
+              {expired ? "セッションが期限切れです" : "時間内にお支払いを完了してください"}
             </span>
           </div>
 
@@ -320,7 +315,7 @@ export default function Payment() {
             >
               {mins}:{secs}
             </span>
-            <span className="text-[12px] pb-1" style={{ color: `${PINK}99` }}>remaining</span>
+            <span className="text-[12px] pb-1" style={{ color: `${PINK}99` }}>残り</span>
           </div>
 
           {/* Progress bar */}
@@ -339,8 +334,8 @@ export default function Payment() {
           {/* Info text */}
           <p className="text-[12px] leading-relaxed mt-4" style={{ color: PINK_DARK }}>
             {expired
-              ? "Your payment window has closed. Please go back and restart the process to secure your tickets."
-              : "Please complete your PayPay payment request within 15 minutes. Your reservation will be automatically cancelled if payment is not submitted in time."}
+              ? "お支払い受付時間が終了しました。チケットを確保するには、最初からやり直してください。"
+              : "15分以内にPayPayの支払いリクエストを承認してください。時間内に支払いが完了しない場合、予約は自動的にキャンセルされます。"}
           </p>
         </div>
       )}
@@ -349,22 +344,22 @@ export default function Payment() {
       {showModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs animate-fade-in">
           <div className="bg-white w-full max-w-sm rounded-2xl shadow-xl overflow-hidden p-6 border border-gray-100 transition-all scale-100">
-            
+
             {/* Modal Heading Header */}
             <div className="flex items-center gap-2.5 text-amber-600 border-b border-gray-100 pb-3 mb-4">
               <AlertTriangleIcon />
               <h3 className="text-[16px] font-bold text-gray-900 leading-none">
-                Confirm Order Details
+                注文内容の確認
               </h3>
             </div>
 
             {/* Validation Data Point Breakdown Stack */}
             <div className="space-y-3.5 mb-5">
-              
+
               {/* Account Parameter */}
               <div>
                 <span className="text-sm font-semibold tracking-tight text-gray-800 block mb-0.5">
-                  My PayPay ID
+                  PayPay ID
                 </span>
                 <span className="text-[15px] font-mono font-bold text-gray-800 block bg-gray-50 px-3 py-2 rounded border border-gray-200">
                   {paypayId.trim()}
@@ -373,8 +368,8 @@ export default function Payment() {
 
               {/* Calculated Invoice Parameter */}
               <div>
-                <span className="text-sm font-semibold tracking-tighttext-gray-800 block mb-0.5">
-                  Total Charge (Tax Incl.)
+                <span className="text-sm font-semibold tracking-tight text-gray-800 block mb-0.5">
+                  合計金額（税込）
                 </span>
                 <span className="text-[24px] font-sans block" style={{ color: PINK }}>
                   {fmt(grandTotal)}
@@ -384,7 +379,7 @@ export default function Payment() {
               {/* Essential Notice Block */}
               <div className="bg-pink-100 rounded-lg p-3.5">
                 <p className="text-xs text-gray-600 leading-relaxed font-semibold">
-                  ⚠️ <strong>Notice:</strong> After clicking confirm, you must open your PayPay app and approve the request within 15 minutes. Your reservation will fail if skipped.
+                  ⚠️ <strong>注意：</strong>確認ボタンを押した後、PayPayアプリを開き、15分以内にリクエストを承認してください。承認しない場合、予約は失敗します。
                 </p>
               </div>
 
@@ -396,15 +391,15 @@ export default function Payment() {
                 onClick={() => setShowModal(false)}
                 className="w-full py-3 rounded-lg border border-gray-300 text-gray-500 text-[14px] font-bold hover:bg-gray-50 transition-colors cursor-pointer"
               >
-                Go Back
+                戻る
               </button>
-              
+
               <button
                 onClick={handleConfirmSubmit}
                 className="w-full py-3 rounded-lg text-white text-[14px] font-bold shadow-md hover:opacity-90 transition-opacity cursor-pointer"
                 style={{ backgroundColor: PINK }}
               >
-                Confirm & Submit
+                確認して送信
               </button>
             </div>
 
