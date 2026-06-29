@@ -63,6 +63,26 @@ const buttons = [
       dot: "#1D9E75",
     },
   },
+  {
+    label: "Transfer error",
+    sub: "Proof of transfer error",
+    href: "./error",
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z" />
+        <line x1="9" y1="12" x2="15" y2="12" strokeDasharray="2 2" />
+      </svg>
+    ),
+    theme: {
+      bg: "#E1F5EE",
+      bgHover: "#9FE1CB",
+      border: "#5DCAA5",
+      borderHover: "#1D9E75",
+      text: "#085041",
+      iconBg: "#9FE1CB",
+      dot: "#1D9E75",
+    },
+  },
 ];
 
 function AdminButton({ label, sub, href, icon, theme }) {
