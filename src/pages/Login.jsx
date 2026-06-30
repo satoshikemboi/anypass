@@ -45,7 +45,7 @@ export default function Login() {
     } catch (error) {
       alert(
         error.response?.data?.message ||
-          "Login failed"
+          "ログインに失敗しました"
       );
     } finally {
       setLoading(false);
@@ -55,17 +55,17 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-white flex flex-col items-center pt-24 px-6">
       <p className="text-sm text-gray-700 mb-4 max-w-lg font-semibold w-full">
-        You need to log in to purchase tickets.
+        チケットを購入するにはログインが必要です。
       </p>
 
       <form
         onSubmit={handleSubmit}
         className="bg-gray-100 rounded-lg shadow-lg p-8 w-full max-w-lg"
       >
-        <h1 className="text-2xl font-bold text-center">Log in</h1>
+        <h1 className="text-2xl font-bold text-center">ログイン</h1>
 
         <p className="text-sm text-center text-gray-500 mb-6">
-          Log in with your email address
+          メールアドレスでログイン
         </p>
 
         <div className="flex flex-col gap-3">
@@ -79,7 +79,7 @@ export default function Login() {
 
           <input
             type="password"
-            placeholder="password"
+            placeholder="パスワード"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="border border-pink-300 rounded-md p-2.5 outline-none"
@@ -90,14 +90,14 @@ export default function Login() {
             disabled={loading}
             className="w-full bg-pink-400 hover:bg-pink-600 text-white py-3 rounded"
           >
-            {loading ? "Logging in..." : "Log in"}
+            {loading ? "ログイン中..." : "ログイン"}
           </button>
         </div>
 
         <p className="text-center mt-4">
-          Don't have an account?
+          アカウントをお持ちでない方は
           <Link to="/signup" className="text-pink-500 ml-1">
-            Register
+            登録
           </Link>
         </p>
       </form>

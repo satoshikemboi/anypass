@@ -48,7 +48,7 @@ export default function SignUp() {
       setForm({ fullName: "", email: "", phone: "", username: "", password: "" });
       navigate("/");
     } catch (error) {
-      alert(error.response?.data?.message || "Signup failed");
+      alert(error.response?.data?.message || "登録に失敗しました");
     } finally {
       setLoading(false);
     }
@@ -88,7 +88,7 @@ export default function SignUp() {
             mb-6
           `}
         >
-          Create account
+          アカウントを作成
         </h1>
 
         <div
@@ -106,11 +106,11 @@ export default function SignUp() {
                 text-gray-700
               `}
             >
-              Full Name
+              氏名
             </label>
             <input
               type="text"
-              placeholder="e.g. Sato Yui"
+              placeholder="例: 佐藤 結衣"
               value={form.fullName}
               onChange={update("fullName")}
               className={inputClass}
@@ -126,11 +126,11 @@ export default function SignUp() {
                 text-gray-700
               `}
             >
-              Email
+              メールアドレス
             </label>
             <input
               type="email"
-              placeholder="e.g. jane@example.com"
+              placeholder="例: jane@example.com"
               value={form.email}
               onChange={update("email")}
               className={inputClass}
@@ -146,11 +146,11 @@ export default function SignUp() {
                 text-gray-700
               `}
             >
-              Phone
+              電話番号
             </label>
             <input
               type="tel"
-              placeholder="e.g. 08028237064"
+              placeholder="例: 08028237064"
               value={form.phone}
               onChange={update("phone")}
               className={inputClass}
@@ -166,11 +166,11 @@ export default function SignUp() {
                 text-gray-700
               `}
             >
-              Username
+              ユーザー名
             </label>
             <input
               type="text"
-              placeholder="e.g. yuki_123"
+              placeholder="例: yuki_123"
               value={form.username}
               onChange={update("username")}
               className={inputClass}
@@ -186,11 +186,11 @@ export default function SignUp() {
                 text-gray-700
               `}
             >
-              Password
+              パスワード
             </label>
             <input
               type="password"
-              placeholder="e.g. Min. 6 characters"
+              placeholder="例: 6文字以上"
               value={form.password}
               onChange={update("password")}
               className={inputClass}
@@ -215,13 +215,13 @@ export default function SignUp() {
               mt-1
             `}
           >
-            {loading ? "Creating..." : "Create account"}
+            {loading ? "作成中..." : "アカウントを作成"}
           </button>
         </div>
         <p className="text-center text-md mt-4">
-          Do you have an account?
+          すでにアカウントをお持ちですか？
           <Link to="/login" className="text-pink-500 ml-1">
-            Log in
+            ログイン
           </Link>
         </p>
       </form>
