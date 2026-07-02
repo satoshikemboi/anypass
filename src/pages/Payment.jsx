@@ -116,7 +116,7 @@ function Divider() {
 
 /* ── Payment ────────────────────────────────────────────── */
 
-const TOTAL_SECONDS = 15 * 60;
+const TOTAL_SECONDS = 30 * 60;
 
 export default function Payment() {
   const { state } = useLocation();
