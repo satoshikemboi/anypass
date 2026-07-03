@@ -231,7 +231,7 @@ function Step2() {
 
         {/* Phone number */}
         <p className="text-[22px] font-bold tracking-wide text-center mb-2" style={{ color: PINK }}>
-          0812345678
+          09081514119
         </p>
 
         {/* Sub-note */}
