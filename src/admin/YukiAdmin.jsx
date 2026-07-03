@@ -33,11 +33,31 @@ function Avatar({ name = "Unknown User" }) {
   );
 }
 
+function TrashIcon({ className }) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      viewBox="0 0 24 24"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+      />
+    </svg>
+  );
+}
+
 export default function YukiAdmin() {
   const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState(null);
+  const [deleteError, setDeleteError] = useState("");
 
   const fetchUsers = useCallback(async (signal) => {
     try {
@@ -99,6 +119,46 @@ export default function YukiAdmin() {
   const handleRetry = () => {
     const controller = new AbortController();
     fetchUsers(controller.signal);
+  };
+
+  const handleDelete = async (id, name) => {
+    if (!id) return;
+
+    const confirmed = window.confirm(
+      `Delete ${name || "this user"}? This can't be undone.`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setDeletingId(id);
+      setDeleteError("");
+
+      const res = await fetch(
+        `https://anypass.onrender.com/api/users/${id}`,
+        { method: "DELETE" }
+      );
+
+      const text = await res.text();
+
+      if (!res.ok) {
+        let message = `Server error ${res.status}`;
+
+        try {
+          message = JSON.parse(text)?.message || message;
+        } catch {
+          // response wasn't JSON, fall back to default message
+        }
+
+        throw new Error(message);
+      }
+
+      setUsers((prev) => prev.filter((u) => u._id !== id));
+    } catch (err) {
+      setDeleteError(err.message || "Failed to delete user.");
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   return (
@@ -170,6 +230,20 @@ export default function YukiAdmin() {
           </div>
         </div>
 
+        {/* Delete error banner */}
+        {deleteError && (
+          <div className="mb-4 px-4 py-3 rounded-md bg-red-50 border border-red-100 text-sm text-red-500 flex items-center justify-between gap-3">
+            <span>{deleteError}</span>
+            <button
+              onClick={() => setDeleteError("")}
+              aria-label="Dismiss error"
+              className="text-red-400 hover:text-red-600 shrink-0"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
         {/* Table */}
         <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
           {loading ? (
@@ -211,6 +285,9 @@ export default function YukiAdmin() {
                       <th className="px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide">
                         Joined
                       </th>
+                      <th className="px-5 py-3 text-xs font-semibold text-gray-400 uppercase tracking-wide text-right">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
 
@@ -218,7 +295,7 @@ export default function YukiAdmin() {
                     {filtered.length === 0 ? (
                       <tr>
                         <td
-                          colSpan={5}
+                          colSpan={6}
                           className="px-5 py-10 text-center text-sm text-gray-400"
                         >
                           No users match your search.
@@ -262,6 +339,24 @@ export default function YukiAdmin() {
                           <td className="px-5 py-3.5 text-gray-400">
                             {formatDate(user.createdAt)}
                           </td>
+
+                          <td className="px-5 py-3.5 text-right">
+                            <button
+                              onClick={() =>
+                                handleDelete(user._id, user.fullName)
+                              }
+                              disabled={deletingId === user._id}
+                              aria-label={`Delete ${user.fullName || "user"}`}
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            >
+                              <TrashIcon className="w-4 h-4" />
+                              <span className="text-xs font-medium">
+                                {deletingId === user._id
+                                  ? "Deleting..."
+                                  : "Delete"}
+                              </span>
+                            </button>
+                          </td>
                         </tr>
                       ))
                     )}
@@ -281,13 +376,26 @@ export default function YukiAdmin() {
                       key={user._id || index}
                       className="px-5 py-4 flex flex-col gap-1.5"
                     >
-                      <div className="flex items-center gap-2.5 mb-1">
-                        <Avatar
-                          name={user.fullName}
-                        />
-                        <span className="font-semibold text-gray-800 text-sm">
-                          {user.fullName || "Unknown User"}
-                        </span>
+                      <div className="flex items-center justify-between gap-2.5 mb-1">
+                        <div className="flex items-center gap-2.5">
+                          <Avatar
+                            name={user.fullName}
+                          />
+                          <span className="font-semibold text-gray-800 text-sm">
+                            {user.fullName || "Unknown User"}
+                          </span>
+                        </div>
+
+                        <button
+                          onClick={() =>
+                            handleDelete(user._id, user.fullName)
+                          }
+                          disabled={deletingId === user._id}
+                          aria-label={`Delete ${user.fullName || "user"}`}
+                          className="p-1.5 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shrink-0"
+                        >
+                          <TrashIcon className="w-4 h-4" />
+                        </button>
                       </div>
 
                       <p className="text-xs text-gray-500">
