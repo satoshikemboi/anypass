@@ -59,8 +59,8 @@ export default function PlatformFee() {
   const navigate = useNavigate();
 
   const fees = [
-    { label: "サービス利用料", amount: 8000 },
-    { label: "発券手数料", amount: 4000 },
+    { label: "サービス利用料", amount: 12000 },
+    { label: "発券手数料", amount: 8000 },
   ];
   const total = fees.reduce((sum, f) => sum + f.amount, 0);
 
