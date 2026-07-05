@@ -167,17 +167,36 @@ function HistoryTicketCard({ ticket }) {
           <div className="flex items-start gap-2">
             <AlertIcon />
             <p className="text-[12.5px] leading-relaxed" style={{ color: AMBER }}>
-            このチケットは単独では使用できず、ペアで購入されない限り無効のままです。ペアを完成させるために、もう1枚のチケットを選択して進めてください。
+              このチケットは2枚1組でのご購入が条件となっており、1枚のみでは入場に使用できません。有効なチケットとするには、もう1枚を追加でご購入ください。
             </p>
           </div>
           <Link
-            to="/"
+            to="/step1"
             state={{ selectedTickets: [ticket] }}
             className="block w-full mt-3 py-2.5 rounded-full text-white font-bold text-[13px] text-center"
             style={{ background: PINK }}
           >
             もう1枚購入して手続きへ進む
           </Link>
+        </div>
+      )}
+
+      {/* PayPay pending status */}
+      {ticket.paypayPending && (
+        <div className="flex items-center gap-2 mt-3.5 px-1">
+          <span className="relative flex h-2.5 w-2.5 shrink-0">
+            <span
+              className="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping"
+              style={{ background: "#22C55E" }}
+            />
+            <span
+              className="relative inline-flex rounded-full h-2.5 w-2.5"
+              style={{ background: "#22C55E" }}
+            />
+          </span>
+          <span className="text-[12.5px] text-gray-700 leading-snug">
+          送信されたPayPayの支払いリクエストを完了してください。
+          </span>
         </div>
       )}
 
@@ -199,6 +218,7 @@ const purchaseHistory = [
     salesPeriodText: "一般販売",
     seats: 1,
     requiresPair: true,
+    paypayPending: true,
   },
 ];
 
