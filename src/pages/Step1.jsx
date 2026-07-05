@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 const PINK = "#E84060";
@@ -77,19 +77,32 @@ function InfoRow({ label, value }) {
   );
 }
 
-function CheckRow({ label, centered = false }) {
+/* Clickable, stateful checkbox row */
+function CheckRow({ label, centered = false, checked, onToggle }) {
   return (
-    <div className={`flex items-center gap-3 px-1 ${centered ? "justify-center" : ""}`}>
+    <button
+      type="button"
+      role="checkbox"
+      aria-checked={checked}
+      onClick={onToggle}
+      className={`flex items-center gap-3 px-1 w-full text-left cursor-pointer rounded-md py-1 -my-1 transition-colors hover:bg-black/[0.03] active:bg-black/[0.05] ${
+        centered ? "justify-center" : ""
+      }`}
+    >
       <div
-        className="w-5.5 h-5.5 rounded-sm flex items-center justify-center shrink-0"
-        style={{ background: PINK }}
+        className="w-5.5 h-5.5 rounded-sm flex items-center justify-center shrink-0 transition-colors duration-150 border-2"
+        style={
+          checked
+            ? { background: PINK, borderColor: PINK }
+            : { background: "white", borderColor: "#d1d5db" }
+        }
       >
-        <CheckIcon />
+        {checked && <CheckIcon />}
       </div>
       <p className={`text-[14px] text-gray-800 leading-snug ${centered ? "text-center" : ""}`}>
         {label}
       </p>
-    </div>
+    </button>
   );
 }
 
@@ -174,8 +187,13 @@ function Step1() {
   const { state } = useLocation();
   const selectedTickets = state?.selectedTickets ?? [];
 
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [agreedMinors, setAgreedMinors] = useState(false);
+
+  const canProceed = agreedToTerms && agreedMinors;
+
   return (
-    <div className="bg-gray-100 min-h-screen p-4 pb-36 font-sans">
+    <div className="bg-gray-100 min-h-screen p-4 pb-40 font-sans">
 
       {/* Top instruction */}
       <p className="text-sm text-gray-600 mb-4 leading-relaxed">
@@ -215,6 +233,8 @@ function Step1() {
         <CheckRow
           label="上記の個別利用規約に同意します。"
           centered
+          checked={agreedToTerms}
+          onToggle={() => setAgreedToTerms(v => !v)}
         />
       </div>
 
@@ -229,19 +249,35 @@ function Step1() {
 
       {/* Consent checkbox */}
       <div className="mb-5">
-        <CheckRow label="未成年者による購入に同意します。" />
+        <CheckRow
+          label="未成年者による購入に同意します。"
+          checked={agreedMinors}
+          onToggle={() => setAgreedMinors(v => !v)}
+        />
       </div>
 
       {/* CTA — fixed to bottom of screen */}
       <div className="fixed bottom-0 left-0 right-0 px-4 pt-3 pb-4" style={{ background: "#FBEAF0" }}>
-        <Link
-          to="/step2"
-          state={{ selectedTickets }}
-          className="block w-full py-3.5 rounded-full text-white font-bold text-[15px] text-center mb-3"
-          style={{ background: PINK }}
-        >
-          購入手続きへ進む
-        </Link>
+        {canProceed ? (
+          <Link
+            to="/step2"
+            state={{ selectedTickets }}
+            className="block w-full py-3.5 rounded-full text-white font-bold text-[15px] text-center mb-3"
+            style={{ background: PINK }}
+          >
+            購入手続きへ進む
+          </Link>
+        ) : (
+          <button
+            type="button"
+            disabled
+            aria-disabled="true"
+            className="block w-full py-3.5 rounded-full text-white font-bold text-[15px] text-center mb-3 cursor-not-allowed"
+            style={{ background: "#f0a8b8" }}
+          >
+            購入手続きへ進む
+          </button>
+        )}
 
         <p className="text-[11px] text-gray-500 text-center leading-relaxed">
           15分以内にお手続きを完了してください。15分を超えた場合、申し込みがキャンセルされる場合があります。ご購入いただくチケットは連続した座席でない場合がありますので、あらかじめご了承ください。
