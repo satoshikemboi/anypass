@@ -1,7 +1,9 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const PINK = "#E84060";
 const BLUE = "#4A8AF4";
+const AMBER = "#B45309";
 
 /* ── Icons ─────────────────────────────────────────────────── */
 
@@ -43,6 +45,21 @@ function TicketIcon() {
     >
       <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
       <line x1="9" y1="9" x2="9" y2="15" />
+    </svg>
+  );
+}
+
+function AlertIcon() {
+  return (
+    <svg
+      width="17" height="17" viewBox="0 0 24 24"
+      fill="none" stroke={AMBER} strokeWidth="2"
+      strokeLinecap="round" strokeLinejoin="round"
+      aria-hidden="true" className="shrink-0 mt-0.5"
+    >
+      <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+      <line x1="12" y1="9" x2="12" y2="13" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
     </svg>
   );
 }
@@ -141,6 +158,29 @@ function HistoryTicketCard({ ticket }) {
       {/* Quantity */}
       <InfoRow label="購入枚数" value={quantityLabel} />
 
+      {/* Pairing requirement warning */}
+      {ticket.requiresPair && (
+        <div
+          className="mt-4 rounded-lg px-3.5 py-3"
+          style={{ background: "#FFF7E6", border: "1px solid #FDE4B0" }}
+        >
+          <div className="flex items-start gap-2">
+            <AlertIcon />
+            <p className="text-[12.5px] leading-relaxed" style={{ color: AMBER }}>
+            このチケットは単独では使用できず、ペアで購入されない限り無効のままです。ペアを完成させるために、もう1枚のチケットを選択して進めてください。
+            </p>
+          </div>
+          <Link
+            to="/"
+            state={{ selectedTickets: [ticket] }}
+            className="block w-full mt-3 py-2.5 rounded-full text-white font-bold text-[13px] text-center"
+            style={{ background: PINK }}
+          >
+            もう1枚購入して手続きへ進む
+          </Link>
+        </div>
+      )}
+
     </div>
   );
 }
@@ -158,6 +198,7 @@ const purchaseHistory = [
     seatType: "Total freedom",
     salesPeriodText: "一般販売",
     seats: 1,
+    requiresPair: true,
   },
 ];
 
