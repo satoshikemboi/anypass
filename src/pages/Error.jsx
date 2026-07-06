@@ -207,8 +207,8 @@ export default function Error() {
                 <LockIcon />
               </div>
               <div className="space-y-4">
-                <TicketRow date="7.11" day="（土）EXO PLANET Japan" note="1公演目" />
-                <TicketRow date="7.12" day="（日）EXO PLANET Japan" note="譲渡対象" highlight />
+                <TicketRow date="7.11" day="（土）Mrs. GREEN APPLE" note="1公演目" />
+                <TicketRow date="7.12" day="（日）Mrs. GREEN APPLE" note="譲渡対象" highlight />
               </div>
             </div>
 
