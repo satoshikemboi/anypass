@@ -13,9 +13,6 @@ import Ticketadmin from "./admin/Ticketadmin";
 import PaymentAdmin from "./admin/PaymentAdmin";
 import AdminPanel from "./admin/AdminPanel";
 import ScrollToTop from "./components/ScrollToTop";
-import Error from "./pages/Error";
-import Error1 from "./pages/Error1";
-import Fee from "./pages/Fee";
 
 import ProtectedRoute from "./components/ProtectedRoute"; 
 
@@ -40,9 +37,6 @@ function AppContent() {
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="*" element={<Error />} />
-        <Route path="/error1" element={<Error1 />} />
-        <Route path="/fee" element={<Fee />} />
 
         {/* Protected Customer Routes */}
         <Route path="/" element={<ProtectedRoute><Tickets /></ProtectedRoute>} />
