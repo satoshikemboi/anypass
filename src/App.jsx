@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
@@ -14,7 +15,25 @@ import PaymentAdmin from "./admin/PaymentAdmin";
 import AdminPanel from "./admin/AdminPanel";
 import ScrollToTop from "./components/ScrollToTop";
 
-import ProtectedRoute from "./components/ProtectedRoute"; 
+import ProtectedRoute from "./components/ProtectedRoute";
+
+// ── Tawk.to live chat widget ────────────────────────────────────────────────
+function useTawkTo() {
+  useEffect(() => {
+    if (window.Tawk_API) return; // avoid double-injecting in StrictMode/dev
+
+    window.Tawk_API = window.Tawk_API || {};
+    window.Tawk_LoadStart = new Date();
+
+    const s1 = document.createElement("script");
+    s1.async = true;
+    s1.src = "https://embed.tawk.to/6a4e66e01548d51d459d70a9/1jt143ned";
+    s1.charset = "UTF-8";
+    s1.setAttribute("crossorigin", "*");
+    document.body.appendChild(s1);
+    // intentionally no cleanup — should persist for the whole app lifetime
+  }, []);
+}
 
 // 1. AppContent handles hooks that depend on the Router context
 function AppContent() {
@@ -57,6 +76,8 @@ function AppContent() {
 
 // 2. App provides the BrowserRouter context and acts as the entry point
 function App() {
+  useTawkTo();
+
   return (
     <BrowserRouter>
       <ScrollToTop />
