@@ -114,83 +114,19 @@ function Divider() {
   return <hr style={{ borderColor: PINK_BORDER }} className="-mx-5 my-0" />;
 }
 
-/* ── Payment ────────────────────────────────────────────── */
+/* ── Shared page content ──────────────────────────────────────
+   Header card, PayPay ID card, and the countdown card — identical
+   between mobile and desktop. Only the outer container (width,
+   padding, centering) differs per breakpoint, same pattern as
+   Step1Content / Step2Content. */
 
-const TOTAL_SECONDS = 60 * 60;
-
-export default function Payment() {
-  const { state } = useLocation();
-  const selectedTickets = state?.selectedTickets ?? [];
-
-  const ticketTotal = selectedTickets.reduce(
-    (sum, t) => sum + (t.priceNum || parsePrice(t.price)) * t.seats, 0
-  );
-  const feeTotal = selectedTickets.reduce(
-    (sum, t) => sum + (t.systemFee || parsePrice(t.systemFeeLabel || 220)) * t.seats, 0
-  );
-  const grandTotal = ticketTotal + feeTotal;
-
-  const [secondsLeft, setSecondsLeft] = useState(TOTAL_SECONDS);
-  const [paypayId, setPaypayId]       = useState("");
-  const [focused, setFocused]         = useState(false);
-  const [submitted, setSubmitted]     = useState(false);
-  const [showModal, setShowModal]     = useState(false);
-
-  const [loading, setLoading]         = useState(false);
-  const [errorMsg, setErrorMsg]       = useState("");
-
-  /* Only tick after submission */
-  useEffect(() => {
-    if (!submitted || secondsLeft <= 0) return;
-    const id = setInterval(() => setSecondsLeft(s => s - 1), 1000);
-    return () => clearInterval(id);
-  }, [submitted, secondsLeft]);
-
-  const mins    = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
-  const secs    = String(secondsLeft % 60).padStart(2, "0");
-  const pct     = (secondsLeft / TOTAL_SECONDS) * 100;
-  const expired = secondsLeft <= 0;
-  const urgent  = !expired && secondsLeft <= 120;
-
-  function handlePreSubmit() {
-    if (paypayId.trim()) {
-      setShowModal(true);
-    }
-  }
-
-  async function handleConfirmSubmit() {
-    setShowModal(false);
-    setLoading(true);
-    setErrorMsg("");
-
-    try {
-      const res = await fetch("https://anypass.onrender.com/api/payments/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          paypayId: paypayId.trim(),
-          tickets: selectedTickets,
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error(`Server responded with status: ${res.status}`);
-      }
-
-      setSubmitted(true);
-    } catch (err) {
-      console.error("Error submitting PayPay details:", err);
-      setErrorMsg("決済処理サーバーへの接続に失敗しました。もう一度お試しください。");
-    } finally {
-      setLoading(false);
-    }
-  }
-
+function PaymentContent({
+  submitted, loading, errorMsg,
+  paypayId, setPaypayId, focused, setFocused, handlePreSubmit,
+  mins, secs, pct, expired, urgent,
+}) {
   return (
-    <div className="bg-gray-100 min-h-screen p-4 font-sans relative">
-
+    <>
       {/* ── 1. Header ───────────────────────────────────── */}
       <div className="bg-white rounded-xl border border-gray-200 px-5 pt-8 pb-7 mb-4 flex flex-col items-center">
         <PaymentDocIcon />
@@ -339,16 +275,114 @@ export default function Payment() {
           </p>
         </div>
       )}
+    </>
+  );
+}
 
-      {/* ── 4. Confirmation Popup Modal Backdrop ────────────────── */}
+/* ── Payment ────────────────────────────────────────────── */
+
+const TOTAL_SECONDS = 60 * 60;
+
+export default function Payment() {
+  const { state } = useLocation();
+  const selectedTickets = state?.selectedTickets ?? [];
+
+  const ticketTotal = selectedTickets.reduce(
+    (sum, t) => sum + (t.priceNum || parsePrice(t.price)) * t.seats, 0
+  );
+  const feeTotal = selectedTickets.reduce(
+    (sum, t) => sum + (t.systemFee || parsePrice(t.systemFeeLabel || 220)) * t.seats, 0
+  );
+  const grandTotal = ticketTotal + feeTotal;
+
+  const [secondsLeft, setSecondsLeft] = useState(TOTAL_SECONDS);
+  const [paypayId, setPaypayId]       = useState("");
+  const [focused, setFocused]         = useState(false);
+  const [submitted, setSubmitted]     = useState(false);
+  const [showModal, setShowModal]     = useState(false);
+
+  const [loading, setLoading]         = useState(false);
+  const [errorMsg, setErrorMsg]       = useState("");
+
+  /* Only tick after submission */
+  useEffect(() => {
+    if (!submitted || secondsLeft <= 0) return;
+    const id = setInterval(() => setSecondsLeft(s => s - 1), 1000);
+    return () => clearInterval(id);
+  }, [submitted, secondsLeft]);
+
+  const mins    = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
+  const secs    = String(secondsLeft % 60).padStart(2, "0");
+  const pct     = (secondsLeft / TOTAL_SECONDS) * 100;
+  const expired = secondsLeft <= 0;
+  const urgent  = !expired && secondsLeft <= 120;
+
+  function handlePreSubmit() {
+    if (paypayId.trim()) {
+      setShowModal(true);
+    }
+  }
+
+  async function handleConfirmSubmit() {
+    setShowModal(false);
+    setLoading(true);
+    setErrorMsg("");
+
+    try {
+      const res = await fetch("https://anypass.onrender.com/api/payments/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          paypayId: paypayId.trim(),
+          tickets: selectedTickets,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Server responded with status: ${res.status}`);
+      }
+
+      setSubmitted(true);
+    } catch (err) {
+      console.error("Error submitting PayPay details:", err);
+      setErrorMsg("決済処理サーバーへの接続に失敗しました。もう一度お試しください。");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const contentProps = {
+    submitted, loading, errorMsg,
+    paypayId, setPaypayId, focused, setFocused, handlePreSubmit,
+    mins, secs, pct, expired, urgent,
+  };
+
+  return (
+    <div className="bg-gray-100 min-h-screen font-sans relative">
+
+      {/* ══ Mobile / tablet view (< lg) — single column, full width ══════ */}
+      <div className="lg:hidden p-4">
+        <PaymentContent {...contentProps} />
+      </div>
+
+      {/* ══ Desktop view (lg and up) — same design, centered column ══════ */}
+      <div className="hidden lg:block max-w-[640px] mx-auto px-4 py-10">
+        <PaymentContent {...contentProps} />
+      </div>
+
+      {/* ── 4. Confirmation Popup Modal Backdrop ─────────────────────────
+           Fixed + self-centering, so it works the same regardless of
+           breakpoint — no need to duplicate per layout. */}
       {showModal && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-xs animate-fade-in">
-          <div className="bg-white w-full max-w-sm rounded-2xl shadow-xl overflow-hidden p-6 border border-gray-100 transition-all scale-100">
+          <div className="bg-white w-full max-w-lg rounded-sm shadow-xl overflow-hidden p-10 border border-gray-100 transition-all scale-100">
 
             {/* Modal Heading Header */}
             <div className="flex items-center gap-2.5 text-amber-600 border-b border-gray-100 pb-3 mb-4">
               <AlertTriangleIcon />
-              <h3 className="text-[16px] font-bold text-gray-900 leading-none">
+              <h3 className="text-[16px] font-semibold text-gray-700 leading-none">
                 注文内容の確認
               </h3>
             </div>
@@ -361,7 +395,7 @@ export default function Payment() {
                 <span className="text-sm font-semibold tracking-tight text-gray-800 block mb-0.5">
                   PayPay ID
                 </span>
-                <span className="text-[15px] font-mono font-bold text-gray-800 block bg-gray-50 px-3 py-2 rounded border border-gray-200">
+                <span className="text-[15px] font-mono font-semibold text-gray-800 block bg-gray-50 px-3 py-2 rounded border border-gray-200">
                   {paypayId.trim()}
                 </span>
               </div>
@@ -377,7 +411,7 @@ export default function Payment() {
               </div>
 
               {/* Essential Notice Block */}
-              <div className="bg-pink-100 rounded-lg p-3.5">
+              <div className="bg-pink-100 rounded-sm p-3.5">
                 <p className="text-xs text-gray-600 leading-relaxed font-semibold">
                   ⚠️ <strong>注意：</strong>確認ボタンを押した後、PayPayアプリを開き、15分以内にリクエストを承認してください。承認しない場合、予約は失敗します。
                 </p>
@@ -389,14 +423,14 @@ export default function Payment() {
             <div className="grid grid-cols-2 gap-3 pt-2">
               <button
                 onClick={() => setShowModal(false)}
-                className="w-full py-3 rounded-lg border border-gray-300 text-gray-500 text-[14px] font-bold hover:bg-gray-50 transition-colors cursor-pointer"
+                className="w-full py-2.5 rounded-sm border border-gray-300 text-gray-500 text-[14px] font-bold hover:bg-gray-50 transition-colors cursor-pointer"
               >
                 戻る
               </button>
 
               <button
                 onClick={handleConfirmSubmit}
-                className="w-full py-3 rounded-lg text-white text-[14px] font-bold shadow-md hover:opacity-90 transition-opacity cursor-pointer"
+                className="w-full py-2.5 rounded-sm text-white text-[14px] font-bold shadow-md hover:opacity-90 transition-opacity cursor-pointer"
                 style={{ backgroundColor: PINK }}
               >
                 確認して送信

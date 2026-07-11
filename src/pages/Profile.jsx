@@ -115,6 +115,10 @@ function Profile({ onClose }) {
       <div className="bg-white rounded-lg border shadow-lg border-gray-200 overflow-hidden mb-3">
         <MenuRow label="Number of tickets currently listed for sale" showDot={userData?.ticketCount > 0} />
         <Divider />
+        <Link to="/myevents">
+        <MenuRow label="My Events" onClick={() => navigate("/myevents")} />
+        <Divider />
+        </Link>
         <Link to="/history">
         <MenuRow label="Purchase history" onClick={() => navigate("/purchase-history")} />
         <Divider />

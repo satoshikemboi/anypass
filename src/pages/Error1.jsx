@@ -52,12 +52,12 @@ export default function Error() {
 
         {/* Headline */}
         <h1 className="text-[19px] font-bold leading-snug mb-3" style={{ color: PINK_DARK }}>
-          MRS GREEN APPLEチケットの<br />個別譲渡はできません
+          なにわ男子 LIVE TOUR 2026<br />「ND⁵」チケットの1日分のみの譲渡はできません
         </h1>
 
         {/* Body */}
         <p className="text-[14px] leading-relaxed mb-6" style={{ color: GRAY_TEXT }}>
-          ご購入いただいたチケットは、購入時と同じ2枚1組（ペア）でのみ譲渡が可能です。1枚単位での譲渡はお受けできません。
+          チケットの譲渡は、公演両日分をご購入いただいた場合のみ可能です。いずれか1日分のみのご購入では譲渡をお受けできません。両日分をご購入のうえ、あらためて譲渡のお手続きをお願いいたします。
         </p>
 
         {/* Rule strip */}
@@ -73,7 +73,7 @@ export default function Error() {
               NG
             </span>
             <p className="text-[13px]" style={{ color: PINK_DARK }}>
-              2枚のうち1枚だけを譲渡すること
+              いずれか1日分のチケットのみを譲渡すること
             </p>
           </div>
           <div className="flex items-center gap-2.5">
@@ -84,7 +84,7 @@ export default function Error() {
               OK
             </span>
             <p className="text-[13px]" style={{ color: PINK_DARK }}>
-              2枚をまとめて同じ方に譲渡すること
+              両日分のチケットをご購入のうえ、まとめて譲渡すること
             </p>
           </div>
         </div>

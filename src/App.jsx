@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import Tickets from "./components/Tickets";
 import Step1 from "./pages/Step1";
 import Step2 from "./pages/Step2";
@@ -14,6 +15,7 @@ import Ticketadmin from "./admin/Ticketadmin";
 import PaymentAdmin from "./admin/PaymentAdmin";
 import AdminPanel from "./admin/AdminPanel";
 import ScrollToTop from "./components/ScrollToTop";
+import Error1 from "./pages/Error1";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -47,6 +49,7 @@ function AppContent() {
   ];
 
   const showNavbar = !hideNavbarRoutes.includes(location.pathname);
+  const showFooter = !hideNavbarRoutes.includes(location.pathname);
 
   return (
     <>
@@ -56,6 +59,7 @@ function AppContent() {
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="*" element={<Error1 />} />
 
         {/* Protected Customer Routes */}
         <Route path="/" element={<ProtectedRoute><Tickets /></ProtectedRoute>} />
@@ -70,6 +74,8 @@ function AppContent() {
         <Route path="/paymentadmin" element={<PaymentAdmin />} />
         <Route path="/adminyuki" element={<AdminPanel />} />
       </Routes>
+
+      {showFooter && <Footer />}
     </>
   );
 }

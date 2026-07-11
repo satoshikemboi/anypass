@@ -6,6 +6,25 @@ const BLUE  = "#4A8AF4";
 // ── Day helper ───────────────────────────────────────────────────────────────
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+// ── Seat type options (value doubles as the Japanese display label used in
+//    receipts / fee labels; label is what shows in the dropdown) ─────────────
+const SEAT_TYPES = [
+  { value: "指定席",         label: "指定席 (Reserved Seat)" },
+  { value: "全席指定",       label: "全席指定 (All Reserved Seats)" },
+  { value: "アリーナ席",     label: "アリーナ席 (Arena Seats)" },
+  { value: "スタンド席",     label: "スタンド席 (Stand Seats)" },
+  { value: "立見席",         label: "立見席 (Standing Area)" },
+  { value: "見切れ席",       label: "見切れ席 (Obstructed View Seat)" },
+  { value: "注釈付き指定席", label: "注釈付き指定席 (Restricted View Reserved Seat)" },
+  { value: "着席指定席",     label: "着席指定席 (Seated-Only Reserved Seat)" },
+  { value: "親子席",         label: "親子席 (Family Seats)" },
+  { value: "プレミアム席",   label: "プレミアム席 (Premium Seat)" },
+  { value: "VIP席",          label: "VIP席 (VIP Seat)" },
+  { value: "SS席",           label: "SS席 (SS Seat)" },
+  { value: "S席",            label: "S席 (S Seat)" },
+  { value: "A席",            label: "A席 (A Seat)" },
+];
+
 // ── Convert admin form data → full ticket record (tickets.jsx shape) ─────────
 function buildRecord(form) {
   const dateSlash = form.eventDate.replace(/-/g, "/");
@@ -30,7 +49,7 @@ function buildRecord(form) {
     price:           `¥${priceNum.toLocaleString()}`,
     priceNum,
     systemFee,
-    systemFeeLabel:  form.seatType === "General reserved" ? "一般指定席" : "立見席",
+    systemFeeLabel:  form.seatType,
     sellByDate:      form.sellByDate || "",
     salesPeriodText: form.sellByDate ? `Until 23:59 on ${form.sellByDate}` : "",
     status:          form.status || null,
@@ -48,7 +67,7 @@ function recordToForm(r) {
     eventDate:  datePart,
     doorsTime:  m?.[1]      ?? "11:30",
     showTime:   m?.[2]      ?? "12:30",
-    seatType:   r.seatType  ?? "General reserved",
+    seatType:   r.seatType  ?? "指定席",
     seatUnit:   r.seatUnit  ?? "seat",
     seats:      r.seats     ?? 2,
     priceNum:   r.priceNum  ?? 0,
@@ -61,7 +80,7 @@ function recordToForm(r) {
 const EMPTY_FORM = {
   artist: "", event: "", venue: "",
   eventDate: "", doorsTime: "11:30", showTime: "12:30",
-  seatType: "General reserved", seatUnit: "seat",
+  seatType: "指定席", seatUnit: "seat",
   seats: 1, priceNum: 0, systemFee: 0,
   status: "", sellByDate: "",
 };
@@ -177,8 +196,7 @@ function TicketForm({ initialForm, id, onSave, onCancel }) {
 
   function handleSeatTypeChange(val) {
     set("seatType", val);
-    if (val === "Total freedom") set("seatUnit", "piece");
-    else set("seatUnit", "seat");
+    set("seatUnit", val === "立見席" ? "piece" : "seat");
   }
 
   const preview_price = Number(f.priceNum) > 0
@@ -186,207 +204,209 @@ function TicketForm({ initialForm, id, onSave, onCancel }) {
     : null;
 
   return (
-    <div className="bg-gray-50 min-h-screen font-sans">
-      <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3 sticky top-0 z-10 shadow-sm">
-        <button
-          onClick={onCancel}
-          className="p-1 -ml-1 text-gray-500 hover:text-gray-800 transition-colors"
-        >
-          <ArrowLeftIcon />
-        </button>
-        <h1 className="flex-1 text-[15px] font-bold text-gray-800">
-          {id ? "Edit Ticket" : "Add New Ticket"}
-        </h1>
-        <button
-          onClick={handleSubmit}
-          className="px-4 py-1.5 rounded-lg text-white text-sm font-semibold shadow-sm"
-          style={{ backgroundColor: PINK }}
-        >
-          Save
-        </button>
-      </div>
-
-      <div className="p-4 pb-12">
-        <div className="bg-white rounded-xl p-4 mb-3 border border-gray-100 shadow-sm">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Basic Info</p>
-          <Field label="Artist / Performer Name" required error={errors.artist}>
-            <input
-              className={inputBase}
-              style={{ borderColor: errors.artist ? PINK : "#E5E7EB" }}
-              placeholder="e.g. Aina the End"
-              value={f.artist}
-              onChange={e => set("artist", e.target.value)}
-            />
-          </Field>
-          <Field label="Event Title" required error={errors.event}>
-            <input
-              className={inputBase}
-              style={{ borderColor: errors.event ? PINK : "#E5E7EB" }}
-              placeholder="e.g. AiNA THE END LIVE TOUR 2026 - PICNIC -"
-              value={f.event}
-              onChange={e => set("event", e.target.value)}
-            />
-          </Field>
-          <Field label="Venue / Location" required error={errors.venue}>
-            <input
-              className={inputBase}
-              style={{ borderColor: errors.venue ? PINK : "#E5E7EB" }}
-              placeholder="e.g. Zepp Haneda, Tokyo"
-              value={f.venue}
-              onChange={e => set("venue", e.target.value)}
-            />
-          </Field>
-        </div>
-
-        <div className="bg-white rounded-xl p-4 mb-3 border border-gray-100 shadow-sm">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Date & Time</p>
-          <Field label="Event Date" required error={errors.eventDate}>
-            <input
-              type="date"
-              className={inputBase}
-              style={{ borderColor: errors.eventDate ? PINK : "#E5E7EB" }}
-              value={f.eventDate}
-              onChange={e => set("eventDate", e.target.value)}
-            />
-          </Field>
-          <div className="flex gap-3">
-            <div className="flex-1">
-              <Field label="Doors Open" required error={errors.doorsTime}>
-                <input
-                  type="time"
-                  className={inputBase}
-                  style={{ borderColor: errors.doorsTime ? PINK : "#E5E7EB" }}
-                  value={f.doorsTime}
-                  onChange={e => set("doorsTime", e.target.value)}
-                />
-              </Field>
-            </div>
-            <div className="flex-1">
-              <Field label="Show Start" required error={errors.showTime}>
-                <input
-                  type="time"
-                  className={inputBase}
-                  style={{ borderColor: errors.showTime ? PINK : "#E5E7EB" }}
-                  value={f.showTime}
-                  onChange={e => set("showTime", e.target.value)}
-                />
-              </Field>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl p-4 mb-3 border border-gray-100 shadow-sm">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Ticket Details</p>
-          <Field label="Seat Type">
-            <select
-              className={inputBase}
-              style={{ borderColor: "#E5E7EB" }}
-              value={f.seatType}
-              onChange={e => handleSeatTypeChange(e.target.value)}
-            >
-              <option value="General reserved">General reserved</option>
-              <option value="Reserved S seat">General reserved</option>
-              <option value="Total freedom">Total freedom</option>
-            </select>
-          </Field>
-          <div className="flex gap-3">
-            <div className="flex-1">
-              <Field label="Seat Unit">
-                <select
-                  className={inputBase}
-                  style={{ borderColor: "#E5E7EB" }}
-                  value={f.seatUnit}
-                  onChange={e => set("seatUnit", e.target.value)}
-                >
-                  <option value="seat">seat</option>
-                  <option value="piece">piece</option>
-                </select>
-              </Field>
-            </div>
-            <div className="flex-1">
-              <Field label="Number of Pieces" required>
-                <input
-                  type="number"
-                  min={1}
-                  className={inputBase}
-                  style={{ borderColor: "#E5E7EB" }}
-                  value={f.seats}
-                  onChange={e => set("seats", e.target.value)}
-                />
-              </Field>
-            </div>
-          </div>
-          <div className="flex gap-3">
-            <div className="flex-1">
-              <Field label="Price per Sheet (¥)" required error={errors.priceNum}>
-                <input
-                  type="number"
-                  min={0}
-                  className={inputBase}
-                  style={{ borderColor: errors.priceNum ? PINK : "#E5E7EB" }}
-                  value={f.priceNum}
-                  onChange={e => set("priceNum", e.target.value)}
-                />
-              </Field>
-            </div>
-            <div className="flex-1">
-              <Field label="System Fee (¥)">
-                <input
-                  type="number"
-                  min={0}
-                  className={inputBase}
-                  style={{ borderColor: "#E5E7EB" }}
-                  value={f.systemFee}
-                  onChange={e => set("systemFee", e.target.value)}
-                />
-              </Field>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl p-4 mb-3 border border-gray-100 shadow-sm">
-          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Status</p>
-          <Field label="Purchase Status">
-            <select
-              className={inputBase}
-              style={{ borderColor: "#E5E7EB" }}
-              value={f.status}
-              onChange={e => set("status", e.target.value)}
-            >
-              <option value="">None</option>
-              <option value="On Sale">On Sale</option>
-              <option value="Purchase in progress">Purchase in progress</option>
-              <option value="Sold out">Sold out</option>
-              <option value="Coming soon">Coming soon</option>
-            </select>
-          </Field>
-          <Field label="Sell-by Date (display text)">
-            <input
-              className={inputBase}
-              style={{ borderColor: "#E5E7EB" }}
-              placeholder="e.g. 2026/6/24 (Wed) 23:59"
-              value={f.sellByDate}
-              onChange={e => set("sellByDate", e.target.value)}
-            />
-          </Field>
-        </div>
-
-        {(f.artist || f.event) && (
-          <div className="rounded-xl p-4 mb-4 border" style={{ background: "#FFF0F3", borderColor: `${PINK}33` }}>
-            <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: PINK }}>Preview</p>
-            <p className="text-xs font-semibold mb-0.5" style={{ color: PINK }}>{f.artist || "—"}</p>
-            <p className="text-sm font-bold text-gray-800 leading-snug mb-2">{f.event || "—"}</p>
-            {f.venue && <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-1"><MapPinIcon />{f.venue}</div>}
-            {f.eventDate && <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-2"><ClockIcon />{f.eventDate.replace(/-/g, "/")} {f.doorsTime} / {f.showTime}</div>}
-            {preview_price && <p className="text-sm font-bold" style={{ color: PINK }}>{preview_price} / sheet &nbsp;×&nbsp; {f.seats} {f.seatUnit}(s)</p>}
-          </div>
-        )}
-
-        <div className="flex gap-3">
-          <button onClick={onCancel} className="flex-1 py-3.5 rounded-xl text-sm font-semibold text-gray-600 bg-white border border-gray-200">Cancel</button>
-          <button onClick={handleSubmit} className="flex-1 py-3.5 rounded-xl text-white text-sm font-semibold shadow-sm" style={{ backgroundColor: PINK }}>
-            {id ? "Save Changes" : "Add Ticket"}
+    <div className="bg-gray-100 min-h-screen font-sans flex justify-center">
+      <div className="w-full max-w-2xl bg-gray-50 min-h-screen sm:shadow-2xl">
+        <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3 sticky top-0 z-10 shadow-sm">
+          <button
+            onClick={onCancel}
+            className="p-1 -ml-1 text-gray-500 hover:text-gray-800 transition-colors"
+          >
+            <ArrowLeftIcon />
           </button>
+          <h1 className="flex-1 text-[15px] font-bold text-gray-800">
+            {id ? "Edit Ticket" : "Add New Ticket"}
+          </h1>
+          <button
+            onClick={handleSubmit}
+            className="px-4 py-1.5 rounded-lg text-white text-sm font-semibold shadow-sm"
+            style={{ backgroundColor: PINK }}
+          >
+            Save
+          </button>
+        </div>
+
+        <div className="p-4 sm:p-6 pb-12">
+          <div className="bg-white rounded-sm p-4 mb-3 border border-gray-100 shadow-sm">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Basic Info</p>
+            <Field label="Artist / Performer Name" required error={errors.artist}>
+              <input
+                className={inputBase}
+                style={{ borderColor: errors.artist ? PINK : "#E5E7EB" }}
+                placeholder="e.g. Aina the End"
+                value={f.artist}
+                onChange={e => set("artist", e.target.value)}
+              />
+            </Field>
+            <Field label="Event Title" required error={errors.event}>
+              <input
+                className={inputBase}
+                style={{ borderColor: errors.event ? PINK : "#E5E7EB" }}
+                placeholder="e.g. AiNA THE END LIVE TOUR 2026 - PICNIC -"
+                value={f.event}
+                onChange={e => set("event", e.target.value)}
+              />
+            </Field>
+            <Field label="Venue / Location" required error={errors.venue}>
+              <input
+                className={inputBase}
+                style={{ borderColor: errors.venue ? PINK : "#E5E7EB" }}
+                placeholder="e.g. Zepp Haneda, Tokyo"
+                value={f.venue}
+                onChange={e => set("venue", e.target.value)}
+              />
+            </Field>
+          </div>
+
+          <div className="bg-white rounded-sm p-4 mb-3 border border-gray-100 shadow-sm">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Date & Time</p>
+            <Field label="Event Date" required error={errors.eventDate}>
+              <input
+                type="date"
+                className={inputBase}
+                style={{ borderColor: errors.eventDate ? PINK : "#E5E7EB" }}
+                value={f.eventDate}
+                onChange={e => set("eventDate", e.target.value)}
+              />
+            </Field>
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <Field label="Doors Open" required error={errors.doorsTime}>
+                  <input
+                    type="time"
+                    className={inputBase}
+                    style={{ borderColor: errors.doorsTime ? PINK : "#E5E7EB" }}
+                    value={f.doorsTime}
+                    onChange={e => set("doorsTime", e.target.value)}
+                  />
+                </Field>
+              </div>
+              <div className="flex-1">
+                <Field label="Show Start" required error={errors.showTime}>
+                  <input
+                    type="time"
+                    className={inputBase}
+                    style={{ borderColor: errors.showTime ? PINK : "#E5E7EB" }}
+                    value={f.showTime}
+                    onChange={e => set("showTime", e.target.value)}
+                  />
+                </Field>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-sm p-4 mb-3 border border-gray-100 shadow-sm">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Ticket Details</p>
+            <Field label="Seat Type">
+              <select
+                className={inputBase}
+                style={{ borderColor: "#E5E7EB" }}
+                value={f.seatType}
+                onChange={e => handleSeatTypeChange(e.target.value)}
+              >
+                {SEAT_TYPES.map(st => (
+                  <option key={st.value} value={st.value}>{st.label}</option>
+                ))}
+              </select>
+            </Field>
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <Field label="Seat Unit">
+                  <select
+                    className={inputBase}
+                    style={{ borderColor: "#E5E7EB" }}
+                    value={f.seatUnit}
+                    onChange={e => set("seatUnit", e.target.value)}
+                  >
+                    <option value="seat">seat</option>
+                    <option value="piece">piece</option>
+                  </select>
+                </Field>
+              </div>
+              <div className="flex-1">
+                <Field label="Number of Pieces" required>
+                  <input
+                    type="number"
+                    min={1}
+                    className={inputBase}
+                    style={{ borderColor: "#E5E7EB" }}
+                    value={f.seats}
+                    onChange={e => set("seats", e.target.value)}
+                  />
+                </Field>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <div className="flex-1">
+                <Field label="Price per Sheet (¥)" required error={errors.priceNum}>
+                  <input
+                    type="number"
+                    min={0}
+                    className={inputBase}
+                    style={{ borderColor: errors.priceNum ? PINK : "#E5E7EB" }}
+                    value={f.priceNum}
+                    onChange={e => set("priceNum", e.target.value)}
+                  />
+                </Field>
+              </div>
+              <div className="flex-1">
+                <Field label="System Fee (¥)">
+                  <input
+                    type="number"
+                    min={0}
+                    className={inputBase}
+                    style={{ borderColor: "#E5E7EB" }}
+                    value={f.systemFee}
+                    onChange={e => set("systemFee", e.target.value)}
+                  />
+                </Field>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-sm p-4 mb-3 border border-gray-100 shadow-sm">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Status</p>
+            <Field label="Purchase Status">
+              <select
+                className={inputBase}
+                style={{ borderColor: "#E5E7EB" }}
+                value={f.status}
+                onChange={e => set("status", e.target.value)}
+              >
+                <option value="">None</option>
+                <option value="On Sale">On Sale</option>
+                <option value="Purchase in progress">Purchase in progress</option>
+                <option value="Sold out">Sold out</option>
+                <option value="Coming soon">Coming soon</option>
+              </select>
+            </Field>
+            <Field label="Sell-by Date (display text)">
+              <input
+                className={inputBase}
+                style={{ borderColor: "#E5E7EB" }}
+                placeholder="e.g. 2026/6/24 (Wed) 23:59"
+                value={f.sellByDate}
+                onChange={e => set("sellByDate", e.target.value)}
+              />
+            </Field>
+          </div>
+
+          {(f.artist || f.event) && (
+            <div className="rounded-sm p-4 mb-4 border" style={{ background: "#FFF0F3", borderColor: `${PINK}33` }}>
+              <p className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: PINK }}>Preview</p>
+              <p className="text-xs font-semibold mb-0.5" style={{ color: PINK }}>{f.artist || "—"}</p>
+              <p className="text-sm font-bold text-gray-800 leading-snug mb-2">{f.event || "—"}</p>
+              {f.venue && <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-1"><MapPinIcon />{f.venue}</div>}
+              {f.eventDate && <div className="flex items-center gap-1.5 text-xs text-gray-500 mb-2"><ClockIcon />{f.eventDate.replace(/-/g, "/")} {f.doorsTime} / {f.showTime}</div>}
+              {preview_price && <p className="text-sm font-bold" style={{ color: PINK }}>{preview_price} / sheet &nbsp;×&nbsp; {f.seats} {f.seatUnit}(s)</p>}
+            </div>
+          )}
+
+          <div className="flex gap-3">
+            <button onClick={onCancel} className="flex-1 py-3.5 rounded-xl text-sm font-semibold text-gray-600 bg-white border border-gray-200">Cancel</button>
+            <button onClick={handleSubmit} className="flex-1 py-3.5 rounded-xl text-white text-sm font-semibold shadow-sm" style={{ backgroundColor: PINK }}>
+              {id ? "Save Changes" : "Add Ticket"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -399,14 +419,17 @@ function TicketRow({ ticket, onEdit, onDelete }) {
   const [confirm, setConfirm] = useState(false);
 
   return (
-    <div className="bg-white rounded-xl p-4 mb-3 border border-gray-100 shadow-sm flex items-start gap-3" style={{ borderLeft: `4px solid ${PINK}` }}>
+    <div className="bg-white rounded-sm p-4 mb-3 border border-gray-100 shadow-sm flex items-start gap-3" style={{ borderLeft: `4px solid ${PINK}` }}>
       <div className="flex-1 min-w-0">
         <p className="text-[11px] font-semibold mb-0.5" style={{ color: PINK }}>{ticket.artist}</p>
         <p className="text-sm font-bold text-gray-800 leading-snug">{ticket.event}</p>
         <div className="flex items-center gap-1 text-[12px] text-gray-400 mt-1.5"><MapPinIcon /><span className="truncate">{ticket.venue}</span></div>
         <div className="flex items-center gap-1 text-[12px] text-gray-400 mt-0.5"><ClockIcon /><span>{ticket.date}</span></div>
         <p className="text-sm font-bold mt-1.5" style={{ color: PINK }}>{ticket.price} / sheet &nbsp;×&nbsp; {ticket.seats} {ticket.seatUnit}(s)</p>
-        {ticket.status && <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white" style={{ backgroundColor: PINK }}>{ticket.status}</span>}
+        <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+          {ticket.seatType && <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold text-gray-600 bg-gray-100">{ticket.seatType}</span>}
+          {ticket.status && <span className="inline-block px-2 py-0.5 rounded-full text-[10px] font-semibold text-white" style={{ backgroundColor: PINK }}>{ticket.status}</span>}
+        </div>
       </div>
 
       <div className="flex flex-col gap-2 shrink-0">
@@ -512,8 +535,10 @@ function TicketAdmin() {
 
   if (loading) {
     return (
-      <div className="bg-gray-50 min-h-screen flex items-center justify-center font-sans">
-        <p className="text-sm text-gray-400">Loading Configuration Data...</p>
+      <div className="bg-gray-100 min-h-screen flex justify-center font-sans">
+        <div className="w-full max-w-2xl bg-gray-50 min-h-screen sm:shadow-2xl flex items-center justify-center">
+          <p className="text-sm text-gray-400">Loading Configuration Data...</p>
+        </div>
       </div>
     );
   }
@@ -530,43 +555,45 @@ function TicketAdmin() {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen font-sans">
-      <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 z-10 shadow-sm">
-        <div>
-          <h1 className="text-[15px] font-bold text-gray-800">Ticket Admin</h1>
-          <p className="text-[11px] text-gray-400">
-            {tickets.length} ticket{tickets.length !== 1 ? "s" : ""} configured
-          </p>
-        </div>
-        <button
-          onClick={openAdd}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-white text-sm font-semibold shadow-sm"
-          style={{ backgroundColor: PINK }}
-        >
-          <PlusIcon /> Add Ticket
-        </button>
-      </div>
-
-      <div className="p-4">
-        {tickets.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: `${PINK}15` }}>
-              <span className="text-3xl">🎫</span>
-            </div>
-            <p className="text-[15px] font-bold text-gray-700 mb-1">No tickets yet</p>
-            <p className="text-xs text-gray-400 mb-6 max-w-50">Add your first ticket and it will appear in the Tickets page immediately.</p>
-            <button onClick={openAdd} className="px-5 py-2.5 rounded-xl text-white text-sm font-semibold shadow-sm" style={{ backgroundColor: PINK }}>+ Add First Ticket</button>
+    <div className="bg-gray-100 min-h-screen font-sans flex justify-center">
+      <div className="w-full max-w-2xl bg-gray-50 min-h-screen sm:shadow-2xl">
+        <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+          <div>
+            <h1 className="text-[15px] font-bold text-gray-800">Ticket Admin</h1>
+            <p className="text-[11px] text-gray-400">
+              {tickets.length} ticket{tickets.length !== 1 ? "s" : ""} configured
+            </p>
           </div>
-        ) : (
-          tickets.map(ticket => (
-            <TicketRow
-              key={ticket._id}
-              ticket={ticket}
-              onEdit={openEdit}
-              onDelete={handleDelete}
-            />
-          ))
-        )}
+          <button
+            onClick={openAdd}
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-white text-sm font-semibold shadow-sm"
+            style={{ backgroundColor: PINK }}
+          >
+            <PlusIcon /> Add Ticket
+          </button>
+        </div>
+
+        <div className="p-4 sm:p-6">
+          {tickets.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center mb-4" style={{ backgroundColor: `${PINK}15` }}>
+                <span className="text-3xl">🎫</span>
+              </div>
+              <p className="text-[15px] font-bold text-gray-700 mb-1">No tickets yet</p>
+              <p className="text-xs text-gray-400 mb-6 max-w-[200px]">Add your first ticket and it will appear in the Tickets page immediately.</p>
+              <button onClick={openAdd} className="px-5 py-2.5 rounded-xl text-white text-sm font-semibold shadow-sm" style={{ backgroundColor: PINK }}>+ Add First Ticket</button>
+            </div>
+          ) : (
+            tickets.map(ticket => (
+              <TicketRow
+                key={ticket._id}
+                ticket={ticket}
+                onEdit={openEdit}
+                onDelete={handleDelete}
+              />
+            ))
+          )}
+        </div>
       </div>
     </div>
   );
