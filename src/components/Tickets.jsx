@@ -4,6 +4,10 @@ import { Link } from "react-router-dom";
 const PINK = "#E84060";
 const BLUE  = "#4A8AF4";
 
+// How many tickets show per page (client-side pagination — the full list is
+// already fetched once on mount, this just slices what gets rendered).
+const PAGE_SIZE = 10;
+
 const REGIONS = [
   "関東地方",
   "関西地方",
@@ -99,6 +103,32 @@ function ChevronDownIcon({ color = "#9CA3AF", size = 14 }) {
       aria-hidden="true" className="shrink-0"
     >
       <polyline points="6 9 12 15 18 9" />
+    </svg>
+  );
+}
+
+function ChevronLeftIcon({ color = "#9CA3AF", size = 16 }) {
+  return (
+    <svg
+      width={size} height={size} viewBox="0 0 24 24"
+      fill="none" stroke={color} strokeWidth="2.5"
+      strokeLinecap="round" strokeLinejoin="round"
+      aria-hidden="true" className="shrink-0"
+    >
+      <polyline points="15 18 9 12 15 6" />
+    </svg>
+  );
+}
+
+function ChevronRightIcon({ color = "#9CA3AF", size = 16 }) {
+  return (
+    <svg
+      width={size} height={size} viewBox="0 0 24 24"
+      fill="none" stroke={color} strokeWidth="2.5"
+      strokeLinecap="round" strokeLinejoin="round"
+      aria-hidden="true" className="shrink-0"
+    >
+      <polyline points="9 18 15 12 9 6" />
     </svg>
   );
 }
@@ -412,12 +442,76 @@ function FilterSidebar() {
   );
 }
 
+/* ── Pager (shared by mobile card list and desktop listing list) ────────────── */
+
+function Pager({ currentPage, totalPages, onChange }) {
+  if (totalPages <= 1) return null;
+
+  // Build a condensed page list: first, last, current ± 1 neighbor, "…" for gaps
+  const pages = [];
+  for (let p = 1; p <= totalPages; p++) {
+    if (p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1) {
+      pages.push(p);
+    } else if (pages[pages.length - 1] !== "…") {
+      pages.push("…");
+    }
+  }
+
+  return (
+    <nav aria-label="ページネーション" className="flex items-center justify-center gap-1.5 mt-6 mb-2">
+      <button
+        type="button"
+        onClick={() => onChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        aria-label="前のページ"
+        className="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 bg-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+      >
+        <ChevronLeftIcon color={currentPage === 1 ? "#D1D5DB" : "#6B7280"} />
+      </button>
+
+      {pages.map((p, i) =>
+        p === "…" ? (
+          <span key={`ellipsis-${i}`} className="w-9 h-9 flex items-center justify-center text-sm text-gray-300">
+            …
+          </span>
+        ) : (
+          <button
+            key={p}
+            type="button"
+            onClick={() => onChange(p)}
+            aria-current={p === currentPage ? "page" : undefined}
+            className="w-9 h-9 flex items-center justify-center rounded-lg text-sm font-semibold transition-colors"
+            style={
+              p === currentPage
+                ? { backgroundColor: PINK, color: "#ffffff" }
+                : { backgroundColor: "#ffffff", color: "#6B7280", border: "1px solid #E5E7EB" }
+            }
+          >
+            {p}
+          </button>
+        )
+      )}
+
+      <button
+        type="button"
+        onClick={() => onChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        aria-label="次のページ"
+        className="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 bg-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+      >
+        <ChevronRightIcon color={currentPage === totalPages ? "#D1D5DB" : "#6B7280"} />
+      </button>
+    </nav>
+  );
+}
+
 /* ── Tickets Page ─────────────────────────────────────────────────────────────── */
 
 function Tickets() {
   const [tickets,     setTickets]     = useState([]);
   const [loading,     setLoading]     = useState(true);
   const [selectedIds, setSelectedIds] = useState(new Set());
+  const [currentPage, setCurrentPage] = useState(1);
 
   // ── Fetch from the admin backend on mount ──────────────────────────────────
   useEffect(() => {
@@ -453,7 +547,23 @@ function Tickets() {
   };
 
   const count           = selectedIds.size;
+  // Selection is tracked by id against the full list, not the current page,
+  // so choosing tickets on page 1 then browsing to page 2 doesn't lose them.
   const selectedTickets = tickets.filter(t => selectedIds.has(t._id));
+
+  // ── Pagination: slice the already-fetched list, don't re-fetch per page ────
+  const totalPages  = Math.max(1, Math.ceil(tickets.length / PAGE_SIZE));
+  const pageTickets = tickets.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  // If the list shrinks (or just loaded) and currentPage no longer exists, snap back
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages);
+  }, [totalPages, currentPage]);
+
+  function goToPage(page) {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 
   // ── Loading state ─────────────────────────────────────────────────────────
   if (loading) {
@@ -484,16 +594,26 @@ function Tickets() {
   }
 
   // ── Main list ─────────────────────────────────────────────────────────────
+  // NOTE on the confirm bars below: they use `sticky`, not `fixed`. A `fixed`
+  // bar is pinned to the viewport regardless of scroll position, so it always
+  // floats on top of whatever comes after this component in the page — like a
+  // <Footer /> rendered below <Tickets />. `sticky` keeps the same "always
+  // visible while scrolling" behavior, but because it stays part of normal
+  // document flow, it naturally stops sticking and scrolls away the moment
+  // this component's content ends — handing off cleanly to the footer instead
+  // of covering it. The `flex flex-col` + `flex-1` on each content section is
+  // what keeps the bar pinned to the bottom of the screen when there are only
+  // a few tickets (otherwise it would sit right under the last card instead).
   return (
-    <div className="bg-gray-100 min-h-screen font-sans">
+    <div className="bg-gray-100 min-h-screen font-sans flex flex-col">
 
       {/* ══ Mobile / tablet view (< lg) — select-to-buy flow ══════════════════ */}
-      <div className="lg:hidden p-4 pb-24">
+      <div className="lg:hidden flex-1 p-4">
         <p className="text-[12px] text-gray-400 mb-3 px-1">
           購入するチケットを選択してください
         </p>
 
-        {tickets.map(ticket => (
+        {pageTickets.map(ticket => (
           <TicketCard
             key={ticket._id}
             ticket={ticket}
@@ -502,17 +622,80 @@ function Tickets() {
           />
         ))}
 
-        {/* Confirm button — fixed to bottom of screen */}
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-gray-100">
+        <Pager currentPage={currentPage} totalPages={totalPages} onChange={goToPage} />
+      </div>
+
+      {/* Confirm button — sticky to the bottom of the viewport while scrolling,
+          scrolls away with the rest of the page once the footer arrives */}
+      <div className="lg:hidden sticky bottom-0 z-20 p-4 bg-gray-100">
+        <Link
+          to="./step1"
+          state={{ selectedTickets }}
+          className="block w-full"
+          onClick={e => count === 0 && e.preventDefault()}
+        >
+          <button
+            disabled={count === 0}
+            className="w-full py-3.5 rounded-sm text-white text-[14px] font-semibold tracking-wide transition-opacity duration-150"
+            style={{
+              backgroundColor: PINK,
+              opacity: count === 0 ? 0.35 : 1,
+              cursor: count === 0 ? "not-allowed" : "pointer",
+            }}
+          >
+            {count === 0
+              ? "チケットを選択してください"
+              : `確認 — ${count}枚のチケットを選択中`}
+          </button>
+        </Link>
+      </div>
+
+      {/* ══ Desktop view (lg and up) — browse / filter layout ═════════════════ */}
+      <div className="hidden lg:block flex-1">
+        <div className="max-w-[1400px] mx-auto px-8 py-8">
+
+          {/* Header row: result count + sort */}
+          <div className="flex items-center justify-between mb-6">
+            <p className="text-sm text-gray-500">
+              <span className="font-bold" style={{ color: PINK }}>{tickets.length}</span>
+              件の出品があります。
+            </p>
+            <button type="button" className="flex items-center gap-1.5 text-sm text-gray-600">
+              新着順
+              <ChevronDownIcon color={PINK} />
+            </button>
+          </div>
+
+          <div className="flex gap-8 items-start">
+            <FilterSidebar />
+
+            <div className="flex-1 min-w-0">
+              {pageTickets.map(ticket => (
+                <ListingCard
+                  key={ticket._id}
+                  ticket={ticket}
+                  selected={selectedIds.has(ticket._id)}
+                  onToggle={() => toggle(ticket._id)}
+                />
+              ))}
+
+              <Pager currentPage={currentPage} totalPages={totalPages} onChange={goToPage} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Confirm bar — sticky, mirrors mobile's flow, hands off to the footer */}
+      <div className="hidden lg:block sticky bottom-0 z-20 bg-white border-t border-gray-200">
+        <div className="max-w-[1400px] mx-auto px-8 py-4 flex items-center justify-end">
           <Link
             to="./step1"
             state={{ selectedTickets }}
-            className="block w-full"
             onClick={e => count === 0 && e.preventDefault()}
           >
             <button
               disabled={count === 0}
-              className="w-full py-3.5 rounded-xl text-white text-[14px] font-semibold tracking-wide transition-opacity duration-150"
+              className="px-8 py-3.5 rounded-sm text-white text-[14px] font-semibold tracking-wide transition-opacity duration-150"
               style={{
                 backgroundColor: PINK,
                 opacity: count === 0 ? 0.35 : 1,
@@ -524,62 +707,6 @@ function Tickets() {
                 : `確認 — ${count}枚のチケットを選択中`}
             </button>
           </Link>
-        </div>
-      </div>
-
-      {/* ══ Desktop view (lg and up) — browse / filter layout ═════════════════ */}
-      <div className="hidden lg:block max-w-[1400px] mx-auto px-8 py-8 pb-28">
-
-        {/* Header row: result count + sort */}
-        <div className="flex items-center justify-between mb-6">
-          <p className="text-sm text-gray-500">
-            <span className="font-bold" style={{ color: PINK }}>{tickets.length}</span>
-            件の出品があります。
-          </p>
-          <button type="button" className="flex items-center gap-1.5 text-sm text-gray-600">
-            新着順
-            <ChevronDownIcon color={PINK} />
-          </button>
-        </div>
-
-        <div className="flex gap-8 items-start">
-          <FilterSidebar />
-
-          <div className="flex-1 min-w-0">
-            {tickets.map(ticket => (
-              <ListingCard
-                key={ticket._id}
-                ticket={ticket}
-                selected={selectedIds.has(ticket._id)}
-                onToggle={() => toggle(ticket._id)}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Confirm bar — fixed to bottom, mirrors mobile's flow */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-20">
-          <div className="max-w-[1400px] mx-auto px-8 py-4 flex items-center justify-end">
-            <Link
-              to="./step1"
-              state={{ selectedTickets }}
-              onClick={e => count === 0 && e.preventDefault()}
-            >
-              <button
-                disabled={count === 0}
-                className="px-8 py-3.5 rounded-xl text-white text-[14px] font-semibold tracking-wide transition-opacity duration-150"
-                style={{
-                  backgroundColor: PINK,
-                  opacity: count === 0 ? 0.35 : 1,
-                  cursor: count === 0 ? "not-allowed" : "pointer",
-                }}
-              >
-                {count === 0
-                  ? "チケットを選択してください"
-                  : `確認 — ${count}枚のチケットを選択中`}
-              </button>
-            </Link>
-          </div>
         </div>
       </div>
     </div>
