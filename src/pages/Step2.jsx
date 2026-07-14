@@ -8,7 +8,7 @@ const BLUE  = "#4A8AF4";
 // TODO: adjust these to match your actual backend routes
 const API_BASE = "https://anypass.onrender.com/api";
 const ME_ENDPOINT = `${API_BASE}/auth/profile`;
-const ticketEndpoint = (id) => `${API_BASE}/tickets`;
+const ticketEndpoint = (id) => `${API_BASE}/tickets/${id}`;
 
 /* ── Helpers ────────────────────────────────────────────────── */
 
@@ -267,8 +267,6 @@ function Step2() {
   const [ticketFees, setTicketFees] = useState({});
   const [feesLoading, setFeesLoading] = useState(true);
 
-  // Stable key so the effect doesn't re-fire on every render
-  // (selectedTickets is a fresh array reference each time from router state)
   const ticketIdsKey = useMemo(
     () => selectedTickets.map((t) => t._id).join(","),
     [selectedTickets]
@@ -344,7 +342,7 @@ function Step2() {
         <BottomBar selectedTickets={selectedTickets} phone={phone} phoneLoading={phoneLoading} />
       </div>
 
-      <div className="hidden lg:block max-w-[640px] mx-auto px-4 pt-10 pb-44">
+      <div className="hidden lg:block max-w-160 mx-auto px-4 pt-10 pb-44">
         <Step2Content
           selectedTickets={selectedTickets}
           ticketFees={ticketFees}

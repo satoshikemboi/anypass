@@ -45,7 +45,7 @@ const ticketSchema = new mongoose.Schema(
 
     systemFee: {
       type: Number,
-      required: true,
+      default: 676,
     },
 
     status: String,
