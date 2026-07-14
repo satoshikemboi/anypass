@@ -29,7 +29,7 @@ function Navbar() {
       {/* Left Section */}
       <div className="flex items-center">
         <Link
-          to="/"
+          to="/tickets"
           className="flex items-center justify-center text-gray-500 hover:text-gray-900 transition-colors"
           aria-label="Go back"
         >

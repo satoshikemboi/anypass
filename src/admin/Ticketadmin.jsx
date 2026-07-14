@@ -186,6 +186,7 @@ function TicketForm({ initialForm, id, onSave, onCancel }) {
     if (!f.doorsTime)                   e.doorsTime = "Required";
     if (!f.showTime)                    e.showTime  = "Required";
     if (!f.priceNum || Number(f.priceNum) <= 0) e.priceNum = "Must be greater than 0";
+    if (!systemFee || Number(f.systemFee) < 0)     e.systemFee = "Cannot be negative";
     setErrs(e);
     return Object.keys(e).length === 0;
   }

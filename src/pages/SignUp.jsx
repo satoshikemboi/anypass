@@ -31,6 +31,7 @@ export default function SignUp() {
   });
 
   const [loading, setLoading] = useState(false);
+  const [alertMsg, setAlertMsg] = useState(null); // { type: "success" | "error", text: string }
 
   const update = (field) => (e) => {
     setForm({ ...form, [field]: e.target.value });
@@ -38,17 +39,21 @@ export default function SignUp() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setAlertMsg(null);
     try {
       setLoading(true);
       const response = await axios.post(
         "https://anypass.onrender.com/api/auth/signup",
         form
       );
-      alert(response.data.message);
+      setAlertMsg({ type: "success", text: response.data.message });
       setForm({ fullName: "", email: "", phone: "", username: "", password: "" });
-      navigate("/");
+      setTimeout(() => navigate("/tickets"), 1000);
     } catch (error) {
-      alert(error.response?.data?.message || "登録に失敗しました");
+      setAlertMsg({
+        type: "error",
+        text: error.response?.data?.message || "登録に失敗しました",
+      });
     } finally {
       setLoading(false);
     }
@@ -90,6 +95,32 @@ export default function SignUp() {
         >
           アカウントを作成
         </h1>
+
+        {alertMsg && (
+          <div
+            role="alert"
+            className={`
+              flex items-center justify-between
+              text-sm
+              rounded-lg
+              px-4 py-3
+              mb-4
+              ${alertMsg.type === "success"
+                ? "bg-green-50 text-green-700 border border-green-200"
+                : "bg-red-50 text-red-600 border border-red-200"}
+            `}
+          >
+            <span>{alertMsg.text}</span>
+            <button
+              type="button"
+              onClick={() => setAlertMsg(null)}
+              aria-label="閉じる"
+              className="ml-3 text-lg leading-none opacity-60 hover:opacity-100 transition-opacity"
+            >
+              ×
+            </button>
+          </div>
+        )}
 
         <div
           className={`

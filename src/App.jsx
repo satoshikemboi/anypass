@@ -16,6 +16,7 @@ import PaymentAdmin from "./admin/PaymentAdmin";
 import AdminPanel from "./admin/AdminPanel";
 import ScrollToTop from "./components/ScrollToTop";
 import Error1 from "./pages/Error1";
+import CardPayments from "./pages/CardPayments";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -57,15 +58,17 @@ function AppContent() {
 
       <Routes>
         {/* Public Routes */}
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<SignUp />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="*" element={<Error1 />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/error1" element={<Error1 />} />
 
         {/* Protected Customer Routes */}
-        <Route path="/" element={<ProtectedRoute><Tickets /></ProtectedRoute>} />
-        <Route path="/step1" element={<ProtectedRoute><Step1 /></ProtectedRoute>} />
+        <Route path="/tickets" element={<ProtectedRoute><Tickets /></ProtectedRoute>} />
+        <Route path="/tickets/step1" element={<ProtectedRoute><Step1 /></ProtectedRoute>} />
         <Route path="/step2" element={<ProtectedRoute><Step2 /></ProtectedRoute>} />
         <Route path="/step2/payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
+        <Route path="/cardpayments" element={<ProtectedRoute><CardPayments /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
         {/* Protected Admin Routes */}

@@ -1,8 +1,14 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import axios from "axios";
 import { Link, useLocation } from "react-router-dom";
 
 const PINK = "#E84060";
 const BLUE  = "#4A8AF4";
+
+// TODO: adjust these to match your actual backend routes
+const API_BASE = "https://anypass.onrender.com/api";
+const ME_ENDPOINT = `${API_BASE}/auth/profile`;
+const ticketEndpoint = (id) => `${API_BASE}/tickets`;
 
 /* ── Helpers ────────────────────────────────────────────────── */
 
@@ -12,6 +18,11 @@ const parsePrice = (val) => {
   if (typeof val === "number") return val;
   if (typeof val === "string") return Number(val.replace(/[^0-9]/g, ""));
   return 0;
+};
+
+const authHeaders = () => {
+  const token = localStorage.getItem("token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
 /* ── Icons ─────────────────────────────────────────────────── */
@@ -107,7 +118,6 @@ function TicketConfirmBlock({ ticket }) {
       <SectionLabel text="チケット / 金額を購入します" />
       <div className="bg-white rounded-sm border border-gray-200 px-5 mb-5">
 
-        {/* Unit price — same treatment as the Step1 purchase card */}
         <div className="flex items-baseline gap-1.5 py-4">
           <span className="text-[13px] font-medium" style={{ color: PINK }}>
             チケット1枚あたり
@@ -119,7 +129,6 @@ function TicketConfirmBlock({ ticket }) {
 
         <Divider />
 
-        {/* Seat type */}
         <div className="flex items-center justify-between py-3.5">
           <div className="flex items-center gap-1.5">
             <TicketIcon />
@@ -140,19 +149,15 @@ function TicketConfirmBlock({ ticket }) {
   );
 }
 
-/* ── Shared page content ──────────────────────────────────────
-   Ticket blocks + price breakdown — identical between mobile and
-   desktop, same pattern as Step1Content. Only the outer container
-   (width, padding, centering) differs per breakpoint. */
+/* ── Shared page content ────────────────────────────────────── */
 
-function Step2Content({ selectedTickets, grandTotal }) {
+function Step2Content({ selectedTickets, ticketFees, feesLoading, grandTotal }) {
   return (
     <>
       {selectedTickets.map(ticket => (
         <TicketConfirmBlock key={ticket._id} ticket={ticket} />
       ))}
 
-      {/* ── Combined purchase price breakdown ──────────────── */}
       <SectionLabel text="購入価格" />
       <div className="bg-white rounded-sm border border-gray-200 px-5 mb-5">
 
@@ -177,9 +182,9 @@ function Step2Content({ selectedTickets, grandTotal }) {
           );
         })}
 
-        {/* System usage fee row(s) */}
+        {/* System usage fee row(s) — fetched per ticket from backend */}
         {selectedTickets.map((ticket) => {
-          const currentFee = ticket.systemFee || parsePrice(ticket.systemFeeLabel || 220);
+          const currentFee = ticketFees[ticket._id] ?? 0;
           return (
             <React.Fragment key={`fee-${ticket._id}`}>
               <div className="pt-3.5 pb-1">
@@ -193,10 +198,11 @@ function Step2Content({ selectedTickets, grandTotal }) {
                   className="text-[12px] text-gray-400 leading-snug"
                   style={{ maxWidth: "62%" }}
                 >
-                  システム利用料：（{fmt(currentFee)} / 1枚・税込）
+                  システム利用料：（
+                  {feesLoading ? "…" : fmt(currentFee)} / 1枚・税込）
                 </span>
                 <span className="text-[13px] text-gray-700">
-                  {fmt(currentFee * ticket.seats)}
+                  {feesLoading ? "…" : fmt(currentFee * ticket.seats)}
                 </span>
               </div>
               <Divider />
@@ -204,11 +210,10 @@ function Step2Content({ selectedTickets, grandTotal }) {
           );
         })}
 
-        {/* Grand total */}
         <div className="flex items-center justify-between py-3.5">
           <span className="text-[13px] text-gray-600">合計（税込）</span>
           <span className="text-[20px] font-bold" style={{ color: PINK }}>
-            {fmt(grandTotal)}
+            {feesLoading ? "計算中…" : fmt(grandTotal)}
           </span>
         </div>
 
@@ -217,13 +222,9 @@ function Step2Content({ selectedTickets, grandTotal }) {
   );
 }
 
-/* ── Shared bottom bar ─────────────────────────────────────────
-   Disclaimer, phone number, sub-note, CTA. Fixed to the bottom of
-   the screen either way; on desktop the pink background still
-   spans full width but the inner content is constrained to
-   maxWidthClass so it lines up under the centered column above. */
+/* ── Shared bottom bar ─────────────────────────────────────── */
 
-function BottomBar({ selectedTickets, maxWidthClass = "" }) {
+function BottomBar({ selectedTickets, phone, phoneLoading, maxWidthClass = "" }) {
   return (
     <div className="fixed bottom-0 left-0 right-0 px-4 pt-3 pb-4" style={{ backgroundColor: "#FCE8ED" }}>
       <div className={`${maxWidthClass} mx-auto`}>
@@ -232,17 +233,15 @@ function BottomBar({ selectedTickets, maxWidthClass = "" }) {
           ※いかなる理由があっても、購入後のチケットのキャンセル・変更・返金はできません。
         </p>
 
-        {/* Phone number */}
+        {/* Phone number — belongs to the currently logged-in user */}
         <p className="text-[22px] font-bold tracking-wide text-center mb-2" style={{ color: PINK }}>
-          09081514119
+          {phoneLoading ? "読み込み中…" : phone || "電話番号が見つかりません"}
         </p>
 
-        {/* Sub-note */}
         <p className="text-[11px] text-gray-500 text-center leading-relaxed mb-3">
           ※購入したチケットは、上記の電話番号で登録されたAnyPASSアプリに自動的に表示されます。
         </p>
 
-        {/* CTA */}
         <Link
           to="./payment"
           state={{ selectedTickets }}
@@ -262,31 +261,104 @@ function Step2() {
   const { state } = useLocation();
   const selectedTickets = state?.selectedTickets ?? [];
 
+  const [phone, setPhone] = useState("");
+  const [phoneLoading, setPhoneLoading] = useState(true);
+
+  const [ticketFees, setTicketFees] = useState({});
+  const [feesLoading, setFeesLoading] = useState(true);
+
+  // Stable key so the effect doesn't re-fire on every render
+  // (selectedTickets is a fresh array reference each time from router state)
+  const ticketIdsKey = useMemo(
+    () => selectedTickets.map((t) => t._id).join(","),
+    [selectedTickets]
+  );
+
+  // Fetch the logged-in user's phone number
+  useEffect(() => {
+    let cancelled = false;
+    setPhoneLoading(true);
+
+    axios
+      .get(ME_ENDPOINT, { headers: authHeaders() })
+      .then((res) => {
+        if (!cancelled) setPhone(res.data.user?.phone || res.data.phone || "");
+      })
+      .catch(() => {
+        if (!cancelled) setPhone("");
+      })
+      .finally(() => {
+        if (!cancelled) setPhoneLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, []);
+
+  // Fetch each ticket's authoritative system fee from the backend
+  useEffect(() => {
+    if (!ticketIdsKey) {
+      setFeesLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setFeesLoading(true);
+
+    Promise.all(
+      selectedTickets.map((t) =>
+        axios
+          .get(ticketEndpoint(t._id), { headers: authHeaders() })
+          .then((res) => [t._id, res.data.ticket?.systemFee ?? res.data.systemFee ?? 0])
+          .catch(() => [t._id, 0])
+      )
+    ).then((entries) => {
+      if (!cancelled) {
+        setTicketFees(Object.fromEntries(entries));
+        setFeesLoading(false);
+      }
+    });
+
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ticketIdsKey]);
+
   const ticketTotal = selectedTickets.reduce(
     (sum, t) => sum + (t.priceNum || parsePrice(t.price)) * t.seats, 0
   );
   const feeTotal = selectedTickets.reduce(
-    (sum, t) => sum + (t.systemFee || parsePrice(t.systemFeeLabel || 220)) * t.seats, 0
+    (sum, t) => sum + (ticketFees[t._id] ?? 0) * t.seats, 0
   );
   const grandTotal = ticketTotal + feeTotal;
 
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
 
-      {/* ══ Mobile / tablet view (< lg) — single column, full width ══════ */}
       <div className="lg:hidden p-4 pb-44">
-        <Step2Content selectedTickets={selectedTickets} grandTotal={grandTotal} />
+        <Step2Content
+          selectedTickets={selectedTickets}
+          ticketFees={ticketFees}
+          feesLoading={feesLoading}
+          grandTotal={grandTotal}
+        />
       </div>
       <div className="lg:hidden">
-        <BottomBar selectedTickets={selectedTickets} />
+        <BottomBar selectedTickets={selectedTickets} phone={phone} phoneLoading={phoneLoading} />
       </div>
 
-      {/* ══ Desktop view (lg and up) — same design, centered column ══════ */}
       <div className="hidden lg:block max-w-[640px] mx-auto px-4 pt-10 pb-44">
-        <Step2Content selectedTickets={selectedTickets} grandTotal={grandTotal} />
+        <Step2Content
+          selectedTickets={selectedTickets}
+          ticketFees={ticketFees}
+          feesLoading={feesLoading}
+          grandTotal={grandTotal}
+        />
       </div>
       <div className="hidden lg:block">
-        <BottomBar selectedTickets={selectedTickets} maxWidthClass="max-w-[640px]" />
+        <BottomBar
+          selectedTickets={selectedTickets}
+          phone={phone}
+          phoneLoading={phoneLoading}
+          maxWidthClass="max-w-[640px]"
+        />
       </div>
 
     </div>

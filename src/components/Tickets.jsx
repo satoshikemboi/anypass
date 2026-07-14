@@ -689,7 +689,7 @@ function Tickets() {
       <div className="hidden lg:block sticky bottom-0 z-20 bg-white border-t border-gray-200">
         <div className="max-w-[1400px] mx-auto px-8 py-4 flex items-center justify-end">
           <Link
-            to="./step1"
+            to="/step1"
             state={{ selectedTickets }}
             onClick={e => count === 0 && e.preventDefault()}
           >
