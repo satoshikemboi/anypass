@@ -160,7 +160,6 @@ function PurchaseDetailsCard({ ticket }) {
             {ticket.seatType}
           </span>
         </div>
-        <span className="text-[13px] text-gray-500">座席未定</span>
       </div>
 
       <Divider />

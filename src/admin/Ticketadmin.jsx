@@ -179,14 +179,22 @@ function TicketForm({ initialForm, id, onSave, onCancel }) {
 
   function validate() {
     const e = {};
-    if (!f.artist.trim())               e.artist    = "Required";
-    if (!f.event.trim())                e.event     = "Required";
-    if (!f.venue.trim())                e.venue     = "Required";
-    if (!f.eventDate)                   e.eventDate = "Required";
-    if (!f.doorsTime)                   e.doorsTime = "Required";
-    if (!f.showTime)                    e.showTime  = "Required";
-    if (!f.priceNum || Number(f.priceNum) <= 0) e.priceNum = "Must be greater than 0";
-    if (!systemFee || Number(f.systemFee) < 0)     e.systemFee = "Cannot be negative";
+  
+    if (!f.artist.trim()) e.artist = "Required";
+    if (!f.event.trim()) e.event = "Required";
+    if (!f.venue.trim()) e.venue = "Required";
+    if (!f.eventDate) e.eventDate = "Required";
+    if (!f.doorsTime) e.doorsTime = "Required";
+    if (!f.showTime) e.showTime = "Required";
+  
+    if (!f.priceNum || Number(f.priceNum) <= 0) {
+      e.priceNum = "Must be greater than 0";
+    }
+  
+    if (Number(f.systemFee) < 0) {
+      e.systemFee = "Cannot be negative";
+    }
+  
     setErrs(e);
     return Object.keys(e).length === 0;
   }
