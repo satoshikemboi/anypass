@@ -66,7 +66,7 @@ export default function SignUp() {
         flex
         justify-center
         items-start
-        px-4
+        px-2
         py-10
       `}
     >
@@ -76,7 +76,7 @@ export default function SignUp() {
           bg-gray-100
           border
           border-gray-200
-          rounded-lg
+          rounded-sm
           shadow-lg
           px-6
           py-8
@@ -233,13 +233,13 @@ export default function SignUp() {
             type="submit"
             disabled={loading}
             className={`
-              bg-pink-500
+              bg-red-600
               hover:bg-pink-600
               text-white
-              font-medium
+              font-semibold
               text-sm
               py-3
-              rounded-lg
+              rounded-sm
               transition-colors
               disabled:opacity-50
               disabled:cursor-not-allowed
@@ -249,7 +249,7 @@ export default function SignUp() {
             {loading ? "作成中..." : "アカウントを作成"}
           </button>
         </div>
-        <p className="text-center text-md mt-4">
+        <p className="text-center text-sm mt-2">
           すでにアカウントをお持ちですか？
           <Link to="/login" className="text-pink-500 ml-1">
             ログイン

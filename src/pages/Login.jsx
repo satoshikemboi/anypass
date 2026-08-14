@@ -112,7 +112,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-pink-400 hover:bg-pink-600 text-white py-3 rounded"
+            className="w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded"
           >
             {loading ? "ログイン中..." : "ログイン"}
           </button>
