@@ -17,6 +17,7 @@ import AdminPanel from "./admin/AdminPanel";
 import ScrollToTop from "./components/ScrollToTop";
 import Error1 from "./pages/Error1";
 import CardPayments from "./pages/CardPayments";
+import TransferError from "./errors/TransferError";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -62,6 +63,7 @@ function AppContent() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
         <Route path="/error1" element={<Error1 />} />
+        <Route path="/transfer-error" element={<TransferError />} />
 
         {/* Protected Customer Routes */}
         <Route path="/tickets" element={<ProtectedRoute><Tickets /></ProtectedRoute>} />
