@@ -24,9 +24,9 @@ function MapPinIcon() {
   return (
     <svg
       width="15" height="15" viewBox="0 0 24 24"
-      fill="none" stroke="#aaaaaa" strokeWidth="2"
+      fill="none" stroke="#E84060" strokeWidth="2"
       strokeLinecap="round" strokeLinejoin="round"
-      aria-hidden="true" className="shrink-0"
+      aria-hidden="true" className="shrink-0 text-[#E84060]"
     >
       <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z" />
       <circle cx="12" cy="10" r="3" />
@@ -38,9 +38,9 @@ function ClockIcon() {
   return (
     <svg
       width="15" height="15" viewBox="0 0 24 24"
-      fill="none" stroke="#aaaaaa" strokeWidth="2"
+      fill="none" stroke="#E84060" strokeWidth="2"
       strokeLinecap="round" strokeLinejoin="round"
-      aria-hidden="true" className="shrink-0"
+      aria-hidden="true" className="shrink-0 text-[#E84060]"
     >
       <circle cx="12" cy="12" r="10" />
       <polyline points="12 6 12 12 16 14" />
@@ -148,18 +148,18 @@ function TicketMeta({ ticket }) {
     <>
       <div className="flex items-center gap-1.75 mb-1.75">
         <MapPinIcon />
-        <span className="text-[13px] text-gray-500 leading-snug">{ticket.venue}</span>
+        <span className="text-[13px] text-gray-600 leading-snug">{ticket.venue}</span>
       </div>
 
       <div className="flex items-center gap-1.75">
         <ClockIcon />
-        <span className="text-[13px] text-gray-500 leading-none">{dateLabel}</span>
+        <span className="text-[13px] text-gray-600 leading-none">{dateLabel}</span>
       </div>
 
       {ticket.salesPeriodText && (
         <div className="flex items-center gap-1.75 mt-1.75">
           <CalendarClockIcon />
-          <span className="text-[12px] text-gray-400 leading-none">{ticket.salesPeriodText}</span>
+          <span className="text-[12px] text-gray-600 leading-none">{ticket.salesPeriodText}</span>
         </div>
       )}
     </>
@@ -185,7 +185,7 @@ function TicketPricing({ ticket, accentColor }) {
         {ticket.seatUnit === "seat" && (
           <>
             <span className="text-[13px] text-gray-400 leading-none">席 x</span>
-            <span className="text-[22px] font-bold leading-none" style={{ color: PINK }}>
+            <span className="text-[22px] leading-none" style={{ color: PINK }}>
               {ticket.seats}
             </span>
           </>
@@ -203,8 +203,8 @@ function TicketPricing({ ticket, accentColor }) {
       </div>
 
       <div className="flex items-baseline gap-1.5">
-        <span className="text-2xl font-bold" style={{ color: PINK }}>{ticket.price}</span>
-        <span className="text-[13px] text-gray-400">/ 1枚</span>
+        <span className="text-2xl" style={{ color: PINK }}>{ticket.price}</span>
+        <span className="text-[13px] text-gray-700">/ 1枚</span>
       </div>
 
       {systemFee > 0 && (
@@ -248,7 +248,7 @@ function TicketCard({ ticket, selected, onToggle }) {
         tabIndex={0}
         onClick={onToggle}
         onKeyDown={e => (e.key === "Enter" || e.key === " ") && onToggle()}
-        className="rounded-lg px-5 pt-4.5 pb-5 cursor-pointer select-none outline-none transition-all duration-150"
+        className="rounded-sm px-5 pt-4.5 pb-5 cursor-pointer select-none outline-none transition-all duration-150"
         style={{
           backgroundColor: selected ? "#FFF0F3" : "#ffffff",
           border: selected ? `2px solid ${PINK}` : "1px solid #E5E7EB",
@@ -274,7 +274,7 @@ function TicketCard({ ticket, selected, onToggle }) {
         </div>
 
         {/* Event title */}
-        <h2 className="text-base font-bold text-gray-900 leading-snug mb-3.5">
+        <h2 className="text-base font-bold text-gray-800 leading-snug mb-3.5">
           {ticket.event}
         </h2>
 
@@ -365,7 +365,7 @@ function FilterSidebar() {
   };
 
   return (
-    <aside className="w-[280px] shrink-0">
+    <aside className="w-70 shrink-0">
 
       {/* フリーワード */}
       <div className="mb-6">
@@ -433,7 +433,7 @@ function FilterSidebar() {
       {/* 検索 */}
       <button
         type="button"
-        className="w-full py-3 rounded-lg text-white text-sm font-semibold transition-opacity hover:opacity-90"
+        className="w-full py-2 rounded-lg text-white text-sm font-semibold transition-opacity hover:opacity-90"
         style={{ backgroundColor: PINK }}
       >
         検索
@@ -652,7 +652,7 @@ function Tickets() {
 
       {/* ══ Desktop view (lg and up) — browse / filter layout ═════════════════ */}
       <div className="hidden lg:block flex-1">
-        <div className="max-w-[1400px] mx-auto px-8 py-8">
+        <div className="max-w-350 mx-auto px-8 py-8">
 
           {/* Header row: result count + sort */}
           <div className="flex items-center justify-between mb-6">
@@ -687,7 +687,7 @@ function Tickets() {
 
       {/* Confirm bar — sticky, mirrors mobile's flow, hands off to the footer */}
       <div className="hidden lg:block sticky bottom-0 z-20 bg-white border-t border-gray-200">
-        <div className="max-w-[1400px] mx-auto px-8 py-4 flex items-center justify-end">
+        <div className="max-w-350 mx-auto px-8 py-2 flex items-center justify-end">
           <Link
             to="/step1"
             state={{ selectedTickets }}
@@ -695,7 +695,7 @@ function Tickets() {
           >
             <button
               disabled={count === 0}
-              className="px-8 py-3.5 rounded-sm text-white text-[14px] font-semibold tracking-wide transition-opacity duration-150"
+              className="px-8 py-1.5 rounded-lg text-white text-[14px] font-semibold tracking-wide transition-opacity duration-150"
               style={{
                 backgroundColor: PINK,
                 opacity: count === 0 ? 0.35 : 1,

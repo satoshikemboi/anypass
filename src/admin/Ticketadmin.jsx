@@ -589,7 +589,7 @@ function TicketAdmin() {
                 <span className="text-3xl">🎫</span>
               </div>
               <p className="text-[15px] font-bold text-gray-700 mb-1">No tickets yet</p>
-              <p className="text-xs text-gray-400 mb-6 max-w-[200px]">Add your first ticket and it will appear in the Tickets page immediately.</p>
+              <p className="text-xs text-gray-400 mb-6 max-w-50">Add your first ticket and it will appear in the Tickets page immediately.</p>
               <button onClick={openAdd} className="px-5 py-2.5 rounded-xl text-white text-sm font-semibold shadow-sm" style={{ backgroundColor: PINK }}>+ Add First Ticket</button>
             </div>
           ) : (

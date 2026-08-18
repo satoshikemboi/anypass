@@ -24,35 +24,18 @@ function Navbar() {
   }, [location]);
 
   return (
-    <nav className="sticky top-0 z-50 flex items-center justify-between bg-white px-4 py-3 md:px-8 border-b shadow-sm transition-all duration-200" style={{ borderBottomColor: PINK }}>
+    <nav className="sticky top-0 z-50 flex items-center justify-between bg-white px-4 pt-2 pb-1 md:px-8 shadow-sm transition-all duration-200" style={{ borderBottomColor: PINK }}>
       
       {/* Left Section */}
-      <div className="flex items-center">
-        <Link
-          to="/tickets"
-          className="flex items-center justify-center text-gray-500 hover:text-gray-900 transition-colors"
-          aria-label="Go back"
-        >
-          <svg
-            width="22"
-            height="22"
-            fill="none"
-            stroke={PINK}
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-        </Link>
+      <div className="items-center">
 
         {/* Brand Logo Container */}
-        <Link to="/" className="flex items-center gap-2 select-none group">
-          <div className="h-11 w-auto flex items-center overflow-hidden rounded-md transition-transform duration-200 group-hover:scale-[1.03]">
+        <Link to="/tickets" className="flex items-center gap-2 select-none group">
+          <div className="h-11 w-auto pl-4 flex items-center overflow-hidden rounded-md transition-transform duration-200 group-hover:scale-[1.03]">
             <img 
-              src="/logo.png" 
+              src="/anypassstore.png" 
               alt="AnyPASS Logo" 
-              className="h-full object-contain"
+              className="h-full scale-[1.2] object-contain"
             />
           </div>
         </Link>
