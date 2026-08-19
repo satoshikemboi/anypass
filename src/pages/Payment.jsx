@@ -129,7 +129,7 @@ function PaymentContent({
     <>
       {/* ── 1. Header ───────────────────────────────────── */}
       <div className="bg-white rounded-xl border border-gray-200 px-5 pt-8 pb-7 mb-4 flex flex-col items-center">
-        <img src="/paypay.png" alt="PayPay Logo" className="h-10 mb-4" />
+        <img src="/paypay.png" alt="PayPay Logo" className="h-10 scale-[1.4] mb-4" />
         <h2 className="text-[17px] font-bold text-gray-900 text-center leading-snug">
           お支払い情報を<br />ご入力ください。
         </h2>
