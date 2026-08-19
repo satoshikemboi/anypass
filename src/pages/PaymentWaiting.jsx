@@ -44,14 +44,19 @@ export default function PaymentWaiting() {
 
   const [secondsLeft, setSecondsLeft] = useState(TOTAL_SECONDS);
 
+  // TEMP DEBUG — remove once the countdown is confirmed working.
+  console.log("[PaymentWaiting] render, secondsLeft =", secondsLeft);
+
   // Set up a single interval against a fixed deadline, rather than
   // decrementing a counter and rebuilding the interval every tick.
   // This can't drift and won't silently stall on re-renders.
   useEffect(() => {
+    console.log("[PaymentWaiting] effect mounted"); // TEMP DEBUG
     const deadline = Date.now() + TOTAL_SECONDS * 1000;
 
     const id = setInterval(() => {
       const remaining = Math.max(0, Math.round((deadline - Date.now()) / 1000));
+      console.log("[PaymentWaiting] tick, remaining =", remaining); // TEMP DEBUG
       setSecondsLeft(remaining);
       if (remaining === 0) clearInterval(id);
     }, 1000);

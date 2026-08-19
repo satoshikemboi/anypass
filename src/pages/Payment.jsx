@@ -29,7 +29,7 @@ function PayPayCardIcon() {
 
 function PaymentContent({
   loading, errorMsg,
-  paypayId, setPaypayId, focused, setFocused, handlePreSubmit,
+  paypayId, setPaypayId, handlePreSubmit,
 }) {
   return (
     <>
@@ -61,11 +61,8 @@ function PaymentContent({
           value={paypayId}
           disabled={loading}
           onChange={e => setPaypayId(e.target.value)}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
-          className="w-full rounded-lg px-4 py-3 text-[14px] text-gray-800 placeholder-gray-300 outline-none transition-colors"
+          className="w-full rounded-lg px-4 py-3 text-[14px] text-gray-800 placeholder-gray-300 outline-none transition-colors border-[1.5px] border-[#E5E7EB] focus:border-[#E84060]"
           style={{
-            border: focused ? `1.5px solid ${PINK}` : "1.5px solid #E5E7EB",
             backgroundColor: loading ? "#F9FAFB" : "#ffffff",
             color: "#1F2937",
           }}
@@ -121,7 +118,6 @@ export default function Payment() {
   const grandTotal = ticketTotal + feeTotal;
 
   const [paypayId, setPaypayId]   = useState("");
-  const [focused, setFocused]     = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading]     = useState(false);
   const [errorMsg, setErrorMsg]   = useState("");
@@ -167,7 +163,7 @@ export default function Payment() {
 
   const contentProps = {
     loading, errorMsg,
-    paypayId, setPaypayId, focused, setFocused, handlePreSubmit,
+    paypayId, setPaypayId, handlePreSubmit,
   };
 
   return (
