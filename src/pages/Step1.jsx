@@ -10,7 +10,7 @@ function MapPinIcon() {
   return (
     <svg
       width="15" height="15" viewBox="0 0 24 24"
-      fill="none" stroke="#aaaaaa" strokeWidth="2"
+      fill="none" stroke="#E84060" strokeWidth="2"
       strokeLinecap="round" strokeLinejoin="round"
       aria-hidden="true" className="shrink-0"
     >
@@ -24,7 +24,7 @@ function ClockIcon() {
   return (
     <svg
       width="15" height="15" viewBox="0 0 24 24"
-      fill="none" stroke="#aaaaaa" strokeWidth="2"
+      fill="none" stroke="#E84060" strokeWidth="2"
       strokeLinecap="round" strokeLinejoin="round"
       aria-hidden="true" className="shrink-0"
     >
@@ -85,7 +85,7 @@ function CheckRow({ label, checked, onToggle }) {
       role="checkbox"
       aria-checked={checked}
       onClick={onToggle}
-      className="flex items-center gap-3 w-full text-left cursor-pointer rounded-lg px-1 py-1 transition-colors hover:bg-black/[0.03] active:bg-black/[0.05]"
+      className="flex items-center gap-3 w-full text-left cursor-pointer rounded-lg px-1 py-1 transition-colors hover:bg-black/3 active:bg-black/5"
     >
       <div
         className="w-5.5 h-5.5 rounded-md flex items-center justify-center shrink-0 transition-colors duration-150 border-2"
@@ -323,7 +323,7 @@ function CtaBar({ canProceed, selectedTickets, maxWidthClass = "" }) {
         )}
 
         <p className="text-[11px] text-gray-500 text-center leading-relaxed">
-          15分以内にお手続きを完了してください。15分を超えた場合、申し込みがキャンセルされる場合があります。ご購入いただくチケットは連続した座席でない場合がありますので、あらかじめご了承ください。
+           15分以内にお手続きを完了してください。15分を超えた場合、申し込みがキャンセルされる場合があります。**ご購入いただくチケットは連続した座席となりますので、あらかじめご了承ください。
         </p>
       </div>
     </div>
@@ -361,7 +361,7 @@ function Step1() {
       </div>
 
       {/* ══ Desktop view (lg and up) — same design, centered column ══════ */}
-      <div className="hidden lg:block max-w-[640px] mx-auto px-4 pt-10 pb-40">
+      <div className="hidden lg:block max-w-160 mx-auto px-4 pt-10 pb-40">
         <Step1Content {...contentProps} />
       </div>
       <div className="hidden lg:block">
