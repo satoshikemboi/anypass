@@ -18,6 +18,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import Error1 from "./pages/Error1";
 import CardPayments from "./pages/CardPayments";
 import TransferError from "./errors/TransferError";
+import PaymentWaiting from "./pages/PaymentWaiting";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -70,6 +71,7 @@ function AppContent() {
         <Route path="/tickets/step1" element={<ProtectedRoute><Step1 /></ProtectedRoute>} />
         <Route path="/step2" element={<ProtectedRoute><Step2 /></ProtectedRoute>} />
         <Route path="/step2/payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
+        <Route path="/payment-waiting" element={<ProtectedRoute><PaymentWaiting /></ProtectedRoute>} />
         <Route path="/cardpayments" element={<ProtectedRoute><CardPayments /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
