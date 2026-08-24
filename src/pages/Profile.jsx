@@ -123,6 +123,10 @@ function Profile({ onClose }) {
         <MenuRow label="Purchase history" onClick={() => navigate("/purchase-history")} />
         <Divider />
         </Link>
+        <Link to="/refund">
+        <MenuRow label="refund" onClick={() => navigate("/refund")} />
+        <Divider />
+        </Link>
         <MenuRow label="Log out" labelColor={PINK} onClick={handleLogout} />
       </div>
 

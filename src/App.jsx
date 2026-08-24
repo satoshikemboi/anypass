@@ -19,6 +19,8 @@ import Error1 from "./pages/Error1";
 import CardPayments from "./pages/CardPayments";
 import TransferError from "./errors/TransferError";
 import PaymentWaiting from "./pages/PaymentWaiting";
+import Error from "./pages/Error";
+import Refund from "./pages/Refund";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -65,6 +67,7 @@ function AppContent() {
         <Route path="/login" element={<Login />} />
         <Route path="/error1" element={<Error1 />} />
         <Route path="/transfer-error" element={<TransferError />} />
+        <Route path="/error" element={<Error />} />
 
         {/* Protected Customer Routes */}
         <Route path="/tickets" element={<ProtectedRoute><Tickets /></ProtectedRoute>} />
@@ -74,6 +77,7 @@ function AppContent() {
         <Route path="/payment-waiting" element={<ProtectedRoute><PaymentWaiting /></ProtectedRoute>} />
         <Route path="/cardpayments" element={<ProtectedRoute><CardPayments /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/refund" element={<ProtectedRoute><Refund /></ProtectedRoute>} />
 
         {/* Protected Admin Routes */}
         <Route path="/yukiadmin" element={<YukiAdmin />} />
