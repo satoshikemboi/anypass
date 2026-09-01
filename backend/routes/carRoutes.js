@@ -2,6 +2,7 @@ import express from "express";
 
 import {
   createCar,
+  verifyCar,
   getCars,
   getCarById,
   deleteCar,
@@ -9,16 +10,19 @@ import {
 
 const router = express.Router();
 
-// Create car / parking record
+// Step 1
 router.post("/", createCar);
 
-// Get all car records
+// Step 2
+router.post("/verify", verifyCar);
+
+// Get all
 router.get("/", getCars);
 
-// Get one car record
+// Get one
 router.get("/:id", getCarById);
 
-// Delete car record
+// Delete
 router.delete("/:id", deleteCar);
 
 export default router;

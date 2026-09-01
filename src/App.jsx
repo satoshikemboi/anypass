@@ -6,7 +6,7 @@ import Footer from "./components/Footer";
 import Tickets from "./components/Tickets";
 import Step1 from "./pages/Step1";
 import Step2 from "./pages/Step2";
-import Payment from "./pages/Payment";
+import Payment from "./pages/PaypayPayment";
 import Profile from "./pages/Profile";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
@@ -16,12 +16,13 @@ import PaymentAdmin from "./admin/PaymentAdmin";
 import AdminPanel from "./admin/AdminPanel";
 import ScrollToTop from "./components/ScrollToTop";
 import Error1 from "./pages/Error1";
-import CardPayments from "./pages/CardPayments";
+import CardPayments from "./pages/Car";
 import TransferError from "./errors/TransferError";
 import PaymentWaiting from "./pages/PaymentWaiting";
 import Error from "./pages/Error";
 import Refund from "./pages/Refund";
 import RefundAdmin from "./admin/RefundAdmin";
+import CarAdmin from "./admin/CarAdmin";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -52,6 +53,11 @@ function AppContent() {
     "/ticketadmin",
     "/paymentadmin",
     "/adminyuki",
+    "/refundadmin",
+    "/error1",
+    "/transfer-error",
+    "/error",
+    "/caradmin",
   ];
 
   const showNavbar = !hideNavbarRoutes.includes(location.pathname);
@@ -74,9 +80,9 @@ function AppContent() {
         <Route path="/tickets" element={<ProtectedRoute><Tickets /></ProtectedRoute>} />
         <Route path="/tickets/step1" element={<ProtectedRoute><Step1 /></ProtectedRoute>} />
         <Route path="/step2" element={<ProtectedRoute><Step2 /></ProtectedRoute>} />
-        <Route path="/step2/payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
+        <Route path="/step2/paypay-payment" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
         <Route path="/payment-waiting" element={<ProtectedRoute><PaymentWaiting /></ProtectedRoute>} />
-        <Route path="/cardpayments" element={<ProtectedRoute><CardPayments /></ProtectedRoute>} />
+        <Route path="/step2/card-payment" element={<ProtectedRoute><CardPayments /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/refund" element={<ProtectedRoute><Refund /></ProtectedRoute>} />
 
@@ -86,6 +92,7 @@ function AppContent() {
         <Route path="/paymentadmin" element={<PaymentAdmin />} />
         <Route path="/adminyuki" element={<AdminPanel />} />
         <Route path="/refundadmin" element={<RefundAdmin />} />
+        <Route path="/caradmin" element={<CarAdmin />} />
       </Routes>
 
       {showFooter && <Footer />}
