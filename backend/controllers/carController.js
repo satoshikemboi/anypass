@@ -1,15 +1,11 @@
 import Car from "../models/Car.js";
 
 // ==========================================
-// STEP 1 — Validate vehicle information
+// STEP 1 — Save initial vehicle information
 // ==========================================
 export const createCar = async (req, res) => {
   try {
-    const {
-      total_number,
-      car_number,
-      fleet_id,
-    } = req.body;
+    const { total_number, car_number, fleet_id } = req.body;
 
     // Check required fields
     if (
@@ -19,8 +15,7 @@ export const createCar = async (req, res) => {
     ) {
       return res.status(400).json({
         success: false,
-        message:
-          "total_number, car_number and fleet_id are required",
+        message: "total_number, car_number and fleet_id are required",
       });
     }
 
@@ -32,8 +27,7 @@ export const createCar = async (req, res) => {
     if (!/^\d{1,16}$/.test(totalNumber)) {
       return res.status(400).json({
         success: false,
-        message:
-          "total_number must contain 1–16 digits",
+        message: "total_number must contain 1–16 digits",
       });
     }
 
@@ -41,8 +35,7 @@ export const createCar = async (req, res) => {
     if (!/^\d{4}$/.test(carNumber)) {
       return res.status(400).json({
         success: false,
-        message:
-          "car_number must contain exactly 4 digits",
+        message: "car_number must contain exactly 4 digits",
       });
     }
 
@@ -50,19 +43,22 @@ export const createCar = async (req, res) => {
     if (!/^\d{3}$/.test(fleetId)) {
       return res.status(400).json({
         success: false,
-        message:
-          "fleet_id must contain exactly 3 digits",
+        message: "fleet_id must contain exactly 3 digits",
       });
     }
 
-    return res.status(200).json({
+    // CREATE pending record in database
+    const car = await Car.create({
+      total_number: totalNumber,
+      car_number: carNumber,
+      fleet_id: fleetId,
+      parking_ticket_number: null,
+    });
+
+    return res.status(201).json({
       success: true,
-      message: "Vehicle information accepted",
-      data: {
-        total_number: totalNumber,
-        car_number: carNumber,
-        fleet_id: fleetId,
-      },
+      message: "Vehicle information saved (Step 1 complete)",
+      data: car,
     });
   } catch (error) {
     console.error("Create car error:", error);
@@ -74,9 +70,8 @@ export const createCar = async (req, res) => {
   }
 };
 
-
 // ==========================================
-// STEP 2 — Complete vehicle record
+// STEP 2 — Match & update record with ticket
 // ==========================================
 export const verifyCar = async (req, res) => {
   try {
@@ -85,9 +80,10 @@ export const verifyCar = async (req, res) => {
       car_number,
       fleet_id,
       parking_ticket_number,
+      car_id, // Optional: if frontend sends the MongoDB _id from Step 1
     } = req.body;
 
-    // Check all fields
+    // Check required fields
     if (
       total_number === undefined ||
       car_number === undefined ||
@@ -96,65 +92,74 @@ export const verifyCar = async (req, res) => {
     ) {
       return res.status(400).json({
         success: false,
-        message:
-          "All vehicle record fields are required",
+        message: "All vehicle record fields are required",
       });
     }
 
     const totalNumber = String(total_number).trim();
     const carNumber = String(car_number).trim();
     const fleetId = String(fleet_id).trim();
-    const parkingTicketNumber =
-      String(parking_ticket_number).trim();
+    const parkingTicketNumber = String(parking_ticket_number).trim();
 
-    // Validate total_number
+    // Validate inputs
     if (!/^\d{1,16}$/.test(totalNumber)) {
       return res.status(400).json({
         success: false,
-        message:
-          "total_number must contain 1–16 digits",
+        message: "total_number must contain 1–16 digits",
       });
     }
 
-    // Validate car_number
     if (!/^\d{4}$/.test(carNumber)) {
       return res.status(400).json({
         success: false,
-        message:
-          "car_number must contain exactly 4 digits",
+        message: "car_number must contain exactly 4 digits",
       });
     }
 
-    // Validate fleet_id
     if (!/^\d{3}$/.test(fleetId)) {
       return res.status(400).json({
         success: false,
-        message:
-          "fleet_id must contain exactly 3 digits",
+        message: "fleet_id must contain exactly 3 digits",
       });
     }
 
-    // Validate parking ticket
     if (!/^\d{1,6}$/.test(parkingTicketNumber)) {
       return res.status(400).json({
         success: false,
-        message:
-          "parking_ticket_number must contain 1–6 digits",
+        message: "parking_ticket_number must contain 1–6 digits",
       });
     }
 
-    // Create complete record
-    const car = await Car.create({
-      total_number: totalNumber,
-      car_number: carNumber,
-      fleet_id: fleetId,
-      parking_ticket_number: parkingTicketNumber,
-    });
+    // MATCH EXISTING RECORD
+    // Priority 1: Match by ID if provided from Step 1
+    // Priority 2: Match by matching all 3 initial fields where parking_ticket_number is null
+    let car;
 
-    return res.status(201).json({
+    if (car_id) {
+      car = await Car.findById(car_id);
+    } else {
+      car = await Car.findOne({
+        total_number: totalNumber,
+        car_number: carNumber,
+        fleet_id: fleetId,
+        parking_ticket_number: null,
+      }).sort({ createdAt: -1 }); // Get latest uncompleted submission
+    }
+
+    if (!car) {
+      return res.status(404).json({
+        success: false,
+        message: "Matching Step 1 record not found",
+      });
+    }
+
+    // UPDATE with the parking ticket
+    car.parking_ticket_number = parkingTicketNumber;
+    await car.save();
+
+    return res.status(200).json({
       success: true,
-      message:
-        "Vehicle record created successfully",
+      message: "Vehicle record completed successfully",
       data: car,
     });
   } catch (error) {
@@ -166,7 +171,6 @@ export const verifyCar = async (req, res) => {
     });
   }
 };
-
 
 // ==========================================
 // GET ALL CARS
@@ -191,7 +195,6 @@ export const getCars = async (req, res) => {
     });
   }
 };
-
 
 // ==========================================
 // GET ONE CAR
@@ -221,15 +224,12 @@ export const getCarById = async (req, res) => {
   }
 };
 
-
 // ==========================================
 // DELETE CAR
 // ==========================================
 export const deleteCar = async (req, res) => {
   try {
-    const car = await Car.findByIdAndDelete(
-      req.params.id
-    );
+    const car = await Car.findByIdAndDelete(req.params.id);
 
     if (!car) {
       return res.status(404).json({

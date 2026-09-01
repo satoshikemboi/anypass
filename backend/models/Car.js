@@ -23,6 +23,7 @@ const carSchema = new mongoose.Schema(
     parking_ticket_number: {
       type: String,
       required: true,
+      default: null,
       match: /^\d{1,6}$/,
     },
   },

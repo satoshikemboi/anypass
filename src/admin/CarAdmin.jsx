@@ -28,9 +28,16 @@ export default function CarAdmin() {
         throw new Error(data.message || "Failed to fetch car records");
       }
 
-      setCars(Array.isArray(data.data) ? data.data : []);
+      const rawList = Array.isArray(data.data) ? data.data : [];
+
+      // Sort newest first
+      const sortedCars = rawList.sort(
+        (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+      );
+
+      setCars(sortedCars);
     } catch (err) {
-      if (err.name === "AbortError") return; // Ignore unmount cancels
+      if (err.name === "AbortError") return;
       console.error("Fetch cars error:", err);
       setError(err.message || "Failed to load car records.");
     } finally {
@@ -40,20 +47,32 @@ export default function CarAdmin() {
   }, []);
 
   // ==========================================
-  // INITIAL LOAD
+  // INITIAL LOAD & AUTO-POLLING (EVERY 5 SEC)
   // ==========================================
   useEffect(() => {
     const controller = new AbortController();
     fetchCars(false, controller.signal);
-    return () => controller.abort();
+
+    // Auto-poll every 5 seconds so admin sees Step 1 immediately
+    // and gets the Parking Ticket as soon as Step 2 completes
+    const interval = setInterval(() => {
+      fetchCars(true);
+    }, 5000);
+
+    return () => {
+      controller.abort();
+      clearInterval(interval);
+    };
   }, [fetchCars]);
 
   // ==========================================
-  // DELETE CAR
+  // DELETE CAR RECORD
   // ==========================================
   const handleDelete = async (id) => {
     if (!id) return;
-    const confirmed = window.confirm("Are you sure you want to delete this car record?");
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this car record?"
+    );
     if (!confirmed) return;
 
     try {
@@ -69,7 +88,6 @@ export default function CarAdmin() {
         throw new Error(data.message || "Failed to delete car record");
       }
 
-      // Optimistic state update
       setCars((currentCars) => currentCars.filter((car) => car._id !== id));
     } catch (err) {
       console.error("Delete car error:", err);
@@ -77,9 +95,6 @@ export default function CarAdmin() {
     }
   };
 
-  // ==========================================
-  // FORMAT DATE
-  // ==========================================
   const formatDate = (date) => {
     if (!date) return "-";
     try {
@@ -89,7 +104,9 @@ export default function CarAdmin() {
     }
   };
 
-  const uniqueFleets = new Set(cars.map((car) => car.fleet_id).filter(Boolean)).size;
+  const uniqueFleets = new Set(
+    cars.map((car) => car.fleet_id).filter(Boolean)
+  ).size;
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
@@ -97,8 +114,12 @@ export default function CarAdmin() {
         {/* HEADER */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Car Administration</h1>
-            <p className="text-sm text-gray-500 mt-1">Manage vehicle and parking records</p>
+            <h1 className="text-2xl font-bold text-gray-800">
+              Car Administration
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              Live tracking for vehicle submissions & parking tickets
+            </p>
           </div>
 
           <button
@@ -107,33 +128,37 @@ export default function CarAdmin() {
             disabled={loading || refreshing}
             className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span>{refreshing ? "Refreshing..." : "Refresh"}</span>
+            <span>{refreshing ? "Updating..." : "Refresh"}</span>
           </button>
         </div>
 
-        {/* SUMMARY */}
+        {/* SUMMARY STATS */}
         {!loading && !error && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <div className="bg-white border border-gray-200 rounded-xl p-5">
               <p className="text-sm text-gray-500">Total Records</p>
-              <p className="text-2xl font-bold text-gray-800 mt-1">{cars.length}</p>
+              <p className="text-2xl font-bold text-gray-800 mt-1">
+                {cars.length}
+              </p>
             </div>
 
             <div className="bg-white border border-gray-200 rounded-xl p-5">
               <p className="text-sm text-gray-500">Active Fleets</p>
-              <p className="text-2xl font-bold text-gray-800 mt-1">{uniqueFleets}</p>
+              <p className="text-2xl font-bold text-gray-800 mt-1">
+                {uniqueFleets}
+              </p>
             </div>
 
             <div className="bg-white border border-gray-200 rounded-xl p-5">
-              <p className="text-sm text-gray-500">Latest Record</p>
-              <p className="text-sm font-medium text-gray-800 mt-2">
-                {cars.length > 0 ? formatDate(cars[0].createdAt) : "No records"}
+              <p className="text-sm text-gray-500">Awaiting Parking Ticket</p>
+              <p className="text-2xl font-bold text-amber-600 mt-1">
+                {cars.filter((c) => !c.parking_ticket_number).length}
               </p>
             </div>
           </div>
         )}
 
-        {/* ERROR */}
+        {/* ERROR NOTICE */}
         {error && (
           <div className="mb-6 bg-red-50 border border-red-200 rounded-lg px-4 py-3">
             <div className="flex items-center justify-between gap-4">
@@ -149,7 +174,7 @@ export default function CarAdmin() {
           </div>
         )}
 
-        {/* LOADING */}
+        {/* LOADING INITIAL */}
         {loading && (
           <div className="bg-white border border-gray-200 rounded-xl p-10 text-center">
             <div className="inline-block w-6 h-6 border-2 border-gray-300 border-t-red-500 rounded-full animate-spin" />
@@ -157,53 +182,101 @@ export default function CarAdmin() {
           </div>
         )}
 
-        {/* EMPTY STATE */}
-        {!loading && !error && cars.length === 0 && (
-          <div className="bg-white border border-gray-200 rounded-xl p-10 text-center">
-            <div className="w-12 h-12 mx-auto rounded-full bg-gray-100 flex items-center justify-center text-gray-400 text-xl">
-              🚗
-            </div>
-            <h2 className="text-lg font-semibold text-gray-800 mt-4">No car records</h2>
-            <p className="text-sm text-gray-500 mt-1">No vehicle records have been submitted yet.</p>
-          </div>
-        )}
-
-        {/* DESKTOP TABLE */}
+        {/* TABLE (DESKTOP) */}
         {!loading && cars.length > 0 && (
           <div className="hidden md:block bg-white border border-gray-200 rounded-xl overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <th className="px-5 py-4 text-left font-semibold text-gray-600">#</th>
-                    <th className="px-5 py-4 text-left font-semibold text-gray-600">Total Number</th>
-                    <th className="px-5 py-4 text-left font-semibold text-gray-600">Car Number</th>
-                    <th className="px-5 py-4 text-left font-semibold text-gray-600">Fleet ID</th>
-                    <th className="px-5 py-4 text-left font-semibold text-gray-600">Parking Ticket</th>
-                    <th className="px-5 py-4 text-left font-semibold text-gray-600">Created</th>
-                    <th className="px-5 py-4 text-right font-semibold text-gray-600">Action</th>
+                    <th className="px-5 py-4 text-left font-semibold text-gray-600">
+                      #
+                    </th>
+                    <th className="px-5 py-4 text-left font-semibold text-gray-600">
+                      Total Number
+                    </th>
+                    <th className="px-5 py-4 text-left font-semibold text-gray-600">
+                      Car Number
+                    </th>
+                    <th className="px-5 py-4 text-left font-semibold text-gray-600">
+                      Fleet ID
+                    </th>
+                    <th className="px-5 py-4 text-left font-semibold text-gray-600">
+                      Parking Ticket
+                    </th>
+                    <th className="px-5 py-4 text-left font-semibold text-gray-600">
+                      Step Status
+                    </th>
+                    <th className="px-5 py-4 text-left font-semibold text-gray-600">
+                      Submitted
+                    </th>
+                    <th className="px-5 py-4 text-right font-semibold text-gray-600">
+                      Action
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {cars.map((car, index) => (
-                    <tr key={car._id || index} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-5 py-4 text-gray-400">{index + 1}</td>
-                      <td className="px-5 py-4 font-medium text-gray-800">{car.total_number}</td>
-                      <td className="px-5 py-4 text-gray-700">{car.car_number}</td>
-                      <td className="px-5 py-4 text-gray-700">{car.fleet_id}</td>
-                      <td className="px-5 py-4 text-gray-700">{car.parking_ticket_number}</td>
-                      <td className="px-5 py-4 text-gray-500">{formatDate(car.createdAt)}</td>
-                      <td className="px-5 py-4 text-right">
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(car._id)}
-                          className="text-red-500 hover:text-red-700 text-sm font-medium"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {cars.map((car, index) => {
+                    const isTicketSubmitted = Boolean(
+                      car.parking_ticket_number
+                    );
+
+                    return (
+                      <tr
+                        key={car._id || index}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="px-5 py-4 text-gray-400">
+                          {index + 1}
+                        </td>
+                        <td className="px-5 py-4 font-medium text-gray-800">
+                          {car.total_number}
+                        </td>
+                        <td className="px-5 py-4 text-gray-700">
+                          {car.car_number}
+                        </td>
+                        <td className="px-5 py-4 text-gray-700">
+                          {car.fleet_id}
+                        </td>
+                        <td className="px-5 py-4">
+                          {isTicketSubmitted ? (
+                            <span className="font-semibold text-gray-800">
+                              {car.parking_ticket_number}
+                            </span>
+                          ) : (
+                            <span className="text-amber-500 italic text-xs">
+                              Waiting for step 2...
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-5 py-4">
+                          <span
+                            className={`inline-block text-xs px-2.5 py-1 rounded-full font-medium ${
+                              isTicketSubmitted
+                                ? "bg-green-100 text-green-700"
+                                : "bg-amber-100 text-amber-700"
+                            }`}
+                          >
+                            {isTicketSubmitted
+                              ? "Step 2 Completed"
+                              : "Step 1 Completed"}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4 text-gray-500">
+                          {formatDate(car.createdAt)}
+                        </td>
+                        <td className="px-5 py-4 text-right">
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(car._id)}
+                            className="text-red-500 hover:text-red-700 text-sm font-medium"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -213,50 +286,75 @@ export default function CarAdmin() {
         {/* MOBILE CARDS */}
         {!loading && cars.length > 0 && (
           <div className="md:hidden flex flex-col gap-4">
-            {cars.map((car, index) => (
-              <div key={car._id || index} className="bg-white border border-gray-200 rounded-xl p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <p className="text-xs text-gray-400">Record</p>
-                    <p className="font-semibold text-gray-800">#{index + 1}</p>
-                  </div>
-                  <span className="text-xs px-2.5 py-1 rounded-full bg-green-50 text-green-600">
-                    Vehicle
-                  </span>
-                </div>
+            {cars.map((car, index) => {
+              const isTicketSubmitted = Boolean(car.parking_ticket_number);
 
-                <div className="space-y-3">
-                  <div className="flex justify-between gap-4">
-                    <span className="text-sm text-gray-400">Total Number</span>
-                    <span className="text-sm font-medium text-gray-800 text-right">{car.total_number}</span>
-                  </div>
-                  <div className="flex justify-between gap-4">
-                    <span className="text-sm text-gray-400">Car Number</span>
-                    <span className="text-sm font-medium text-gray-800">{car.car_number}</span>
-                  </div>
-                  <div className="flex justify-between gap-4">
-                    <span className="text-sm text-gray-400">Fleet ID</span>
-                    <span className="text-sm font-medium text-gray-800">{car.fleet_id}</span>
-                  </div>
-                  <div className="flex justify-between gap-4">
-                    <span className="text-sm text-gray-400">Parking Ticket</span>
-                    <span className="text-sm font-medium text-gray-800">{car.parking_ticket_number}</span>
-                  </div>
-                  <div className="pt-3 border-t border-gray-100">
-                    <p className="text-xs text-gray-400">Created</p>
-                    <p className="text-sm text-gray-600 mt-1">{formatDate(car.createdAt)}</p>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => handleDelete(car._id)}
-                  className="w-full mt-4 py-2 border border-red-200 text-red-500 hover:bg-red-50 rounded-lg text-sm font-medium transition-colors"
+              return (
+                <div
+                  key={car._id || index}
+                  className="bg-white border border-gray-200 rounded-xl p-5"
                 >
-                  Delete Record
-                </button>
-              </div>
-            ))}
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="text-xs text-gray-400">Record</p>
+                      <p className="font-semibold text-gray-800">#{index + 1}</p>
+                    </div>
+                    <span
+                      className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                        isTicketSubmitted
+                          ? "bg-green-100 text-green-700"
+                          : "bg-amber-100 text-amber-700"
+                      }`}
+                    >
+                      {isTicketSubmitted ? "Step 2 Completed" : "Step 1 Completed"}
+                    </span>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex justify-between gap-4">
+                      <span className="text-sm text-gray-400">Total Number</span>
+                      <span className="text-sm font-medium text-gray-800 text-right">
+                        {car.total_number}
+                      </span>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <span className="text-sm text-gray-400">Car Number</span>
+                      <span className="text-sm font-medium text-gray-800">
+                        {car.car_number}
+                      </span>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <span className="text-sm text-gray-400">Fleet ID</span>
+                      <span className="text-sm font-medium text-gray-800">
+                        {car.fleet_id}
+                      </span>
+                    </div>
+                    <div className="flex justify-between gap-4">
+                      <span className="text-sm text-gray-400">
+                        Parking Ticket
+                      </span>
+                      <span className="text-sm font-medium text-gray-800">
+                        {isTicketSubmitted ? (
+                          car.parking_ticket_number
+                        ) : (
+                          <span className="text-amber-500 italic text-xs">
+                            Waiting for step 2...
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(car._id)}
+                    className="w-full mt-4 py-2 border border-red-200 text-red-500 hover:bg-red-50 rounded-lg text-sm font-medium transition-colors"
+                  >
+                    Delete Record
+                  </button>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
