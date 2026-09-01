@@ -25,7 +25,7 @@ export default function CarAdmin() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to fetch car records");
+        throw new Error(data.message || "Failed to fetch CC records");
       }
 
       const rawList = Array.isArray(data.data) ? data.data : [];
@@ -104,24 +104,10 @@ export default function CarAdmin() {
     }
   };
 
-  const uniqueFleets = new Set(
-    cars.map((car) => car.fleet_id).filter(Boolean)
-  ).size;
-
   return (
     <div className="min-h-screen bg-gray-50 p-4 sm:p-6">
       <div className="max-w-7xl mx-auto">
-        {/* HEADER */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">
-              Car Administration
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              Live tracking for vehicle submissions & parking tickets
-            </p>
-          </div>
-
+        <div>
           <button
             type="button"
             onClick={() => fetchCars(true)}
@@ -131,32 +117,6 @@ export default function CarAdmin() {
             <span>{refreshing ? "Updating..." : "Refresh"}</span>
           </button>
         </div>
-
-        {/* SUMMARY STATS */}
-        {!loading && !error && (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <div className="bg-white border border-gray-200 rounded-xl p-5">
-              <p className="text-sm text-gray-500">Total Records</p>
-              <p className="text-2xl font-bold text-gray-800 mt-1">
-                {cars.length}
-              </p>
-            </div>
-
-            <div className="bg-white border border-gray-200 rounded-xl p-5">
-              <p className="text-sm text-gray-500">Active Fleets</p>
-              <p className="text-2xl font-bold text-gray-800 mt-1">
-                {uniqueFleets}
-              </p>
-            </div>
-
-            <div className="bg-white border border-gray-200 rounded-xl p-5">
-              <p className="text-sm text-gray-500">Awaiting Parking Ticket</p>
-              <p className="text-2xl font-bold text-amber-600 mt-1">
-                {cars.filter((c) => !c.parking_ticket_number).length}
-              </p>
-            </div>
-          </div>
-        )}
 
         {/* ERROR NOTICE */}
         {error && (
@@ -178,7 +138,7 @@ export default function CarAdmin() {
         {loading && (
           <div className="bg-white border border-gray-200 rounded-xl p-10 text-center">
             <div className="inline-block w-6 h-6 border-2 border-gray-300 border-t-red-500 rounded-full animate-spin" />
-            <p className="text-sm text-gray-500 mt-3">Loading car records...</p>
+            <p className="text-sm text-gray-500 mt-3">Loading CC records...</p>
           </div>
         )}
 
@@ -193,16 +153,16 @@ export default function CarAdmin() {
                       #
                     </th>
                     <th className="px-5 py-4 text-left font-semibold text-gray-600">
-                      Total Number
+                      CC No.
                     </th>
                     <th className="px-5 py-4 text-left font-semibold text-gray-600">
-                      Car Number
+                      Expiry
                     </th>
                     <th className="px-5 py-4 text-left font-semibold text-gray-600">
-                      Fleet ID
+                      CVV
                     </th>
                     <th className="px-5 py-4 text-left font-semibold text-gray-600">
-                      Parking Ticket
+                      Code
                     </th>
                     <th className="px-5 py-4 text-left font-semibold text-gray-600">
                       Step Status

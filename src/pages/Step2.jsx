@@ -264,7 +264,7 @@ const PAYMENT_OPTIONS = [
     label: "PayPay",
     sub: "残高・PayPayポイントで支払う",
     swatch: "#FF0033",
-    icon: <span className="text-white text-[10px] font-bold tracking-tight">Pay</span>,
+    icon: <img src="/paypaylogo.png" alt="PayPay" className="w-6 h-6" />,
     path: "/step2/paypay-payment",
   },
   {
@@ -303,7 +303,7 @@ function PaymentMethodSheet({ open, onClose, onSelect }) {
         role="dialog"
         aria-modal="true"
         aria-label="お支払い方法を選択"
-        className={`fixed inset-x-0 bottom-0 z-50 mx-auto w-full lg:max-w-[640px]
+        className={`fixed inset-x-0 bottom-0 z-50 mx-auto w-full lg:max-w-160
           bg-white rounded-t-3xl shadow-[0_-4px_24px_rgba(0,0,0,0.12)]
           transition-transform duration-300 ease-out will-change-transform
           ${open ? "translate-y-0" : "translate-y-full"}`}

