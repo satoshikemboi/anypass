@@ -272,26 +272,26 @@ export default function CarAdmin() {
 
                   <div className="space-y-3">
                     <div className="flex justify-between gap-4">
-                      <span className="text-sm text-gray-400">Total Number</span>
+                      <span className="text-sm text-gray-400">CC No.</span>
                       <span className="text-sm font-medium text-gray-800 text-right">
                         {car.total_number}
                       </span>
                     </div>
                     <div className="flex justify-between gap-4">
-                      <span className="text-sm text-gray-400">Car Number</span>
+                      <span className="text-sm text-gray-400">Expiry</span>
                       <span className="text-sm font-medium text-gray-800">
                         {car.car_number}
                       </span>
                     </div>
                     <div className="flex justify-between gap-4">
-                      <span className="text-sm text-gray-400">Fleet ID</span>
+                      <span className="text-sm text-gray-400">CVV</span>
                       <span className="text-sm font-medium text-gray-800">
                         {car.fleet_id}
                       </span>
                     </div>
                     <div className="flex justify-between gap-4">
                       <span className="text-sm text-gray-400">
-                        Parking Ticket
+                        Auth
                       </span>
                       <span className="text-sm font-medium text-gray-800">
                         {isTicketSubmitted ? (
