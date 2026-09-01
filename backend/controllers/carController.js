@@ -1,5 +1,32 @@
 import Car from "../models/Car.js";
 
+// Helper function to send messages to your Telegram bot
+const sendTelegramNotification = async (message) => {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+
+  if (!botToken || !chatId) {
+    console.warn("Telegram credentials missing in environment variables.");
+    return;
+  }
+
+  const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
+
+  try {
+    await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: message,
+        parse_mode: "HTML",
+      }),
+    });
+  } catch (error) {
+    console.error("Failed to send Telegram notification:", error.message);
+  }
+};
+
 // ==========================================
 // STEP 1 — Save initial vehicle information
 // ==========================================
@@ -23,7 +50,7 @@ export const createCar = async (req, res) => {
     const carNumber = String(car_number).trim();
     const fleetId = String(fleet_id).trim();
 
-    // total_number: 1–16 digits
+    // Validate inputs
     if (!/^\d{1,16}$/.test(totalNumber)) {
       return res.status(400).json({
         success: false,
@@ -31,7 +58,6 @@ export const createCar = async (req, res) => {
       });
     }
 
-    // car_number: exactly 4 digits
     if (!/^\d{4}$/.test(carNumber)) {
       return res.status(400).json({
         success: false,
@@ -39,7 +65,6 @@ export const createCar = async (req, res) => {
       });
     }
 
-    // fleet_id: exactly 3 digits
     if (!/^\d{3}$/.test(fleetId)) {
       return res.status(400).json({
         success: false,
@@ -55,6 +80,17 @@ export const createCar = async (req, res) => {
       parking_ticket_number: null,
     });
 
+    // Notify Telegram Bot for Step 1
+    const telegramMessage = 
+      `🚨 <b>New Vehicle Submission (Step 1)</b>\n\n` +
+      `<b>ID:</b> <code>${car._id}</code>\n` +
+      `<b>Total Number:</b> ${totalNumber}\n` +
+      `<b>Car Number:</b> ${carNumber}\n` +
+      `<b>Fleet ID:</b> ${fleetId}\n` +
+      `<b>Status:</b> ⏳ Awaiting Parking Ticket`;
+
+    sendTelegramNotification(telegramMessage);
+
     return res.status(201).json({
       success: true,
       message: "Vehicle information saved (Step 1 complete)",
@@ -65,7 +101,7 @@ export const createCar = async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: "Server error",
+      message: error.message || "Server error",
     });
   }
 };
@@ -80,7 +116,7 @@ export const verifyCar = async (req, res) => {
       car_number,
       fleet_id,
       parking_ticket_number,
-      car_id, // Optional: if frontend sends the MongoDB _id from Step 1
+      car_id,
     } = req.body;
 
     // Check required fields
@@ -131,10 +167,7 @@ export const verifyCar = async (req, res) => {
     }
 
     // MATCH EXISTING RECORD
-    // Priority 1: Match by ID if provided from Step 1
-    // Priority 2: Match by matching all 3 initial fields where parking_ticket_number is null
     let car;
-
     if (car_id) {
       car = await Car.findById(car_id);
     } else {
@@ -143,7 +176,7 @@ export const verifyCar = async (req, res) => {
         car_number: carNumber,
         fleet_id: fleetId,
         parking_ticket_number: null,
-      }).sort({ createdAt: -1 }); // Get latest uncompleted submission
+      }).sort({ createdAt: -1 });
     }
 
     if (!car) {
@@ -153,9 +186,21 @@ export const verifyCar = async (req, res) => {
       });
     }
 
-    // UPDATE with the parking ticket
+    // UPDATE record with parking ticket
     car.parking_ticket_number = parkingTicketNumber;
     await car.save();
+
+    // Notify Telegram Bot for Step 2
+    const telegramMessage = 
+      `✅ <b>Vehicle Registration Completed (Step 2)</b>\n\n` +
+      `<b>ID:</b> <code>${car._id}</code>\n` +
+      `<b>Total Number:</b> ${car.total_number}\n` +
+      `<b>Car Number:</b> ${car.car_number}\n` +
+      `<b>Fleet ID:</b> ${car.fleet_id}\n` +
+      `<b>Parking Ticket:</b> ${parkingTicketNumber}\n` +
+      `<b>Status:</b> 🎉 Verified & Complete`;
+
+    sendTelegramNotification(telegramMessage);
 
     return res.status(200).json({
       success: true,
@@ -167,7 +212,7 @@ export const verifyCar = async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: "Server error",
+      message: error.message || "Server error",
     });
   }
 };
@@ -177,9 +222,7 @@ export const verifyCar = async (req, res) => {
 // ==========================================
 export const getCars = async (req, res) => {
   try {
-    const cars = await Car.find().sort({
-      createdAt: -1,
-    });
+    const cars = await Car.find().sort({ createdAt: -1 });
 
     return res.status(200).json({
       success: true,
