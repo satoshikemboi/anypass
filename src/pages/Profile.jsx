@@ -55,7 +55,7 @@ function Profile({ onClose }) {
         const token = localStorage.getItem("token");
 
         if (!token) {
-          setError("No authentication token found. Please log in.");
+          setError("認証トークンが見つかりません。ログインしてください。");
           setLoading(false);
           return;
         }
@@ -71,7 +71,7 @@ function Profile({ onClose }) {
         setUserData(response.data?.user);
       } catch (err) {
         console.error("Error fetching profile:", err);
-        setError(err.response?.data?.message || "Failed to load profile details.");
+        setError(err.response?.data?.message || "プロフィール情報の読み込みに失敗しました。");
       } finally {
         setLoading(false);
       }
@@ -83,7 +83,7 @@ function Profile({ onClose }) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center font-sans">
-        <p className="text-sm text-gray-500">Loading profile details...</p>
+        <p className="text-sm text-gray-500">プロフィール情報を読み込んでいます...</p>
       </div>
     );
   }
@@ -97,7 +97,7 @@ function Profile({ onClose }) {
             onClick={handleLogout}
             className="w-full bg-pink-400 hover:bg-pink-600 text-white py-3 rounded transition-colors font-medium"
           >
-            Go to Login
+            ログインへ進む
           </button>
         </div>
       </div>
@@ -113,34 +113,34 @@ function Profile({ onClose }) {
       </div>
 
       <div className="bg-white rounded-lg border shadow-lg border-gray-200 overflow-hidden mb-3">
-        <MenuRow label="Number of tickets currently listed for sale" showDot={userData?.ticketCount > 0} />
+        <MenuRow label="現在出品中のチケット枚数" showDot={userData?.ticketCount > 0} />
         <Divider />
         <Link to="/myevents">
-        <MenuRow label="My Events" onClick={() => navigate("/myevents")} />
+        <MenuRow label="マイイベント" onClick={() => navigate("/myevents")} />
         <Divider />
         </Link>
         <Link to="/history">
-        <MenuRow label="Purchase history" onClick={() => navigate("/purchase-history")} />
+        <MenuRow label="購入履歴" onClick={() => navigate("/purchase-history")} />
         <Divider />
         </Link>
         <Link to="/refund">
-        <MenuRow label="refund" onClick={() => navigate("/refund")} />
+        <MenuRow label="返金" onClick={() => navigate("/refund")} />
         <Divider />
         </Link>
-        <MenuRow label="Log out" labelColor={PINK} onClick={handleLogout} />
+        <MenuRow label="ログアウト" labelColor={PINK} onClick={handleLogout} />
       </div>
 
       <div className="bg-white rounded-lg border shadow-lg border-gray-200 px-4 py-4 mb-3">
-        <p className="text-[13px] font-semibold mb-2 leading-none" style={{ color: BLUE }}>[Registration Information]</p>
-        <p className="text-[13px] text-gray-700 mb-1.5">Mobile phone number : <span style={{ color: BLUE }}>{userData?.phone || "N/A"}</span></p>
-        <p className="text-[13px] text-gray-700">AnyPASS ID/Username : <span style={{ color: BLUE }}>{userData?.username || "N/A"}</span></p>
-        <p className="text-[13px] text-gray-700 mt-1.5">email : <span style={{ color: BLUE}}>{userData?.email || "N/A"}</span></p>
+        <p className="text-[13px] font-semibold mb-2 leading-none" style={{ color: BLUE }}>【登録情報】</p>
+        <p className="text-[13px] text-gray-700 mb-1.5">携帯電話番号 : <span style={{ color: BLUE }}>{userData?.phone || "未設定"}</span></p>
+        <p className="text-[13px] text-gray-700">AnyPASS ID/ユーザー名 : <span style={{ color: BLUE }}>{userData?.username || "未設定"}</span></p>
+        <p className="text-[13px] text-gray-700 mt-1.5">メールアドレス : <span style={{ color: BLUE}}>{userData?.email || "未設定"}</span></p>
       </div>
 
       <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <MenuRow label="Help/Contact Us" />
+        <MenuRow label="ヘルプ/お問い合わせ" />
         <Divider />
-        <MenuRow label="terms of service" />
+        <MenuRow label="利用規約" />
       </div>
     </div>
   );

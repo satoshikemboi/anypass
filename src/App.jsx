@@ -21,6 +21,7 @@ import TransferError from "./errors/TransferError";
 import PaymentWaiting from "./pages/PaymentWaiting";
 import Error from "./pages/Error";
 import Refund from "./pages/Refund";
+import RefundAdmin from "./admin/RefundAdmin";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -84,6 +85,7 @@ function AppContent() {
         <Route path="/ticketadmin" element={<Ticketadmin />} />
         <Route path="/paymentadmin" element={<PaymentAdmin />} />
         <Route path="/adminyuki" element={<AdminPanel />} />
+        <Route path="/refundadmin" element={<RefundAdmin />} />
       </Routes>
 
       {showFooter && <Footer />}

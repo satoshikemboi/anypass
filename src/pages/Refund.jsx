@@ -1,15 +1,16 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const PINK = "#E84060";
 const BLUE = "#4A8AF4";
 const PINK_BG = "#FCE8ED";
 const RED = "#DC2626";
-const GREEN = "#16A34A";
 
 const INITIAL_FORM = {
   fullName: "",
   phone: "",
   email: "",
+  paypayId: "",
   amount: "",
   note: "",
 };
@@ -23,7 +24,7 @@ function generateTicketNumber() {
   return `RF-${yy}${mm}${dd}-${rand}`;
 }
 
-const fmt = (num) => `$${Number(num || 0).toFixed(2)}`;
+const fmt = (num) => `¥${Number(num || 0).toFixed(2)}`;
 
 function validate(data) {
   const errors = {};
@@ -38,7 +39,11 @@ function validate(data) {
   if (!data.email.trim()) errors.email = "Enter your email.";
   else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errors.email = "Enter a valid email address.";
 
-  if (!data.amount) errors.amount = "Enter the amount to refund.";
+  if (!data.paypayId.trim()) errors.paypayId = "Enter your PayPay ID.";
+  else if (!/^[A-Za-z0-9_.-]{5,20}$/.test(data.paypayId.trim()))
+    errors.paypayId = "PayPay IDs are 5–20 characters (letters, numbers, _ . -).";
+
+  if (!data.amount) errors.amount = "Enter the amount to be refunded.";
   else if (Number(data.amount) <= 0) errors.amount = "Amount must be greater than zero.";
 
   if (!data.note.trim()) errors.note = "Tell us what happened.";
@@ -78,6 +83,16 @@ function MailIcon() {
   );
 }
 
+function WalletIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#aaaaaa" strokeWidth="2"
+      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="shrink-0">
+      <path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-5" />
+      <path d="M21 12h-4a2 2 0 0 0 0 4h4a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1Z" />
+    </svg>
+  );
+}
+
 function NoteIcon() {
   return (
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#aaaaaa" strokeWidth="2"
@@ -108,16 +123,6 @@ function AlertIcon() {
   );
 }
 
-function CheckIcon({ color = GREEN, size = 15 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2"
-      strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="shrink-0">
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-      <polyline points="22 4 12 14.01 9 11.01" />
-    </svg>
-  );
-}
-
 /* ── Shared primitives (mirroring the source page) ── */
 
 function SectionLabel({ text }) {
@@ -131,13 +136,14 @@ function Divider() {
 /* ── Page ── */
 
 export default function Refund() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
-  const [status, setStatus] = useState("idle"); // idle | submitting | submitted
-  const [ticketNumber, setTicketNumber] = useState(generateTicketNumber());
+  const [status, setStatus] = useState("idle"); // idle | submitting
+  const [ticketNumber] = useState(generateTicketNumber());
 
-  const isDisabled = status === "submitting" || status === "submitted";
+  const isDisabled = status === "submitting";
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -153,7 +159,7 @@ export default function Refund() {
   const handleSubmit = () => {
     const nextErrors = validate(formData);
     setErrors(nextErrors);
-    setTouched({ fullName: true, phone: true, email: true, amount: true, note: true });
+    setTouched({ fullName: true, phone: true, email: true, paypayId: true, amount: true, note: true });
     if (Object.keys(nextErrors).length > 0) return;
 
     setStatus("submitting");
@@ -163,15 +169,18 @@ export default function Refund() {
     //   headers: { "Content-Type": "application/json" },
     //   body: JSON.stringify({ ...formData, ticketNumber }),
     // });
-    setTimeout(() => setStatus("submitted"), 1200);
-  };
-
-  const handleReset = () => {
-    setFormData(INITIAL_FORM);
-    setErrors({});
-    setTouched({});
-    setStatus("idle");
-    setTicketNumber(generateTicketNumber());
+    setTimeout(() => {
+      navigate("/refund-confirmation", {
+        state: {
+          ticketNumber,
+          fullName: formData.fullName,
+          phone: formData.phone,
+          email: formData.email,
+          paypayId: formData.paypayId,
+          amount: formData.amount,
+        },
+      });
+    }, 1200);
   };
 
   const inputClass =
@@ -185,7 +194,7 @@ export default function Refund() {
           <h1 className="text-lg font-bold text-gray-900">Refund request</h1>
           <p className="text-xs text-gray-500 mt-1 leading-relaxed">
             Tell us what happened and how much is owed back to you. A person on our
-            support team reviews every claim and replies within 2 business days.
+            support team reviews every claim and replies within 24 hours.
           </p>
         </div>
 
@@ -206,7 +215,7 @@ export default function Refund() {
               onChange={handleChange}
               onBlur={handleBlur}
               disabled={isDisabled}
-              placeholder="Jane Achieng"
+              placeholder="Sato Yui"
               aria-invalid={!!errors.fullName}
               className={inputClass}
             />
@@ -233,7 +242,7 @@ export default function Refund() {
               onChange={handleChange}
               onBlur={handleBlur}
               disabled={isDisabled}
-              placeholder="+254 700 000 000"
+              placeholder="09 00 000 000"
               aria-invalid={!!errors.phone}
               className={inputClass}
             />
@@ -270,6 +279,36 @@ export default function Refund() {
               </p>
             )}
           </div>
+
+          <Divider />
+
+          <div className="py-3.5">
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <WalletIcon />
+              <label htmlFor="paypayId" className="text-xs text-gray-500">PayPay ID</label>
+            </div>
+            <input
+              id="paypayId"
+              name="paypayId"
+              type="text"
+              autoComplete="off"
+              value={formData.paypayId}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              disabled={isDisabled}
+              placeholder="yui_sato_02"
+              aria-invalid={!!errors.paypayId}
+              className={inputClass}
+            />
+            <p className="mt-1.5 text-[11px] text-gray-400 leading-relaxed">
+              Found in the PayPay app under Account → PayPay ID. We'll send your refund here once approved.
+            </p>
+            {errors.paypayId && touched.paypayId && (
+              <p className="mt-1.5 flex items-center gap-1 text-xs" style={{ color: RED }}>
+                <AlertIcon /> {errors.paypayId}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Refund details */}
@@ -284,13 +323,9 @@ export default function Refund() {
             </div>
             <span
               className="text-xs font-medium px-2 py-0.5 rounded-full"
-              style={
-                status === "submitted"
-                  ? { color: GREEN, backgroundColor: "#DCFCE7" }
-                  : { color: "#92600A", backgroundColor: "#FEF3C7" }
-              }
+              style={{ color: "#92600A", backgroundColor: "#FEF3C7" }}
             >
-              {status === "submitted" ? "Submitted" : "Draft"}
+              Draft
             </span>
           </div>
 
@@ -301,7 +336,7 @@ export default function Refund() {
               <label htmlFor="amount" className="text-xs text-gray-500">Amount to be refunded</label>
             </div>
             <div className="flex items-baseline gap-1">
-              <span className="text-sm text-gray-400">$</span>
+              <span className="text-sm text-gray-400">¥</span>
               <input
                 id="amount"
                 name="amount"
@@ -371,44 +406,20 @@ export default function Refund() {
       {/* Fixed bottom action bar, matching the source page */}
       <div className="fixed bottom-0 left-0 right-0 px-4 pt-3 pb-4" style={{ backgroundColor: PINK_BG }}>
         <div className="max-w-2xl mx-auto">
-          {status === "submitted" ? (
-            <>
-              <p className="text-xs text-gray-500 leading-relaxed mb-3 px-1 flex items-center gap-1">
-                <CheckIcon size={13} /> Your claim is in — we'll email {formData.email || "you"} within 2 business days.
-              </p>
-              <p className="text-lg font-bold tracking-wide text-center mb-2" style={{ color: PINK }}>
-                {ticketNumber}
-              </p>
-              <p className="text-xs text-gray-500 text-center leading-relaxed mb-3">
-                Keep this reference number — you can quote it in any follow-up email to support.
-              </p>
-              <button
-                type="button"
-                onClick={handleReset}
-                className="block w-full py-3.5 rounded-lg text-white text-sm font-semibold tracking-wide text-center"
-                style={{ backgroundColor: PINK }}
-              >
-                Submit another request
-              </button>
-            </>
-          ) : (
-            <>
-              <p className="text-xs text-gray-500 leading-relaxed mb-3 px-1">
-                ※ Once submitted, a support agent will review your claim — you don't need to contact us again in the meantime.
-              </p>
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={status === "submitting"}
-                className="block w-full py-3.5 rounded-lg text-white text-sm font-semibold tracking-wide text-center disabled:opacity-70"
-                style={{ backgroundColor: PINK }}
-              >
-                {status === "submitting" ? "Sending claim…" : "Submit refund request"}
-              </button>
-            </>
-          )}
+          <p className="text-xs text-gray-500 leading-relaxed mb-3 px-1">
+            ※ Once submitted, a support agent will review your claim — you don't need to contact us again in the meantime.
+          </p>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={status === "submitting"}
+            className="block w-full py-3.5 rounded-lg text-white text-sm font-semibold tracking-wide text-center disabled:opacity-70"
+            style={{ backgroundColor: PINK }}
+          >
+            {status === "submitting" ? "Sending claim…" : "Submit refund request"}
+          </button>
         </div>
       </div>
     </div>
   );
-} 
+}

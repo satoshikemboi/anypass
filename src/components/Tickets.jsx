@@ -527,7 +527,7 @@ function Tickets() {
   
         const data = await res.json();
   
-        setTickets(data);
+        setTickets([...data].reverse());
       } catch (err) {
         console.error("Error fetching tickets:", err);
       } finally {
