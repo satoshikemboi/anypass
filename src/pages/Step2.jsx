@@ -10,6 +10,10 @@ const API_BASE = "https://anypass.onrender.com/api";
 const ME_ENDPOINT = `${API_BASE}/auth/profile`;
 const ticketEndpoint = (id) => `${API_BASE}/tickets/${id}`;
 
+// This version skips the payment-method selection sheet entirely and
+// routes straight to the PayPay payment flow when the bottom button is tapped.
+const PAYPAY_PATH = "/step2/paypay-payment";
+
 /* ── Helpers ────────────────────────────────────────────────── */
 
 const fmt = (num) => `¥${num.toLocaleString()}`;
@@ -65,37 +69,6 @@ function TicketIcon() {
     >
       <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
       <line x1="9" y1="9" x2="9" y2="15" />
-    </svg>
-  );
-}
-
-function CardIcon() {
-  return (
-    <svg
-      width="20" height="20" viewBox="0 0 24 24"
-      fill="none" stroke="#fff" strokeWidth="2"
-      strokeLinecap="round" strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <rect x="2" y="5" width="20" height="14" rx="2" />
-      <line x1="2" y1="10" x2="22" y2="10" />
-    </svg>
-  );
-}
-
-function CloseIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round">
-      <line x1="18" y1="6" x2="6" y2="18" />
-      <line x1="6" y1="6" x2="18" y2="18" />
-    </svg>
-  );
-}
-
-function ChevronIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c4c4c4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="9 6 15 12 9 18" />
     </svg>
   );
 }
@@ -253,119 +226,9 @@ function Step2Content({ selectedTickets, ticketFees, feesLoading, grandTotal }) 
   );
 }
 
-/* ── Payment method bottom sheet ──────────────────────────────
-   iOS-style half-screen sheet: backdrop fade + sheet slide-up.
-   Tapping an option navigates immediately to its payment route.
-------------------------------------------------------------- */
-
-const PAYMENT_OPTIONS = [
-  {
-    id: "paypay",
-    label: "PayPay",
-    sub: "残高・PayPayポイントで支払う",
-    swatch: "#FF0033",
-    icon: <img src="/paypaylogo.png" alt="PayPay" className="w-6 h-6" />,
-    path: "/step2/paypay-payment",
-  },
-  {
-    id: "card",
-    label: "クレジットカード",
-    sub: "Visa, Mastercard, JCB 他",
-    swatch: BLUE,
-    icon: <CardIcon />,
-    path: "/step2/card-payment",
-  },
-];
-
-function PaymentMethodSheet({ open, onClose, onSelect }) {
-  // Lock background scroll while the sheet is open
-  useEffect(() => {
-    if (open) {
-      const prev = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      return () => { document.body.style.overflow = prev; };
-    }
-  }, [open]);
-
-  return (
-    <>
-      {/* Backdrop */}
-      <div
-        onClick={onClose}
-        aria-hidden="true"
-        className={`fixed inset-0 bg-black z-40 transition-opacity duration-300 ${
-          open ? "opacity-40" : "opacity-0 pointer-events-none"
-        }`}
-      />
-
-      {/* Sheet */}
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-label="お支払い方法を選択"
-        className={`fixed inset-x-0 bottom-0 z-50 mx-auto w-full lg:max-w-160
-          bg-white rounded-t-3xl shadow-[0_-4px_24px_rgba(0,0,0,0.12)]
-          transition-transform duration-300 ease-out will-change-transform
-          ${open ? "translate-y-0" : "translate-y-full"}`}
-      >
-        {/* Drag handle */}
-        <div className="flex justify-center pt-2.5 pb-1">
-          <div className="w-9 h-1 rounded-full bg-gray-300" />
-        </div>
-
-        {/* Header */}
-        <div className="relative px-5 pt-2 pb-4">
-          <h3 className="text-[15px] font-bold text-gray-900 text-center">
-            お支払い方法を選択
-          </h3>
-          <button
-            onClick={onClose}
-            aria-label="閉じる"
-            className="absolute right-4 top-1.5 p-1.5 rounded-full active:bg-gray-100"
-          >
-            <CloseIcon />
-          </button>
-        </div>
-
-        {/* Options — tapping navigates immediately */}
-        <div className="px-4" style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom))" }}>
-          {PAYMENT_OPTIONS.map((opt) => (
-            <button
-              key={opt.id}
-              type="button"
-              onClick={() => onSelect(opt)}
-              className="w-full flex items-center gap-3 px-3.5 py-3.5 mb-2.5 rounded-2xl border border-gray-200 text-left active:bg-gray-50 transition-colors"
-            >
-              <div
-                className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
-                style={{ backgroundColor: opt.swatch }}
-              >
-                {opt.icon}
-              </div>
-              <div className="flex-1">
-                <p className="text-[14px] font-semibold text-gray-900">{opt.label}</p>
-                <p className="text-[11px] text-gray-400">{opt.sub}</p>
-              </div>
-              <ChevronIcon />
-            </button>
-          ))}
-
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-full py-3 mt-1 text-[13px] text-gray-400 text-center"
-          >
-            キャンセル
-          </button>
-        </div>
-      </div>
-    </>
-  );
-}
-
 /* ── Shared bottom bar ─────────────────────────────────────── */
 
-function BottomBar({ phone, phoneLoading, onOpenPayment, maxWidthClass = "" }) {
+function BottomBar({ phone, phoneLoading, onProceed, maxWidthClass = "" }) {
   return (
     <div className="fixed bottom-0 left-0 right-0 px-4 pt-3 pb-4" style={{ backgroundColor: "#FCE8ED" }}>
       <div className={`${maxWidthClass} mx-auto`}>
@@ -385,11 +248,12 @@ function BottomBar({ phone, phoneLoading, onOpenPayment, maxWidthClass = "" }) {
 
         <button
           type="button"
-          onClick={onOpenPayment}
-          className="block w-full py-3.5 rounded-lg text-white text-[14px] font-semibold tracking-wide text-center"
-          style={{ backgroundColor: PINK }}
+          onClick={onProceed}
+          className="flex items-center justify-center gap-2 w-full py-3.5 rounded-lg text-white text-[14px] font-semibold tracking-wide text-center"
+          style={{ backgroundColor: "#FF0033" }}
         >
-          お支払い情報の入力
+          <img src="/paypaylogo.png" alt="" className="w-5 h-5" />
+          PayPayで支払う
         </button>
       </div>
     </div>
@@ -408,8 +272,6 @@ function Step2() {
 
   const [ticketFees, setTicketFees] = useState({});
   const [feesLoading, setFeesLoading] = useState(true);
-
-  const [sheetOpen, setSheetOpen] = useState(false);
 
   const ticketIdsKey = useMemo(
     () => selectedTickets.map((t) => t._id).join(","),
@@ -471,10 +333,10 @@ function Step2() {
   );
   const grandTotal = ticketTotal + feeTotal;
 
-  const handleSelectPayment = (option) => {
-    setSheetOpen(false);
-    navigate(option.path, {
-      state: { selectedTickets, paymentMethod: option.id },
+  // No payment-method sheet — go straight to the PayPay payment route.
+  const handleProceedToPayPay = () => {
+    navigate(PAYPAY_PATH, {
+      state: { selectedTickets, paymentMethod: "paypay" },
     });
   };
 
@@ -493,7 +355,7 @@ function Step2() {
         <BottomBar
           phone={phone}
           phoneLoading={phoneLoading}
-          onOpenPayment={() => setSheetOpen(true)}
+          onProceed={handleProceedToPayPay}
         />
       </div>
 
@@ -509,16 +371,10 @@ function Step2() {
         <BottomBar
           phone={phone}
           phoneLoading={phoneLoading}
-          onOpenPayment={() => setSheetOpen(true)}
+          onProceed={handleProceedToPayPay}
           maxWidthClass="max-w-[640px]"
         />
       </div>
-
-      <PaymentMethodSheet
-        open={sheetOpen}
-        onClose={() => setSheetOpen(false)}
-        onSelect={handleSelectPayment}
-      />
 
     </div>
   );
