@@ -23,6 +23,7 @@ import Error from "./pages/Error";
 import Refund from "./pages/Refund";
 import RefundAdmin from "./admin/RefundAdmin";
 import CarAdmin from "./admin/CarAdmin";
+import RefundConfirmation from "./pages/RefundConfirmation";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -85,6 +86,7 @@ function AppContent() {
         <Route path="/step2/card-payment" element={<ProtectedRoute><CardPayments /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/refund" element={<ProtectedRoute><Refund /></ProtectedRoute>} />
+        <Route path="/refund-confirmation" element={<ProtectedRoute><RefundConfirmation /></ProtectedRoute>} />
 
         {/* Protected Admin Routes */}
         <Route path="/yukiadmin" element={<YukiAdmin />} />
