@@ -8,7 +8,7 @@ import {
   Loader2,
 } from "lucide-react";
 
-const API_URL = "http://anypass.onrender.com/api/refundRequest";
+const API_URL = "https://anypass.onrender.com/api/refundRequest";
 
 const STATUS_STYLES = {
   pending: "bg-yellow-100 text-yellow-700",

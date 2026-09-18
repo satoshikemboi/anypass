@@ -17,7 +17,7 @@ const BLUE = "#4A8AF4";
 const PINK_BG = "#FCE8ED";
 const RED = "#DC2626";
 
-const API_URL = "http://anypass.onrender.com";
+const API_URL = "https://anypass.onrender.com";
 
 // Change this later to get the real order ID from your route/order data
 const ORDER_ID = "ORD-58291";
