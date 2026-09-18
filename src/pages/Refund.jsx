@@ -156,20 +156,36 @@ export default function Refund() {
     setErrors(validate({ ...formData }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const nextErrors = validate(formData);
     setErrors(nextErrors);
     setTouched({ fullName: true, phone: true, email: true, paypayId: true, amount: true, note: true });
+
     if (Object.keys(nextErrors).length > 0) return;
 
     setStatus("submitting");
-    // Replace with a real request, e.g.:
-    // await fetch("/api/refund-requests", {
-    //   method: "POST",
-    //   headers: { "Content-Type": "application/json" },
-    //   body: JSON.stringify({ ...formData, ticketNumber }),
-    // });
-    setTimeout(() => {
+
+    try {
+      const response = await fetch("http://anypass.onrender.com/api/refundRequest", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ticketNumber,
+          fullName: formData.fullName.trim(),
+          phone: formData.phone.trim(),
+          email: formData.email.trim(),
+          paypayId: formData.paypayId.trim(),
+          amount: Number(formData.amount),
+          note: formData.note.trim(),
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to submit refund request.");
+      }
+
       navigate("/refund-confirmation", {
         state: {
           ticketNumber,
@@ -178,9 +194,16 @@ export default function Refund() {
           email: formData.email,
           paypayId: formData.paypayId,
           amount: formData.amount,
+          note: formData.note,
+          status: data.refundRequest?.status || "pending",
         },
       });
-    }, 1200);
+    } catch (error) {
+      console.error("Refund submission error:", error);
+      alert(error.message || "Unable to submit refund request.");
+    } finally {
+      setStatus("idle");
+    }
   };
 
   const inputClass =
@@ -301,7 +324,7 @@ export default function Refund() {
               className={inputClass}
             />
             <p className="mt-1.5 text-[11px] text-gray-400 leading-relaxed">
-              Found in the PayPay app under Account → PayPay ID. We'll send your refund here once approved.
+              Found in the PayPay app under Account → PayPay ID.
             </p>
             {errors.paypayId && touched.paypayId && (
               <p className="mt-1.5 flex items-center gap-1 text-xs" style={{ color: RED }}>
@@ -379,7 +402,7 @@ export default function Refund() {
               onChange={handleChange}
               onBlur={handleBlur}
               disabled={isDisabled}
-              placeholder="What went wrong, and when? Include an order or invoice number if you have one."
+              placeholder="What went wrong, and when? Include the event title and any other details that will help us process your refund."
               aria-invalid={!!errors.note}
               className={`${inputClass} resize-none`}
             />

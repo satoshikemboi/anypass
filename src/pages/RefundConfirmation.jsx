@@ -17,18 +17,18 @@ const BLUE = "#4A8AF4";
 const PINK_BG = "#FCE8ED";
 const RED = "#DC2626";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "http://anypass.onrender.com";
 
 // Change this later to get the real order ID from your route/order data
 const ORDER_ID = "ORD-58291";
 
 const TERMS = [
-  "Refunds are returned to your original payment method and can't be redirected to a different card or account.",
-  "AnyPASS STORE only accepts refund requests above 99,000 JPY!",
-  "For your refund request to be valid you need to follow the steps below to generate and submit a PayPay payment link.",
-  "We will use the PayPay link to ensure that the threshold is met according to the terms and conditions of AnyPASS STORE.",
-  "You will receive a full refund of 32,500 + 66,500 JPY.",
-];
+    "Refunds are returned to the original payment method and cannot be redirected to a different card or account.",
+    "AnyPASS STORE only accepts refund requests that meet the minimum threshold of ¥99,000 JPY.",
+    "To submit a valid refund request, you must follow the instructions provided below to generate and submit a PayPay payment link.",
+    "The submitted PayPay payment link will be reviewed as part of the refund verification process to determine whether the request meets the applicable requirements.",
+    "The total refund amount is ¥99,000 JPY, consisting of ¥32,500 JPY + ¥66,500 JPY, subject to successful verification and eligibility.",
+  ];
 
 const LINK_STEPS = [
   "Open your PayPay app and go to the 'Send' tab.",
@@ -172,7 +172,7 @@ export default function RefundConfirmation() {
               </p>
 
               <p className="text-2xl font-semibold text-slate-900 tracking-tight mt-0.5">
-                32000 JPY
+                32500 JPY
               </p>
             </div>
           </div>
@@ -239,7 +239,7 @@ export default function RefundConfirmation() {
               </span>
 
               <span className="text-slate-800 font-medium">
-                Sep 12, 2026
+                Sep 18, 2026
               </span>
             </div>
 
