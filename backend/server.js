@@ -9,6 +9,7 @@ import ticketRoutes from "./routes/ticketRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
 import carRoutes from "./routes/carRoutes.js";
 import refundRoutes from "./routes/refundRoutes.js";
+import refundRequestRoutes from "./routes/refundRequest.js";
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.use("/api/tickets", ticketRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/cars", carRoutes);
 app.use("/api/refunds", refundRoutes);
+app.use("/api/refundRequest", refundRequestRoutes);
 
 app.listen(process.env.PORT, () => {
   console.log(`Server started on port ${process.env.PORT}`);
