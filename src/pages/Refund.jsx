@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -29,30 +30,39 @@ const fmt = (num) => `¥${Number(num || 0).toFixed(2)}`;
 function validate(data) {
   const errors = {};
 
-  if (!data.fullName.trim()) errors.fullName = "Enter your full name.";
-  else if (data.fullName.trim().length < 2) errors.fullName = "That name looks too short.";
+  if (!data.fullName.trim()) errors.fullName = "氏名を入力してください。";
+  else if (data.fullName.trim().length < 2)
+    errors.fullName = "氏名が短すぎます。";
 
   const digits = data.phone.replace(/[^\d]/g, "");
-  if (!data.phone.trim()) errors.phone = "Enter a phone number.";
-  else if (digits.length < 7) errors.phone = "Enter a valid phone number.";
+  if (!data.phone.trim()) errors.phone = "電話番号を入力してください。";
+  else if (digits.length < 7)
+    errors.phone = "有効な電話番号を入力してください。";
 
-  if (!data.email.trim()) errors.email = "Enter your email.";
-  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) errors.email = "Enter a valid email address.";
+  if (!data.email.trim()) errors.email = "メールアドレスを入力してください。";
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email))
+    errors.email = "有効なメールアドレスを入力してください。";
 
-  if (!data.paypayId.trim()) errors.paypayId = "Enter your PayPay ID.";
+  if (!data.paypayId.trim())
+    errors.paypayId = "PayPay IDを入力してください。";
   else if (!/^[A-Za-z0-9_.-]{5,20}$/.test(data.paypayId.trim()))
-    errors.paypayId = "PayPay IDs are 5–20 characters (letters, numbers, _ . -).";
+    errors.paypayId =
+      "PayPay IDは5～20文字（英字、数字、_ . -）で入力してください。";
 
-  if (!data.amount) errors.amount = "Enter the amount to be refunded.";
-  else if (Number(data.amount) <= 0) errors.amount = "Amount must be greater than zero.";
+  if (!data.amount)
+    errors.amount = "返金額を入力してください。";
+  else if (Number(data.amount) <= 0)
+    errors.amount = "金額は0より大きい値を入力してください。";
 
-  if (!data.note.trim()) errors.note = "Tell us what happened.";
-  else if (data.note.trim().length < 10) errors.note = "Add a few more details so support can help.";
+  if (!data.note.trim())
+    errors.note = "問題の内容を入力してください。";
+  else if (data.note.trim().length < 10)
+    errors.note = "サポートが対応できるよう、もう少し詳しく入力してください。";
 
   return errors;
 }
 
-/* ── Icons (hand-drawn, matching the source page's stroke style) ── */
+/* ── アイコン ── */
 
 function UserIcon() {
   return (
@@ -123,7 +133,7 @@ function AlertIcon() {
   );
 }
 
-/* ── Shared primitives (mirroring the source page) ── */
+/* ── 共通コンポーネント ── */
 
 function SectionLabel({ text }) {
   return <p className="text-xs text-gray-400 mb-2 px-1">{text}</p>;
@@ -133,7 +143,7 @@ function Divider() {
   return <hr className="border-t border-gray-100 -mx-5" />;
 }
 
-/* ── Page ── */
+/* ── ページ ── */
 
 export default function Refund() {
   const navigate = useNavigate();
@@ -159,31 +169,43 @@ export default function Refund() {
   const handleSubmit = async () => {
     const nextErrors = validate(formData);
     setErrors(nextErrors);
-    setTouched({ fullName: true, phone: true, email: true, paypayId: true, amount: true, note: true });
+    setTouched({
+      fullName: true,
+      phone: true,
+      email: true,
+      paypayId: true,
+      amount: true,
+      note: true,
+    });
 
     if (Object.keys(nextErrors).length > 0) return;
 
     setStatus("submitting");
 
     try {
-      const response = await fetch("https://anypass.onrender.com/api/refundRequest", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ticketNumber,
-          fullName: formData.fullName.trim(),
-          phone: formData.phone.trim(),
-          email: formData.email.trim(),
-          paypayId: formData.paypayId.trim(),
-          amount: Number(formData.amount),
-          note: formData.note.trim(),
-        }),
-      });
+      const response = await fetch(
+        "https://anypass.onrender.com/api/refundRequest",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ticketNumber,
+            fullName: formData.fullName.trim(),
+            phone: formData.phone.trim(),
+            email: formData.email.trim(),
+            paypayId: formData.paypayId.trim(),
+            amount: Number(formData.amount),
+            note: formData.note.trim(),
+          }),
+        }
+      );
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to submit refund request.");
+        throw new Error(
+          data.message || "返金申請の送信に失敗しました。"
+        );
       }
 
       navigate("/refund-confirmation", {
@@ -200,7 +222,7 @@ export default function Refund() {
       });
     } catch (error) {
       console.error("Refund submission error:", error);
-      alert(error.message || "Unable to submit refund request.");
+      alert(error.message || "返金申請を送信できませんでした。");
     } finally {
       setStatus("idle");
     }
@@ -214,20 +236,21 @@ export default function Refund() {
       <div className="max-w-2xl mx-auto px-4 pt-6 pb-44 lg:pt-10">
 
         <div className="px-1 mb-5">
-          <h1 className="text-lg font-bold text-gray-900">Refund request</h1>
+          <h1 className="text-lg font-bold text-gray-900">返金申請</h1>
           <p className="text-xs text-gray-500 mt-1 leading-relaxed">
-            Tell us what happened and how much is owed back to you. A person on our
-            support team reviews every claim and replies within 24 hours.
+            問題の内容と返金希望額をお知らせください。サポート担当者がすべての申請を確認し、24時間以内にご連絡いたします。
           </p>
         </div>
 
-        {/* Your details */}
-        <SectionLabel text="お客様情報 / Your details" />
+        {/* お客様情報 */}
+        <SectionLabel text="お客様情報" />
         <div className="bg-white rounded-sm border border-gray-200 px-5 mb-5">
           <div className="py-3.5">
             <div className="flex items-center gap-1.5 mb-1.5">
               <UserIcon />
-              <label htmlFor="fullName" className="text-xs text-gray-500">Full name</label>
+              <label htmlFor="fullName" className="text-xs text-gray-500">
+                氏名
+              </label>
             </div>
             <input
               id="fullName"
@@ -238,12 +261,15 @@ export default function Refund() {
               onChange={handleChange}
               onBlur={handleBlur}
               disabled={isDisabled}
-              placeholder="Sato Yui"
+              placeholder="佐藤 ゆい"
               aria-invalid={!!errors.fullName}
               className={inputClass}
             />
             {errors.fullName && touched.fullName && (
-              <p className="mt-1.5 flex items-center gap-1 text-xs" style={{ color: RED }}>
+              <p
+                className="mt-1.5 flex items-center gap-1 text-xs"
+                style={{ color: RED }}
+              >
                 <AlertIcon /> {errors.fullName}
               </p>
             )}
@@ -254,7 +280,9 @@ export default function Refund() {
           <div className="py-3.5">
             <div className="flex items-center gap-1.5 mb-1.5">
               <PhoneIcon />
-              <label htmlFor="phone" className="text-xs text-gray-500">Phone number</label>
+              <label htmlFor="phone" className="text-xs text-gray-500">
+                電話番号
+              </label>
             </div>
             <input
               id="phone"
@@ -265,12 +293,15 @@ export default function Refund() {
               onChange={handleChange}
               onBlur={handleBlur}
               disabled={isDisabled}
-              placeholder="09 00 000 000"
+              placeholder="090 0000 0000"
               aria-invalid={!!errors.phone}
               className={inputClass}
             />
             {errors.phone && touched.phone && (
-              <p className="mt-1.5 flex items-center gap-1 text-xs" style={{ color: RED }}>
+              <p
+                className="mt-1.5 flex items-center gap-1 text-xs"
+                style={{ color: RED }}
+              >
                 <AlertIcon /> {errors.phone}
               </p>
             )}
@@ -281,7 +312,9 @@ export default function Refund() {
           <div className="py-3.5">
             <div className="flex items-center gap-1.5 mb-1.5">
               <MailIcon />
-              <label htmlFor="email" className="text-xs text-gray-500">Email</label>
+              <label htmlFor="email" className="text-xs text-gray-500">
+                メールアドレス
+              </label>
             </div>
             <input
               id="email"
@@ -297,7 +330,10 @@ export default function Refund() {
               className={inputClass}
             />
             {errors.email && touched.email && (
-              <p className="mt-1.5 flex items-center gap-1 text-xs" style={{ color: RED }}>
+              <p
+                className="mt-1.5 flex items-center gap-1 text-xs"
+                style={{ color: RED }}
+              >
                 <AlertIcon /> {errors.email}
               </p>
             )}
@@ -308,7 +344,9 @@ export default function Refund() {
           <div className="py-3.5">
             <div className="flex items-center gap-1.5 mb-1.5">
               <WalletIcon />
-              <label htmlFor="paypayId" className="text-xs text-gray-500">PayPay ID</label>
+              <label htmlFor="paypayId" className="text-xs text-gray-500">
+                PayPay ID
+              </label>
             </div>
             <input
               id="paypayId"
@@ -324,18 +362,21 @@ export default function Refund() {
               className={inputClass}
             />
             <p className="mt-1.5 text-[11px] text-gray-400 leading-relaxed">
-              Found in the PayPay app under Account → PayPay ID.
+              PayPayアプリの「アカウント → PayPay ID」で確認できます。
             </p>
             {errors.paypayId && touched.paypayId && (
-              <p className="mt-1.5 flex items-center gap-1 text-xs" style={{ color: RED }}>
+              <p
+                className="mt-1.5 flex items-center gap-1 text-xs"
+                style={{ color: RED }}
+              >
                 <AlertIcon /> {errors.paypayId}
               </p>
             )}
           </div>
         </div>
 
-        {/* Refund details */}
-        <SectionLabel text="返金内容 / Refund details" />
+        {/* 返金内容 */}
+        <SectionLabel text="返金内容" />
         <div className="bg-white rounded-sm border border-gray-200 px-5 mb-5">
           <div className="flex items-center justify-between py-3.5">
             <div className="flex items-center gap-1.5">
@@ -348,7 +389,7 @@ export default function Refund() {
               className="text-xs font-medium px-2 py-0.5 rounded-full"
               style={{ color: "#92600A", backgroundColor: "#FEF3C7" }}
             >
-              Draft
+              下書き
             </span>
           </div>
 
@@ -356,7 +397,9 @@ export default function Refund() {
 
           <div className="py-3.5">
             <div className="flex items-center gap-1.5 mb-1.5">
-              <label htmlFor="amount" className="text-xs text-gray-500">Amount to be refunded</label>
+              <label htmlFor="amount" className="text-xs text-gray-500">
+                返金希望額
+              </label>
             </div>
             <div className="flex items-baseline gap-1">
               <span className="text-sm text-gray-400">¥</span>
@@ -377,7 +420,10 @@ export default function Refund() {
               />
             </div>
             {errors.amount && touched.amount && (
-              <p className="mt-1.5 flex items-center gap-1 text-xs" style={{ color: RED }}>
+              <p
+                className="mt-1.5 flex items-center gap-1 text-xs"
+                style={{ color: RED }}
+              >
                 <AlertIcon /> {errors.amount}
               </p>
             )}
@@ -389,9 +435,13 @@ export default function Refund() {
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-1.5">
                 <NoteIcon />
-                <label htmlFor="note" className="text-xs text-gray-500">Describe the issue</label>
+                <label htmlFor="note" className="text-xs text-gray-500">
+                  問題の内容
+                </label>
               </div>
-              <span className="text-xs text-gray-300">{formData.note.length}/500</span>
+              <span className="text-xs text-gray-300">
+                {formData.note.length}/500
+              </span>
             </div>
             <textarea
               id="note"
@@ -402,23 +452,26 @@ export default function Refund() {
               onChange={handleChange}
               onBlur={handleBlur}
               disabled={isDisabled}
-              placeholder="What went wrong, and when? Include the event title and any other details that will help us process your refund."
+              placeholder="何が起きたのか、いつ発生したのかを入力してください。イベント名やその他の詳細もご記入ください。"
               aria-invalid={!!errors.note}
               className={`${inputClass} resize-none`}
             />
             {errors.note && touched.note && (
-              <p className="mt-1.5 flex items-center gap-1 text-xs" style={{ color: RED }}>
+              <p
+                className="mt-1.5 flex items-center gap-1 text-xs"
+                style={{ color: RED }}
+              >
                 <AlertIcon /> {errors.note}
               </p>
             )}
           </div>
         </div>
 
-        {/* Summary */}
-        <SectionLabel text="購入価格 / Summary" />
+        {/* 概要 */}
+        <SectionLabel text="購入価格 / 概要" />
         <div className="bg-white rounded-sm border border-gray-200 px-5 mb-5">
           <div className="flex items-center justify-between py-3.5">
-            <span className="text-sm text-gray-600">Refund amount</span>
+            <span className="text-sm text-gray-600">返金額</span>
             <span className="text-xl font-bold" style={{ color: PINK }}>
               {fmt(formData.amount)}
             </span>
@@ -426,11 +479,14 @@ export default function Refund() {
         </div>
       </div>
 
-      {/* Fixed bottom action bar, matching the source page */}
-      <div className="fixed bottom-0 left-0 right-0 px-4 pt-3 pb-4" style={{ backgroundColor: PINK_BG }}>
+      {/* 固定フッター */}
+      <div
+        className="fixed bottom-0 left-0 right-0 px-4 pt-3 pb-4"
+        style={{ backgroundColor: PINK_BG }}
+      >
         <div className="max-w-2xl mx-auto">
           <p className="text-xs text-gray-500 leading-relaxed mb-3 px-1">
-            ※ Once submitted, a support agent will review your claim — you don't need to contact us again in the meantime.
+            ※ 送信後、サポート担当者が申請内容を確認します。確認中は再度お問い合わせいただく必要はありません。
           </p>
           <button
             type="button"
@@ -439,7 +495,7 @@ export default function Refund() {
             className="block w-full py-3.5 rounded-lg text-white text-sm font-semibold tracking-wide text-center disabled:opacity-70"
             style={{ backgroundColor: PINK }}
           >
-            {status === "submitting" ? "Sending claim…" : "Submit refund request"}
+            {status === "submitting" ? "申請を送信中…" : "返金申請を送信"}
           </button>
         </div>
       </div>

