@@ -240,7 +240,7 @@ export default function RefundConfirmation() {
               </span>
 
               <span className="text-slate-800 font-medium">
-                2026年9月18日
+                2026年9月19日
               </span>
             </div>
 
