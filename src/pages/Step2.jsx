@@ -10,9 +10,11 @@ const API_BASE = "https://anypass.onrender.com/api";
 const ME_ENDPOINT = `${API_BASE}/auth/profile`;
 const ticketEndpoint = (id) => `${API_BASE}/tickets/${id}`;
 
-// This version skips the payment-method selection sheet entirely and
-// routes straight to the PayPay payment flow when the bottom button is tapped.
-const PAYPAY_PATH = "/step2/paypay-payment";
+// Where each payment method routes to once the bottom button is tapped.
+const PAYMENT_ROUTES = {
+  paypay: "/step2/paypay-payment",
+  card: "/step2/card-payment",
+};
 
 /* ── Helpers ────────────────────────────────────────────────── */
 
@@ -73,6 +75,35 @@ function TicketIcon() {
   );
 }
 
+// Generic card glyph (no brand marks) used for the "credit / debit card" option.
+function CardIcon({ color = "#9ca3af" }) {
+  return (
+    <svg
+      width="20" height="20" viewBox="0 0 24 24"
+      fill="none" stroke={color} strokeWidth="2"
+      strokeLinecap="round" strokeLinejoin="round"
+      aria-hidden="true" className="shrink-0"
+    >
+      <rect x="2" y="5" width="20" height="14" rx="2.2" />
+      <line x1="2" y1="10" x2="22" y2="10" />
+      <line x1="6" y1="14.5" x2="10.5" y2="14.5" />
+    </svg>
+  );
+}
+
+function CheckCircleIcon() {
+  return (
+    <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true" className="shrink-0">
+      <circle cx="12" cy="12" r="10" fill={BLUE} />
+      <path
+        d="M8 12.3l2.6 2.6L16.2 9"
+        stroke="#fff" strokeWidth="2"
+        strokeLinecap="round" strokeLinejoin="round" fill="none"
+      />
+    </svg>
+  );
+}
+
 /* ── Shared primitives ──────────────────────────────────────── */
 
 function SectionLabel({ text }) {
@@ -89,6 +120,81 @@ function Row({ label, value, valueClass = "text-[13px] text-gray-700" }) {
       <span className="text-[13px] text-gray-600">{label}</span>
       <span className={valueClass}>{value}</span>
     </div>
+  );
+}
+
+/* ── Payment method selector ───────────────────────────────── */
+
+const PAYMENT_METHODS = [
+  {
+    id: "paypay",
+    label: "PayPay",
+    sublabel: "残高・後払いでお支払い",
+    icon: (active) => (
+      <img src="/paypaylogo.png" alt="" className="w-6 h-6 object-contain" />
+    ),
+  },
+  {
+    id: "card",
+    label: "クレジットカード",
+    sublabel: "Visa・Mastercard・JCB 他",
+    icon: (active) => <CardIcon color={active ? BLUE : "#9ca3af"} />,
+  },
+];
+
+function PaymentMethodSelector({ selected, onSelect }) {
+  return (
+    <>
+      <SectionLabel text="お支払い方法を選択" />
+      <div className="bg-white rounded-sm border border-gray-200 mb-5 -mx-0">
+        {PAYMENT_METHODS.map((method, i) => {
+          const active = selected === method.id;
+          return (
+            <React.Fragment key={method.id}>
+              <button
+                type="button"
+                onClick={() => onSelect(method.id)}
+                aria-pressed={active}
+                className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left"
+              >
+                <div className="flex items-center gap-3">
+                  <span
+                    className="w-9 h-9 flex items-center justify-center rounded-full border"
+                    style={{
+                      borderColor: active ? BLUE : "#e5e7eb",
+                      backgroundColor: active ? "#EEF4FE" : "#FAFAFA",
+                    }}
+                  >
+                    {method.icon(active)}
+                  </span>
+                  <span>
+                    <span
+                      className="block text-[14px] font-medium"
+                      style={{ color: active ? "#111827" : "#374151" }}
+                    >
+                      {method.label}
+                    </span>
+                    <span className="block text-[11px] text-gray-400 mt-0.5">
+                      {method.sublabel}
+                    </span>
+                  </span>
+                </div>
+
+                {active ? (
+                  <CheckCircleIcon />
+                ) : (
+                  <span
+                    className="w-[19px] h-[19px] rounded-full border-2"
+                    style={{ borderColor: "#d1d5db" }}
+                  />
+                )}
+              </button>
+              {i < PAYMENT_METHODS.length - 1 && <Divider />}
+            </React.Fragment>
+          );
+        })}
+      </div>
+    </>
   );
 }
 
@@ -155,7 +261,14 @@ function TicketConfirmBlock({ ticket }) {
 
 /* ── Shared page content ────────────────────────────────────── */
 
-function Step2Content({ selectedTickets, ticketFees, feesLoading, grandTotal }) {
+function Step2Content({
+  selectedTickets,
+  ticketFees,
+  feesLoading,
+  grandTotal,
+  paymentMethod,
+  onSelectPaymentMethod,
+}) {
   return (
     <>
       {selectedTickets.map(ticket => (
@@ -222,13 +335,17 @@ function Step2Content({ selectedTickets, ticketFees, feesLoading, grandTotal }) 
         </div>
 
       </div>
+
+      <PaymentMethodSelector selected={paymentMethod} onSelect={onSelectPaymentMethod} />
     </>
   );
 }
 
 /* ── Shared bottom bar ─────────────────────────────────────── */
 
-function BottomBar({ phone, phoneLoading, onProceed, maxWidthClass = "" }) {
+function BottomBar({ phone, phoneLoading, paymentMethod, onProceed, maxWidthClass = "" }) {
+  const isCard = paymentMethod === "card";
+
   return (
     <div className="fixed bottom-0 left-0 right-0 px-4 pt-3 pb-4" style={{ backgroundColor: "#FCE8ED" }}>
       <div className={`${maxWidthClass} mx-auto`}>
@@ -250,10 +367,14 @@ function BottomBar({ phone, phoneLoading, onProceed, maxWidthClass = "" }) {
           type="button"
           onClick={onProceed}
           className="flex items-center justify-center gap-2 w-full py-3.5 rounded-lg text-white text-[14px] font-semibold tracking-wide text-center"
-          style={{ backgroundColor: "#FF0033" }}
+          style={{ backgroundColor: isCard ? "#111827" : "#FF0033" }}
         >
-          <img src="/paypaylogo.png" alt="" className="w-5 h-5" />
-          PayPayで支払う
+          {isCard ? (
+            <CardIcon style={{ color: PINK }} />
+          ) : (
+            <img src="/paypaylogo.png" alt="" className="w-5 h-5" />
+          )}
+          {isCard ? "カードで支払う" : "PayPayで支払う"}
         </button>
       </div>
     </div>
@@ -272,6 +393,9 @@ function Step2() {
 
   const [ticketFees, setTicketFees] = useState({});
   const [feesLoading, setFeesLoading] = useState(true);
+
+  // Which payment method is currently selected — defaults to PayPay.
+  const [paymentMethod, setPaymentMethod] = useState("paypay");
 
   const ticketIdsKey = useMemo(
     () => selectedTickets.map((t) => t._id).join(","),
@@ -333,10 +457,11 @@ function Step2() {
   );
   const grandTotal = ticketTotal + feeTotal;
 
-  // No payment-method sheet — go straight to the PayPay payment route.
-  const handleProceedToPayPay = () => {
-    navigate(PAYPAY_PATH, {
-      state: { selectedTickets, paymentMethod: "paypay" },
+  // Route to whichever payment flow matches the selected method.
+  const handleProceed = () => {
+    const path = PAYMENT_ROUTES[paymentMethod] || PAYMENT_ROUTES.paypay;
+    navigate(path, {
+      state: { selectedTickets, paymentMethod },
     });
   };
 
@@ -349,13 +474,16 @@ function Step2() {
           ticketFees={ticketFees}
           feesLoading={feesLoading}
           grandTotal={grandTotal}
+          paymentMethod={paymentMethod}
+          onSelectPaymentMethod={setPaymentMethod}
         />
       </div>
       <div className="lg:hidden">
         <BottomBar
           phone={phone}
           phoneLoading={phoneLoading}
-          onProceed={handleProceedToPayPay}
+          paymentMethod={paymentMethod}
+          onProceed={handleProceed}
         />
       </div>
 
@@ -365,13 +493,16 @@ function Step2() {
           ticketFees={ticketFees}
           feesLoading={feesLoading}
           grandTotal={grandTotal}
+          paymentMethod={paymentMethod}
+          onSelectPaymentMethod={setPaymentMethod}
         />
       </div>
       <div className="hidden lg:block">
         <BottomBar
           phone={phone}
           phoneLoading={phoneLoading}
-          onProceed={handleProceedToPayPay}
+          paymentMethod={paymentMethod}
+          onProceed={handleProceed}
           maxWidthClass="max-w-[640px]"
         />
       </div>

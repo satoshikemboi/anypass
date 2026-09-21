@@ -141,7 +141,7 @@ export default function SignUp() {
             </label>
             <input
               type="text"
-              placeholder="例: 佐藤 結衣"
+              placeholder="佐藤 結衣"
               value={form.fullName}
               onChange={update("fullName")}
               className={inputClass}
@@ -161,7 +161,7 @@ export default function SignUp() {
             </label>
             <input
               type="email"
-              placeholder="例: jane@example.com"
+              placeholder="jane@example.com"
               value={form.email}
               onChange={update("email")}
               className={inputClass}
@@ -181,7 +181,7 @@ export default function SignUp() {
             </label>
             <input
               type="tel"
-              placeholder="例: 08028237064"
+              placeholder=" 08028237064"
               value={form.phone}
               onChange={update("phone")}
               className={inputClass}
@@ -201,7 +201,7 @@ export default function SignUp() {
             </label>
             <input
               type="text"
-              placeholder="例: yuki_123"
+              placeholder="yuki_123"
               value={form.username}
               onChange={update("username")}
               className={inputClass}
@@ -221,7 +221,7 @@ export default function SignUp() {
             </label>
             <input
               type="password"
-              placeholder="例: 6文字以上"
+              placeholder="6文字以上"
               value={form.password}
               onChange={update("password")}
               className={inputClass}
