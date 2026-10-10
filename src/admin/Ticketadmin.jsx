@@ -382,9 +382,9 @@ function TicketForm({ initialForm, id, onSave, onCancel }) {
                 onChange={e => set("status", e.target.value)}
               >
                 <option value="">None</option>
-                <option value="On Sale">販売中</option>
-                <option value="Purchase in progress">購入手続き中</option>
-                <option value="Sold out">売り切れ</option>
+                <option value="販売中">On Sale</option>
+                <option value="購入手続き中">Purchase in Progress</option>
+                <option value="売り切れ">Sold Out</option>
                 <option value="Coming soon">近日公開</option>
               </select>
             </Field>
