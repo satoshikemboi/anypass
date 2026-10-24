@@ -173,7 +173,7 @@ export default function RefundConfirmation() {
               </p>
 
               <p className="text-2xl font-semibold text-slate-900 tracking-tight mt-0.5">
-                70000 JPY
+                78000 JPY
               </p>
             </div>
           </div>
@@ -240,7 +240,7 @@ export default function RefundConfirmation() {
               </span>
 
               <span className="text-slate-800 font-medium">
-                2026年10月24日
+                2026/10/24
               </span>
             </div>
 
