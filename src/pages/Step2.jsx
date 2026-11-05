@@ -1,20 +1,18 @@
+
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const PINK = "#E84060";
-const BLUE  = "#4A8AF4";
+const BLUE = "#4A8AF4";
 
-// TODO: adjust these to match your actual backend routes
+// API endpoints
 const API_BASE = "https://anypass.onrender.com/api";
 const ME_ENDPOINT = `${API_BASE}/auth/profile`;
 const ticketEndpoint = (id) => `${API_BASE}/tickets/${id}`;
 
-// Where each payment method routes to once the bottom button is tapped.
-const PAYMENT_ROUTES = {
-  paypay: "/step2/paypay-payment",
-  card: "/step2/card-payment",
-};
+// PayPay is the only available payment method.
+const PAYMENT_ROUTE = "/step2/paypay-payment";
 
 /* ── Helpers ────────────────────────────────────────────────── */
 
@@ -36,10 +34,16 @@ const authHeaders = () => {
 function MapPinIcon() {
   return (
     <svg
-      width="15" height="15" viewBox="0 0 24 24"
-      fill="none" stroke="#aaaaaa" strokeWidth="2"
-      strokeLinecap="round" strokeLinejoin="round"
-      aria-hidden="true" className="shrink-0"
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#aaaaaa"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className="shrink-0"
     >
       <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z" />
       <circle cx="12" cy="10" r="3" />
@@ -50,10 +54,16 @@ function MapPinIcon() {
 function ClockIcon() {
   return (
     <svg
-      width="15" height="15" viewBox="0 0 24 24"
-      fill="none" stroke="#aaaaaa" strokeWidth="2"
-      strokeLinecap="round" strokeLinejoin="round"
-      aria-hidden="true" className="shrink-0"
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#aaaaaa"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className="shrink-0"
     >
       <circle cx="12" cy="12" r="10" />
       <polyline points="12 6 12 12 16 14" />
@@ -64,10 +74,16 @@ function ClockIcon() {
 function TicketIcon() {
   return (
     <svg
-      width="15" height="15" viewBox="0 0 24 24"
-      fill="none" stroke={BLUE} strokeWidth="2"
-      strokeLinecap="round" strokeLinejoin="round"
-      aria-hidden="true" className="shrink-0"
+      width="15"
+      height="15"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={BLUE}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className="shrink-0"
     >
       <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z" />
       <line x1="9" y1="9" x2="9" y2="15" />
@@ -75,14 +91,19 @@ function TicketIcon() {
   );
 }
 
-// Generic card glyph (no brand marks) used for the "credit / debit card" option.
 function CardIcon({ color = "#9ca3af" }) {
   return (
     <svg
-      width="20" height="20" viewBox="0 0 24 24"
-      fill="none" stroke={color} strokeWidth="2"
-      strokeLinecap="round" strokeLinejoin="round"
-      aria-hidden="true" className="shrink-0"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={color}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className="shrink-0"
     >
       <rect x="2" y="5" width="20" height="14" rx="2.2" />
       <line x1="2" y1="10" x2="22" y2="10" />
@@ -93,21 +114,34 @@ function CardIcon({ color = "#9ca3af" }) {
 
 function CheckCircleIcon() {
   return (
-    <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true" className="shrink-0">
+    <svg
+      width="19"
+      height="19"
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className="shrink-0"
+    >
       <circle cx="12" cy="12" r="10" fill={BLUE} />
       <path
         d="M8 12.3l2.6 2.6L16.2 9"
-        stroke="#fff" strokeWidth="2"
-        strokeLinecap="round" strokeLinejoin="round" fill="none"
+        stroke="#fff"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
       />
     </svg>
   );
 }
 
-/* ── Shared primitives ──────────────────────────────────────── */
+/* ── Shared primitives ─────────────────────────────────────── */
 
 function SectionLabel({ text }) {
-  return <p className="text-[12px] text-gray-400 mb-2 px-1">{text}</p>;
+  return (
+    <p className="text-[12px] text-gray-400 mb-2 px-1">
+      {text}
+    </p>
+  );
 }
 
 function Divider() {
@@ -123,99 +157,95 @@ function Row({ label, value, valueClass = "text-[13px] text-gray-700" }) {
   );
 }
 
-/* ── Payment method selector ───────────────────────────────── */
+/* ── Payment method display ────────────────────────────────── */
 
-const PAYMENT_METHODS = [
-  {
-    id: "paypay",
-    label: "PayPay",
-    sublabel: "残高・後払いでお支払い",
-    icon: (active) => (
-      <img src="/paypaylogo.png" alt="" className="w-6 h-6 object-contain" />
-    ),
-  },
-  {
-    id: "card",
-    label: "クレジットカード",
-    sublabel: "Visa・Mastercard・JCB 他",
-    icon: (active) => <CardIcon color={active ? BLUE : "#9ca3af"} />,
-  },
-];
-
-function PaymentMethodSelector({ selected, onSelect }) {
+function PaymentMethodSelector() {
   return (
     <>
-      <SectionLabel text="お支払い方法を選択" />
-      <div className="bg-white rounded-sm border border-gray-200 mb-5 -mx-0">
-        {PAYMENT_METHODS.map((method, i) => {
-          const active = selected === method.id;
-          return (
-            <React.Fragment key={method.id}>
-              <button
-                type="button"
-                onClick={() => onSelect(method.id)}
-                aria-pressed={active}
-                className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left"
-              >
-                <div className="flex items-center gap-3">
-                  <span
-                    className="w-9 h-9 flex items-center justify-center rounded-full border"
-                    style={{
-                      borderColor: active ? BLUE : "#e5e7eb",
-                      backgroundColor: active ? "#EEF4FE" : "#FAFAFA",
-                    }}
-                  >
-                    {method.icon(active)}
-                  </span>
-                  <span>
-                    <span
-                      className="block text-[14px] font-medium"
-                      style={{ color: active ? "#111827" : "#374151" }}
-                    >
-                      {method.label}
-                    </span>
-                    <span className="block text-[11px] text-gray-400 mt-0.5">
-                      {method.sublabel}
-                    </span>
-                  </span>
-                </div>
+      <SectionLabel text="お支払い方法" />
 
-                {active ? (
-                  <CheckCircleIcon />
-                ) : (
-                  <span
-                    className="w-[19px] h-[19px] rounded-full border-2"
-                    style={{ borderColor: "#d1d5db" }}
-                  />
-                )}
-              </button>
-              {i < PAYMENT_METHODS.length - 1 && <Divider />}
-            </React.Fragment>
-          );
-        })}
+      <div className="bg-white rounded-sm border border-gray-200 mb-5">
+
+        {/* Available PayPay payment */}
+        <div className="flex items-center gap-3 px-5 py-4">
+          <span className="w-9 h-9 flex items-center justify-center rounded-full border border-blue-200 bg-blue-50">
+            <img
+              src="/paypaylogo.png"
+              alt="PayPay"
+              className="w-6 h-6 object-contain"
+            />
+          </span>
+
+          <div>
+            <p className="text-[14px] font-medium text-gray-900">
+              PayPay
+            </p>
+
+            <p className="text-[11px] text-green-600 mt-0.5">
+              ご利用いただけます
+            </p>
+          </div>
+
+          <span className="ml-auto">
+            <CheckCircleIcon />
+          </span>
+        </div>
+
+        <Divider />
+
+        {/* Credit card maintenance notice */}
+        <div className="flex items-start gap-3 px-5 py-4 bg-gray-50">
+          <span className="w-9 h-9 flex items-center justify-center rounded-full border border-gray-200 bg-white">
+            <CardIcon color="#9ca3af" />
+          </span>
+
+          <div className="flex-1">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-[14px] font-medium text-gray-400">
+                クレジットカード
+              </p>
+
+              <span className="text-[10px] font-semibold text-red-500 bg-red-50 px-2 py-1 rounded">
+                メンテナンス中
+              </span>
+            </div>
+
+            <p className="text-[11px] text-gray-400 mt-1 leading-relaxed">
+              現在、カード決済はメンテナンスのためご利用いただけません。
+              ご不便をおかけしますが、PayPayをご利用ください。
+            </p>
+          </div>
+        </div>
+
       </div>
     </>
   );
 }
 
-/* ── Per-ticket confirmation block ──────────────────────────── */
+/* ── Per-ticket confirmation block ─────────────────────────── */
 
 function TicketConfirmBlock({ ticket }) {
   return (
     <>
-      {/* Event info card */}
+      {/* Event information */}
       <SectionLabel text="購入詳細の確認" />
+
       <div className="bg-white rounded-sm border border-gray-200 px-5 pt-4.5 pb-5 mb-3">
         <p className="text-xs font-medium mb-1 leading-none" style={{ color: PINK }}>
           {ticket.artist}
         </p>
+
         <h2 className="text-base font-bold text-gray-900 leading-snug mb-3.5">
           {ticket.event}
         </h2>
+
         <div className="flex items-center gap-1.75 mb-1.75">
           <MapPinIcon />
-          <span className="text-[13px] text-gray-500">{ticket.venue}</span>
+          <span className="text-[13px] text-gray-500">
+            {ticket.venue}
+          </span>
         </div>
+
         <div className="flex items-center gap-1.75">
           <ClockIcon />
           <span className="text-[13px] text-gray-500">
@@ -224,14 +254,16 @@ function TicketConfirmBlock({ ticket }) {
         </div>
       </div>
 
-      {/* Purchase ticket / amount card */}
+      {/* Ticket and amount */}
       <SectionLabel text="チケット / 金額を購入します" />
+
       <div className="bg-white rounded-sm border border-gray-200 px-5 mb-5">
 
         <div className="flex items-baseline gap-1.5 py-4">
           <span className="text-[13px] font-medium" style={{ color: PINK }}>
             チケット1枚あたり
           </span>
+
           <span className="text-2xl font-bold" style={{ color: PINK }}>
             {ticket.price}
           </span>
@@ -242,16 +274,26 @@ function TicketConfirmBlock({ ticket }) {
         <div className="flex items-center justify-between py-3.5">
           <div className="flex items-center gap-1.5">
             <TicketIcon />
+
             <span className="text-[13px] font-medium" style={{ color: BLUE }}>
               {ticket.seatType}
             </span>
           </div>
-          <span className="text-[13px] text-gray-500">座席未定</span>
+
+          <span className="text-[13px] text-gray-500">
+            座席未定
+          </span>
         </div>
 
         <Divider />
-        <Row label="日付別販売" value={ticket.salesPeriodText || ticket.sellByDate || ticket.date} />
+
+        <Row
+          label="日付別販売"
+          value={ticket.salesPeriodText || ticket.sellByDate || ticket.date}
+        />
+
         <Divider />
+
         <Row label="購入数" value={`${ticket.seats}`} />
 
       </div>
@@ -259,57 +301,76 @@ function TicketConfirmBlock({ ticket }) {
   );
 }
 
-/* ── Shared page content ────────────────────────────────────── */
+/* ── Shared page content ───────────────────────────────────── */
 
 function Step2Content({
   selectedTickets,
   ticketFees,
   feesLoading,
   grandTotal,
-  paymentMethod,
-  onSelectPaymentMethod,
 }) {
   return (
     <>
-      {selectedTickets.map(ticket => (
-        <TicketConfirmBlock key={ticket._id} ticket={ticket} />
+      {selectedTickets.map((ticket) => (
+        <TicketConfirmBlock
+          key={ticket._id}
+          ticket={ticket}
+        />
       ))}
 
       <SectionLabel text="購入価格" />
+
       <div className="bg-white rounded-sm border border-gray-200 px-5 mb-5">
 
-        {/* Ticket price row(s) */}
+        {/* Ticket prices */}
         {selectedTickets.map((ticket) => {
-          const currentPriceNum = ticket.priceNum || parsePrice(ticket.price);
+          const currentPriceNum =
+            ticket.priceNum || parsePrice(ticket.price);
+
           return (
             <React.Fragment key={ticket._id}>
               <div className="flex items-start justify-between py-3.5">
-                <span className="text-[13px] text-gray-600 leading-snug" style={{ maxWidth: "60%" }}>
+                <span
+                  className="text-[13px] text-gray-600 leading-snug"
+                  style={{ maxWidth: "60%" }}
+                >
                   チケット価格（税込）
+
                   {selectedTickets.length > 1 && (
-                    <span className="block text-[11px] text-gray-400">{ticket.artist}</span>
+                    <span className="block text-[11px] text-gray-400">
+                      {ticket.artist}
+                    </span>
                   )}
                 </span>
+
                 <span className="text-[13px] text-gray-700">
                   {fmt(currentPriceNum * ticket.seats)}
                 </span>
               </div>
+
               <Divider />
             </React.Fragment>
           );
         })}
 
-        {/* System usage fee row(s) — fetched per ticket from backend */}
+        {/* System usage fees */}
         {selectedTickets.map((ticket) => {
           const currentFee = ticketFees[ticket._id] ?? 0;
+
           return (
             <React.Fragment key={`fee-${ticket._id}`}>
               <div className="pt-3.5 pb-1">
-                <span className="text-[13px] text-gray-600">システム利用料</span>
+                <span className="text-[13px] text-gray-600">
+                  システム利用料
+                </span>
+
                 {selectedTickets.length > 1 && (
-                  <span className="text-[11px] text-gray-400 ml-1">({ticket.artist})</span>
+                  <span className="text-[11px] text-gray-400 ml-1">
+                    ({ticket.artist})
+                  </span>
                 )}
               </div>
+
               <div className="flex items-start justify-between pb-3.5 pl-4">
                 <span
                   className="text-[12px] text-gray-400 leading-snug"
@@ -318,17 +379,23 @@ function Step2Content({
                   システム利用料：（
                   {feesLoading ? "…" : fmt(currentFee)} / 1枚・税込）
                 </span>
+
                 <span className="text-[13px] text-gray-700">
                   {feesLoading ? "…" : fmt(currentFee * ticket.seats)}
                 </span>
               </div>
+
               <Divider />
             </React.Fragment>
           );
         })}
 
+        {/* Grand total */}
         <div className="flex items-center justify-between py-3.5">
-          <span className="text-[13px] text-gray-600">合計（税込）</span>
+          <span className="text-[13px] text-gray-600">
+            合計（税込）
+          </span>
+
           <span className="text-[20px] font-bold" style={{ color: PINK }}>
             {feesLoading ? "計算中…" : fmt(grandTotal)}
           </span>
@@ -336,46 +403,61 @@ function Step2Content({
 
       </div>
 
-      <PaymentMethodSelector selected={paymentMethod} onSelect={onSelectPaymentMethod} />
+      {/* Payment method information */}
+      <PaymentMethodSelector />
     </>
   );
 }
 
 /* ── Shared bottom bar ─────────────────────────────────────── */
 
-function BottomBar({ phone, phoneLoading, paymentMethod, onProceed, maxWidthClass = "" }) {
-  const isCard = paymentMethod === "card";
-
+function BottomBar({
+  phone,
+  phoneLoading,
+  onProceed,
+  maxWidthClass = "",
+}) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 px-4 pt-3 pb-4" style={{ backgroundColor: "#FCE8ED" }}>
+    <div
+      className="fixed bottom-0 left-0 right-0 px-4 pt-3 pb-4"
+      style={{ backgroundColor: "#FCE8ED" }}
+    >
       <div className={`${maxWidthClass} mx-auto`}>
 
         <p className="text-[12px] text-gray-500 leading-relaxed mb-3 px-1">
           ※いかなる理由があっても、購入後のチケットのキャンセル・変更・返金はできません。
         </p>
 
-        {/* Phone number — belongs to the currently logged-in user */}
-        <p className="text-[22px] font-bold tracking-wide text-center mb-2" style={{ color: PINK }}>
-          {phoneLoading ? "読み込み中…" : phone || "電話番号が見つかりません"}
+        {/* Logged-in user's phone number */}
+        <p
+          className="text-[22px] font-bold tracking-wide text-center mb-2"
+          style={{ color: PINK }}
+        >
+          {phoneLoading
+            ? "読み込み中…"
+            : phone || "電話番号が見つかりません"}
         </p>
 
         <p className="text-[11px] text-gray-500 text-center leading-relaxed mb-3">
           ※購入したチケットは、上記の電話番号で登録されたAnyPASSアプリに自動的に表示されます。
         </p>
 
+        {/* PayPay payment button */}
         <button
           type="button"
           onClick={onProceed}
           className="flex items-center justify-center gap-2 w-full py-3.5 rounded-lg text-white text-[14px] font-semibold tracking-wide text-center"
-          style={{ backgroundColor: isCard ? "#111827" : "#FF0033" }}
+          style={{ backgroundColor: "#FF0033" }}
         >
-          {isCard ? (
-            <CardIcon style={{ color: PINK }} />
-          ) : (
-            <img src="/paypaylogo.png" alt="" className="w-5 h-5" />
-          )}
-          {isCard ? "カードで支払う" : "PayPayで支払う"}
+          <img
+            src="/paypaylogo.png"
+            alt=""
+            className="w-5 h-5"
+          />
+
+          PayPayで支払う
         </button>
+
       </div>
     </div>
   );
@@ -386,6 +468,7 @@ function BottomBar({ phone, phoneLoading, paymentMethod, onProceed, maxWidthClas
 function Step2() {
   const { state } = useLocation();
   const navigate = useNavigate();
+
   const selectedTickets = state?.selectedTickets ?? [];
 
   const [phone, setPhone] = useState("");
@@ -394,23 +477,25 @@ function Step2() {
   const [ticketFees, setTicketFees] = useState({});
   const [feesLoading, setFeesLoading] = useState(true);
 
-  // Which payment method is currently selected — defaults to PayPay.
-  const [paymentMethod, setPaymentMethod] = useState("paypay");
-
   const ticketIdsKey = useMemo(
     () => selectedTickets.map((t) => t._id).join(","),
     [selectedTickets]
   );
 
-  // Fetch the logged-in user's phone number
+  // Fetch logged-in user's phone number
   useEffect(() => {
     let cancelled = false;
+
     setPhoneLoading(true);
 
     axios
       .get(ME_ENDPOINT, { headers: authHeaders() })
       .then((res) => {
-        if (!cancelled) setPhone(res.data.user?.phone || res.data.phone || "");
+        if (!cancelled) {
+          setPhone(
+            res.data.user?.phone || res.data.phone || ""
+          );
+        }
       })
       .catch(() => {
         if (!cancelled) setPhone("");
@@ -419,23 +504,32 @@ function Step2() {
         if (!cancelled) setPhoneLoading(false);
       });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  // Fetch each ticket's authoritative system fee from the backend
+  // Fetch each ticket's authoritative system fee
   useEffect(() => {
     if (!ticketIdsKey) {
       setFeesLoading(false);
       return;
     }
+
     let cancelled = false;
+
     setFeesLoading(true);
 
     Promise.all(
       selectedTickets.map((t) =>
         axios
-          .get(ticketEndpoint(t._id), { headers: authHeaders() })
-          .then((res) => [t._id, res.data.ticket?.systemFee ?? res.data.systemFee ?? 0])
+          .get(ticketEndpoint(t._id), {
+            headers: authHeaders(),
+          })
+          .then((res) => [
+            t._id,
+            res.data.ticket?.systemFee ?? res.data.systemFee ?? 0,
+          ])
           .catch(() => [t._id, 0])
       )
     ).then((entries) => {
@@ -445,63 +539,75 @@ function Step2() {
       }
     });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ticketIdsKey]);
 
+  // Calculate ticket total
   const ticketTotal = selectedTickets.reduce(
-    (sum, t) => sum + (t.priceNum || parsePrice(t.price)) * t.seats, 0
+    (sum, t) =>
+      sum + (t.priceNum || parsePrice(t.price)) * t.seats,
+    0
   );
+
+  // Calculate system fee total
   const feeTotal = selectedTickets.reduce(
-    (sum, t) => sum + (ticketFees[t._id] ?? 0) * t.seats, 0
+    (sum, t) =>
+      sum + (ticketFees[t._id] ?? 0) * t.seats,
+    0
   );
+
+  // Final amount
   const grandTotal = ticketTotal + feeTotal;
 
-  // Route to whichever payment flow matches the selected method.
+  // Always proceed with PayPay
   const handleProceed = () => {
-    const path = PAYMENT_ROUTES[paymentMethod] || PAYMENT_ROUTES.paypay;
-    navigate(path, {
-      state: { selectedTickets, paymentMethod },
+    navigate(PAYMENT_ROUTE, {
+      state: {
+        selectedTickets,
+        paymentMethod: "paypay",
+      },
     });
   };
 
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
 
+      {/* Mobile layout */}
       <div className="lg:hidden p-4 pb-44">
         <Step2Content
           selectedTickets={selectedTickets}
           ticketFees={ticketFees}
           feesLoading={feesLoading}
           grandTotal={grandTotal}
-          paymentMethod={paymentMethod}
-          onSelectPaymentMethod={setPaymentMethod}
         />
       </div>
+
       <div className="lg:hidden">
         <BottomBar
           phone={phone}
           phoneLoading={phoneLoading}
-          paymentMethod={paymentMethod}
           onProceed={handleProceed}
         />
       </div>
 
+      {/* Desktop layout */}
       <div className="hidden lg:block max-w-160 mx-auto px-4 pt-10 pb-44">
         <Step2Content
           selectedTickets={selectedTickets}
           ticketFees={ticketFees}
           feesLoading={feesLoading}
           grandTotal={grandTotal}
-          paymentMethod={paymentMethod}
-          onSelectPaymentMethod={setPaymentMethod}
         />
       </div>
+
       <div className="hidden lg:block">
         <BottomBar
           phone={phone}
           phoneLoading={phoneLoading}
-          paymentMethod={paymentMethod}
           onProceed={handleProceed}
           maxWidthClass="max-w-[640px]"
         />
