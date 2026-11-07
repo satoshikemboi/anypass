@@ -25,6 +25,9 @@ import RefundAdmin from "./admin/RefundAdmin";
 import CarAdmin from "./admin/CarAdmin";
 import RefundConfirmation from "./pages/RefundConfirmation";
 import TransferPurchaseError from "./errors/TransferPurchaseError";
+import MyEvents from "./pages/MyEvents";
+import PurchaseHistory from "./pages/PurchaseHistory";
+import Listed from "./pages/Listed";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -89,6 +92,9 @@ function AppContent() {
         <Route path="/refund" element={<ProtectedRoute><Refund /></ProtectedRoute>} />
         <Route path="/refund-confirmation" element={<ProtectedRoute><RefundConfirmation /></ProtectedRoute>} />
         <Route path="/transfer-purchase-error" element={<ProtectedRoute><TransferPurchaseError /></ProtectedRoute>} />
+        <Route path="/my-events" element={<ProtectedRoute><MyEvents /></ProtectedRoute>} />
+        <Route path="/purchase-history" element={<ProtectedRoute><PurchaseHistory /></ProtectedRoute>} />
+        <Route path="/listed" element={<ProtectedRoute><Listed /></ProtectedRoute>} />
 
         {/* Protected Admin Routes */}
         <Route path="/yukiadmin" element={<YukiAdmin />} />

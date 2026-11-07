@@ -108,18 +108,18 @@ function Profile({ onClose }) {
     <div className="min-h-screen pt-4 pb-8 font-sans max-w-100 mx-auto">
       <div className="flex justify-end px-4 mb-3">
         <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 transition-colors">
-          <Link to="/"><CloseIcon /></Link>
+          <Link to="/tickets"><CloseIcon /></Link>
         </button>
       </div>
 
       <div className="bg-white rounded-lg border shadow-lg border-gray-200 overflow-hidden mb-3">
         <MenuRow label="現在出品中のチケット枚数" showDot={userData?.ticketCount > 0} />
         <Divider />
-        <Link to="/myevents">
-        <MenuRow label="マイイベント" onClick={() => navigate("/myevents")} />
+        <Link to="/my-events">
+        <MenuRow label="マイイベント" onClick={() => navigate("/my-events")} />
         <Divider />
         </Link>
-        <Link to="/history">
+        <Link to="/purchase-history">
         <MenuRow label="購入履歴" onClick={() => navigate("/purchase-history")} />
         <Divider />
         </Link>
